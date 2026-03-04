@@ -28,6 +28,34 @@ def seed_schema(engine):
             db.add_all([wh1, wh2])
             print(f"Initial warehouses created.")
             
+        # 3. Create v_inventory_summary view if not exists
+        # We use DROP VIEW IF EXISTS to ensure it's updated if the schema changed
+        view_sql = """
+        CREATE OR REPLACE VIEW v_inventory_summary AS
+        SELECT 
+            p.code,
+            p.name,
+            w.name as warehouse_name,
+            SUM(
+                CASE 
+                    WHEN sm.destination_warehouse_id = w.id THEN sm.quantity
+                    WHEN sm.origin_warehouse_id = w.id THEN -sm.quantity
+                    ELSE 0
+                END
+            ) as current_stock
+        FROM products p
+        CROSS JOIN warehouses w
+        LEFT JOIN stock_movements sm ON (sm.product_id = p.id AND (sm.origin_warehouse_id = w.id OR sm.destination_warehouse_id = w.id))
+        GROUP BY p.code, p.name, w.name;
+        """
+        # For SQLite, "CREATE OR REPLACE VIEW" doesn't exist, we must drop first
+        if "postgresql" not in str(engine.url):
+            db.execute(text("DROP VIEW IF EXISTS v_inventory_summary"))
+            view_sql = view_sql.replace("CREATE OR REPLACE VIEW", "CREATE VIEW")
+            
+        db.execute(text(view_sql))
+        print(f"View v_inventory_summary updated.")
+            
         db.commit()
     except Exception as e:
         print(f"Error seeding schema: {e}")

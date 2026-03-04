@@ -21,6 +21,7 @@ export default function LoginPage() {
             formData.append('password', password);
 
             const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, "");
+            console.log("Login API_URL:", API_URL);
             const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 body: formData,

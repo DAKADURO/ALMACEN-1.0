@@ -1,4 +1,5 @@
 const API_URL = (process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000").replace(/\/$/, "");
+console.log("Inventario API_URL:", API_URL);
 
 // Helper to get headers with the current inventory context
 const getHeaders = (extraHeaders = {}) => {

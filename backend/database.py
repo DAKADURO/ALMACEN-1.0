@@ -14,13 +14,32 @@ SessionLocals = {}
 Base = declarative_base()
 
 def get_engine(context: str):
-    db_filename = f"almacen_{context.lower()}.db"
-    db_url = f"sqlite:///./{db_filename}"
+    # Try to get DATABASE_URL from environment
+    db_url = os.getenv("DATABASE_URL")
+    
+    if db_url:
+        # If it's PostgreSQL, we use schemas to keep contexts separate
+        if db_url.startswith("postgresql"):
+            # Ensure we have a different engine/session for each schema
+            # We use the context as the schema name
+            schema_name = context.lower()
+            if f"{db_url}_{schema_name}" not in engines:
+                engines[f"{db_url}_{schema_name}"] = create_engine(
+                    db_url,
+                    connect_args={"options": f"-csearch_path={schema_name},public"}
+                )
+                SessionLocals[f"{db_url}_{schema_name}"] = sessionmaker(
+                    autocommit=False, autoflush=False, bind=engines[f"{db_url}_{schema_name}"]
+                )
+            return engines[f"{db_url}_{schema_name}"], SessionLocals[f"{db_url}_{schema_name}"]
+    else:
+        # Fallback to local SQLite
+        db_filename = f"almacen_{context.lower()}.db"
+        db_url = f"sqlite:///./{db_filename}"
     
     if db_url not in engines:
-        engines[db_url] = create_engine(
-            db_url, connect_args={"check_same_thread": False}
-        )
+        connect_args = {"check_same_thread": False} if "sqlite" in db_url else {}
+        engines[db_url] = create_engine(db_url, connect_args=connect_args)
         SessionLocals[db_url] = sessionmaker(
             autocommit=False, autoflush=False, bind=engines[db_url]
         )

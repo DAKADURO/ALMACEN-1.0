@@ -20,7 +20,8 @@ export default function LoginPage() {
             formData.append('username', username);
             formData.append('password', password);
 
-            const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/login`, {
+            const API_URL = (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000').replace(/\/$/, "");
+            const response = await fetch(`${API_URL}/auth/login`, {
                 method: 'POST',
                 body: formData,
             });
@@ -32,7 +33,7 @@ export default function LoginPage() {
             const data = await response.json();
 
             // Fetch user profile
-            const userResponse = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'}/auth/me`, {
+            const userResponse = await fetch(`${API_URL}/auth/me`, {
                 headers: {
                     'Authorization': `Bearer ${data.access_token}`
                 }

@@ -305,7 +305,7 @@ export default function InventoryPage() {
             {tab === "stock" && (
                 <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20">
                     <table className="w-full text-left">
-                        <thead className="bg-slate-800/60 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                        <thead className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
                             <tr>
                                 <th className="p-4">Código</th>
                                 <th className="p-4">Producto</th>
@@ -335,7 +335,7 @@ export default function InventoryPage() {
             {tab === "products" && (
                 <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20">
                     <table className="w-full text-left">
-                        <thead className="bg-slate-800/60 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                        <thead className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
                             <tr>
                                 <th className="p-4">Código</th>
                                 <th className="p-4">Nombre</th>

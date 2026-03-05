@@ -10,7 +10,7 @@ router = APIRouter(
 
 @router.get("/", response_model=List[schemas.Warehouse])
 def read_warehouses(skip: int = 0, limit: int = 100, db: Session = Depends(database.get_db)):
-    warehouses = db.query(models.Warehouse).offset(skip).limit(limit).all()
+    warehouses = db.query(models.Warehouse).filter(models.Warehouse.active == True).offset(skip).limit(limit).all()
     return warehouses
 
 @router.post("/", response_model=schemas.Warehouse)

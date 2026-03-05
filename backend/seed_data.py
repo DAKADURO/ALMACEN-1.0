@@ -25,8 +25,8 @@ def seed_data():
     db = SessionLocal()
     # 1. Seed Warehouses
     if not db.query(models.Warehouse).first():
-        wh1 = models.Warehouse(name="ALMACEN CENTRAL", description="Bodega principal", location_type="FIXED")
-        wh2 = models.Warehouse(name="UNIDAD MOVIL 01", description="Vehículo Juan", location_type="VEHICLE")
+        wh1 = models.Warehouse(name="TIJUANA", description="Almacén Tijuana", location_type="FIXED")
+        wh2 = models.Warehouse(name="HERMOSILLO", description="Almacén Hermosillo", location_type="FIXED")
         db.add_all([wh1, wh2])
         db.commit()
     

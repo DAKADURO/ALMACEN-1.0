@@ -303,265 +303,267 @@ export default function InventoryPage() {
 
             {/* Stock Table */}
             {tab === "stock" && (
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/20">
-                    <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
-                            <tr>
-                                <th className="p-4 rounded-tl-2xl">Código</th>
-                                <th className="p-4">Producto</th>
-                                <th className="p-4">Almacén</th>
-                                <th className="p-4 text-right rounded-tr-2xl">Existencia</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                            {loading ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-slate-500 animate-pulse">Cargando...</td></tr>
-                            ) : filteredData.length === 0 ? (
-                                <tr><td colSpan={4} className="p-8 text-center text-slate-500">Sin registros.</td></tr>
-                            ) : filteredData.map((item: any, i) => (
-                                <tr key={i} className="hover:bg-slate-700/30 transition-colors">
-                                    <td className="p-4 font-mono text-emerald-400">{item.code}</td>
-                                    <td className="p-4">{item.name}</td>
-                                    <td className="p-4 text-sm text-slate-400">{item.warehouse_name}</td>
-                                    <td className="p-4 text-right font-bold">{item.current_stock}</td>
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
+                    <div className="max-h-[calc(100vh-300px)] overflow-auto">
+                        <table className="w-full text-left border-separate border-spacing-0">
+                            <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                                <tr>
+                                    <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>
+                                    <th className="p-4 bg-slate-800">Producto</th>
+                                    <th className="p-4 bg-slate-800">Almacén</th>
+                                    <th className="p-4 bg-slate-800 text-right rounded-tr-2xl">Existencia</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
+                            </thead>
+                            <tbody className="divide-y divide-slate-700">
+                                {loading ? (
+                                    <tr><td colSpan={4} className="p-8 text-center text-slate-500 animate-pulse">Cargando...</td></tr>
+                                ) : filteredData.length === 0 ? (
+                                    <tr><td colSpan={4} className="p-8 text-center text-slate-500">Sin registros.</td></tr>
+                                ) : filteredData.map((item: any, i) => (
+                                    <tr key={i} className="hover:bg-slate-700/30 transition-colors">
+                                        <td className="p-4 font-mono text-emerald-400">{item.code}</td>
+                                        <td className="p-4">{item.name}</td>
+                                        <td className="p-4 text-sm text-slate-400">{item.warehouse_name}</td>
+                                        <td className="p-4 text-right font-bold">{item.current_stock}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
             )}
 
-            {/* Products Catalog Table */}
-            {tab === "products" && (
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/20">
-                    <table className="w-full text-left border-separate border-spacing-0">
-                        <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
-                            <tr>
-                                <th className="p-4 rounded-tl-2xl">Código</th>
-                                <th className="p-4">Nombre</th>
-                                <th className="p-4">Marca</th>
-                                <th className="p-4">Familia</th>
-                                <th className="p-4">Unidad</th>
-                                <th className="p-4 text-right">Costo ($)</th>
-                                <th className="p-4 text-center">Estado</th>
-                                <th className="p-4 text-right rounded-tr-2xl">Acciones</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-700">
-                            {loading ? (
-                                <tr><td colSpan={8} className="p-8 text-center text-slate-500 animate-pulse">Cargando...</td></tr>
-                            ) : filteredProducts.length === 0 ? (
-                                <tr><td colSpan={8} className="p-8 text-center text-slate-500">Sin productos.</td></tr>
-                            ) : filteredProducts.map((p: any) => (
-                                <tr key={p.id} className={`hover:bg-slate-700/30 transition-colors ${!p.active ? "opacity-50" : ""}`}>
-                                    <td className="p-4 font-mono text-emerald-400">{p.code}</td>
-                                    <td className="p-4">{p.name}</td>
-                                    <td className="p-4 text-sm text-slate-300">{p.brand || "—"}</td>
-                                    <td className="p-4 text-sm text-slate-400">{p.family || "—"}</td>
-                                    <td className="p-4 text-sm">{p.unit_of_measure}</td>
-                                    <td className="p-4 text-right font-mono">${p.cost_price?.toLocaleString() || "0.00"}</td>
-                                    <td className="p-4 text-center">
-                                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.active ? "bg-emerald-900/40 text-emerald-400" : "bg-red-900/40 text-red-400"}`}>
-                                            {p.active ? "Activo" : "Inactivo"}
-                                        </span>
-                                    </td>
-                                    <td className="p-4 text-right">
-                                        <div className="flex gap-2 justify-end">
-                                            <button
-                                                onClick={() => openEditModal(p)}
-                                                className="px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-600/30 transition-colors"
-                                            >
-                                                Editar
-                                            </button>
-                                            {p.active && (
-                                                <button
-                                                    onClick={() => handleDelete(p)}
-                                                    className="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-sm font-medium hover:bg-red-600/30 transition-colors"
-                                                >
-                                                    Desactivar
-                                                </button>
+                    {/* Products Catalog Table */}
+                    {tab === "products" && (
+                        <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
+                            <div className="max-h-[calc(100vh-300px)] overflow-auto">
+                                <table className="w-full text-left border-separate border-spacing-0">
+                                    <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                                        <tr>
+                                            <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>
+                                            <th className="p-4 bg-slate-800">Nombre</th>
+                                            <th className="p-4 bg-slate-800">Marca</th>
+                                            <th className="p-4 bg-slate-800">Familia</th>
+                                            <th className="p-4 bg-slate-800">Unidad</th>
+                                            <th className="p-4 bg-slate-800 text-right">Costo ($)</th>
+                                            <th className="p-4 bg-slate-800 text-center">Estado</th>
+                                            <th className="p-4 bg-slate-800 text-right rounded-tr-2xl">Acciones</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody className="divide-y divide-slate-700">
+                                        {loading ? (
+                                            <tr><td colSpan={8} className="p-8 text-center text-slate-500 animate-pulse">Cargando...</td></tr>
+                                        ) : filteredProducts.length === 0 ? (
+                                            <tr><td colSpan={8} className="p-8 text-center text-slate-500">Sin productos.</td></tr>
+                                        ) : filteredProducts.map((p: any) => (
+                                            <tr key={p.id} className={`hover:bg-slate-700/30 transition-colors ${!p.active ? "opacity-50" : ""}`}>
+                                                <td className="p-4 font-mono text-emerald-400">{p.code}</td>
+                                                <td className="p-4">{p.name}</td>
+                                                <td className="p-4 text-sm text-slate-300">{p.brand || "—"}</td>
+                                                <td className="p-4 text-sm text-slate-400">{p.family || "—"}</td>
+                                                <td className="p-4 text-sm">{p.unit_of_measure}</td>
+                                                <td className="p-4 text-right font-mono">${p.cost_price?.toLocaleString() || "0.00"}</td>
+                                                <td className="p-4 text-center">
+                                                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.active ? "bg-emerald-900/40 text-emerald-400" : "bg-red-900/40 text-red-400"}`}>
+                                                        {p.active ? "Activo" : "Inactivo"}
+                                                    </span>
+                                                </td>
+                                                <td className="p-4 text-right">
+                                                    <div className="flex gap-2 justify-end">
+                                                        <button
+                                                            onClick={() => openEditModal(p)}
+                                                            className="px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-600/30 transition-colors"
+                                                        >
+                                                            Editar
+                                                        </button>
+                                                        {p.active && (
+                                                            <button
+                                                                onClick={() => handleDelete(p)}
+                                                                className="px-3 py-1.5 bg-red-600/20 text-red-400 rounded-lg text-sm font-medium hover:bg-red-600/30 transition-colors"
+                                                            >
+                                                                Desactivar
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                            </div>
+            )}
+
+                            {/* Modal Create/Edit */}
+                            {isModalOpen && (
+                                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl">
+                                        <div className="p-6 border-b border-slate-700">
+                                            <h2 className="text-xl font-bold text-white">
+                                                {editingProduct ? "Editar Producto" : "Registrar Nuevo Producto"}
+                                            </h2>
+                                        </div>
+                                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-semibold text-slate-400 uppercase">Código</label>
+                                                    <input required type="text" placeholder="API-001"
+                                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                        value={newProduct.code}
+                                                        onChange={(e) => setNewProduct({ ...newProduct, code: e.target.value })}
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-semibold text-slate-400 uppercase">Unidad</label>
+                                                    <input required type="text" placeholder="PZA"
+                                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                        value={newProduct.unit}
+                                                        onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase">Nombre</label>
+                                                <input required type="text" placeholder="Nombre del producto"
+                                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                    value={newProduct.name}
+                                                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
+                                                />
+                                            </div>
+
+                                            <div className="grid grid-cols-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-semibold text-slate-400 uppercase">Segmento / Familia</label>
+                                                    <select required
+                                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                        value={newProduct.family}
+                                                        onChange={(e) => setNewProduct({ ...newProduct, family: e.target.value })}
+                                                    >
+                                                        <option value="">Seleccionar...</option>
+                                                        <option value="TUBERIA">Tubería y Accesorios</option>
+                                                        <option value="REFACCIONES">Refacciones</option>
+                                                        <option value="OTROS">Otros</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-xs font-semibold text-slate-400 uppercase">Precio Costo ($)</label>
+                                                    <input required type="number" step="0.01" placeholder="0.00"
+                                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                        value={newProduct.cost_price}
+                                                        onChange={(e) => setNewProduct({ ...newProduct, cost_price: e.target.value })}
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase">Marca</label>
+                                                <input type="text" placeholder="Ej: Parker, SMC, Festo"
+                                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                    value={newProduct.brand}
+                                                    onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
+                                                />
+                                            </div>
+
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase">Descripción / Comentarios</label>
+                                                <textarea
+                                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none min-h-[60px]"
+                                                    value={newProduct.description}
+                                                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
+                                                />
+                                            </div>
+
+                                            {/* Initial stock — only when creating */}
+                                            {!editingProduct && (
+                                                <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-700 space-y-3">
+                                                    <h3 className="text-sm font-bold text-slate-300">Stock Inicial (Opcional)</h3>
+                                                    <div className="grid grid-cols-2 gap-4">
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Almacén</label>
+                                                            <select
+                                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                                value={newProduct.warehouse_id}
+                                                                onChange={(e) => setNewProduct({ ...newProduct, warehouse_id: e.target.value })}
+                                                            >
+                                                                <option value="">Seleccionar...</option>
+                                                                {warehouses.map((w: any) => (
+                                                                    <option key={w.id} value={w.id}>{w.name}</option>
+                                                                ))}
+                                                            </select>
+                                                        </div>
+                                                        <div className="space-y-1">
+                                                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Cantidad</label>
+                                                            <input type="number"
+                                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                                value={newProduct.initial_stock}
+                                                                onChange={(e) => setNewProduct({ ...newProduct, initial_stock: e.target.value })}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            )}
 
-            {/* Modal Create/Edit */}
-            {isModalOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl">
-                        <div className="p-6 border-b border-slate-700">
-                            <h2 className="text-xl font-bold text-white">
-                                {editingProduct ? "Editar Producto" : "Registrar Nuevo Producto"}
-                            </h2>
-                        </div>
-                        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-slate-400 uppercase">Código</label>
-                                    <input required type="text" placeholder="API-001"
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        value={newProduct.code}
-                                        onChange={(e) => setNewProduct({ ...newProduct, code: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-slate-400 uppercase">Unidad</label>
-                                    <input required type="text" placeholder="PZA"
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        value={newProduct.unit}
-                                        onChange={(e) => setNewProduct({ ...newProduct, unit: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-400 uppercase">Nombre</label>
-                                <input required type="text" placeholder="Nombre del producto"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                    value={newProduct.name}
-                                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-slate-400 uppercase">Segmento / Familia</label>
-                                    <select required
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        value={newProduct.family}
-                                        onChange={(e) => setNewProduct({ ...newProduct, family: e.target.value })}
-                                    >
-                                        <option value="">Seleccionar...</option>
-                                        <option value="TUBERIA">Tubería y Accesorios</option>
-                                        <option value="REFACCIONES">Refacciones</option>
-                                        <option value="OTROS">Otros</option>
-                                    </select>
-                                </div>
-                                <div className="space-y-1">
-                                    <label className="text-xs font-semibold text-slate-400 uppercase">Precio Costo ($)</label>
-                                    <input required type="number" step="0.01" placeholder="0.00"
-                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                        value={newProduct.cost_price}
-                                        onChange={(e) => setNewProduct({ ...newProduct, cost_price: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-400 uppercase">Marca</label>
-                                <input type="text" placeholder="Ej: Parker, SMC, Festo"
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                    value={newProduct.brand}
-                                    onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-400 uppercase">Descripción / Comentarios</label>
-                                <textarea
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none min-h-[60px]"
-                                    value={newProduct.description}
-                                    onChange={(e) => setNewProduct({ ...newProduct, description: e.target.value })}
-                                />
-                            </div>
-
-                            {/* Initial stock — only when creating */}
-                            {!editingProduct && (
-                                <div className="p-4 bg-slate-900/50 rounded-xl border border-slate-700 space-y-3">
-                                    <h3 className="text-sm font-bold text-slate-300">Stock Inicial (Opcional)</h3>
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Almacén</label>
-                                            <select
-                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                                value={newProduct.warehouse_id}
-                                                onChange={(e) => setNewProduct({ ...newProduct, warehouse_id: e.target.value })}
-                                            >
-                                                <option value="">Seleccionar...</option>
-                                                {warehouses.map((w: any) => (
-                                                    <option key={w.id} value={w.id}>{w.name}</option>
-                                                ))}
-                                            </select>
-                                        </div>
-                                        <div className="space-y-1">
-                                            <label className="text-[10px] font-semibold text-slate-500 uppercase">Cantidad</label>
-                                            <input type="number"
-                                                className="w-full bg-slate-800 border border-slate-700 rounded-lg px-2 py-1.5 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                                value={newProduct.initial_stock}
-                                                onChange={(e) => setNewProduct({ ...newProduct, initial_stock: e.target.value })}
-                                            />
-                                        </div>
+                                            <div className="flex gap-3 pt-2">
+                                                <button type="button" onClick={() => setIsModalOpen(false)}
+                                                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors">
+                                                    Cancelar
+                                                </button>
+                                                <button disabled={isSubmitting} type="submit"
+                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors">
+                                                    {isSubmitting ? "Guardando..." : editingProduct ? "Actualizar" : "Guardar Producto"}
+                                                </button>
+                                            </div>
+                                        </form>
                                     </div>
                                 </div>
                             )}
 
-                            <div className="flex gap-3 pt-2">
-                                <button type="button" onClick={() => setIsModalOpen(false)}
-                                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors">
-                                    Cancelar
-                                </button>
-                                <button disabled={isSubmitting} type="submit"
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors">
-                                    {isSubmitting ? "Guardando..." : editingProduct ? "Actualizar" : "Guardar Producto"}
-                                </button>
-                            </div>
-                        </form>
-                    </div>
-                </div>
-            )}
-
-            {/* Upload Dialog — warehouse selector */}
-            {isUploadDialogOpen && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl">
-                        <div className="p-6 border-b border-slate-700">
-                            <h2 className="text-xl font-bold text-white">📁 Cargar Archivo Excel</h2>
-                            <p className="text-sm text-slate-400 mt-1">
-                                Archivo: <span className="text-emerald-400 font-mono">{pendingFile?.name}</span>
-                            </p>
+                            {/* Upload Dialog — warehouse selector */}
+                            {isUploadDialogOpen && (
+                                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                                    <div className="bg-slate-800 border border-slate-700 rounded-2xl w-full max-w-sm shadow-2xl">
+                                        <div className="p-6 border-b border-slate-700">
+                                            <h2 className="text-xl font-bold text-white">📁 Cargar Archivo Excel</h2>
+                                            <p className="text-sm text-slate-400 mt-1">
+                                                Archivo: <span className="text-emerald-400 font-mono">{pendingFile?.name}</span>
+                                            </p>
+                                        </div>
+                                        <div className="p-6 space-y-4">
+                                            <div className="space-y-1">
+                                                <label className="text-xs font-semibold text-slate-400 uppercase">Almacén para stock inicial (opcional)</label>
+                                                <select
+                                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                                    value={uploadWarehouseId}
+                                                    onChange={(e) => setUploadWarehouseId(e.target.value)}
+                                                >
+                                                    <option value="">Sin stock inicial</option>
+                                                    {warehouses.map((w: any) => (
+                                                        <option key={w.id} value={w.id}>{w.name}</option>
+                                                    ))}
+                                                </select>
+                                                <p className="text-xs text-slate-500 mt-1">
+                                                    Si tu Excel tiene columna &quot;TOTAL EN EXISTENCIA&quot;, selecciona el almacén destino.
+                                                </p>
+                                            </div>
+                                            <div className="flex gap-3 pt-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => { setIsUploadDialogOpen(false); setPendingFile(null); }}
+                                                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors"
+                                                >
+                                                    Cancelar
+                                                </button>
+                                                <button
+                                                    disabled={isSubmitting}
+                                                    onClick={handleConfirmUpload}
+                                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors"
+                                                >
+                                                    {isSubmitting ? "Subiendo..." : "Subir Archivo"}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                         </div>
-                        <div className="p-6 space-y-4">
-                            <div className="space-y-1">
-                                <label className="text-xs font-semibold text-slate-400 uppercase">Almacén para stock inicial (opcional)</label>
-                                <select
-                                    className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
-                                    value={uploadWarehouseId}
-                                    onChange={(e) => setUploadWarehouseId(e.target.value)}
-                                >
-                                    <option value="">Sin stock inicial</option>
-                                    {warehouses.map((w: any) => (
-                                        <option key={w.id} value={w.id}>{w.name}</option>
-                                    ))}
-                                </select>
-                                <p className="text-xs text-slate-500 mt-1">
-                                    Si tu Excel tiene columna &quot;TOTAL EN EXISTENCIA&quot;, selecciona el almacén destino.
-                                </p>
-                            </div>
-                            <div className="flex gap-3 pt-2">
-                                <button
-                                    type="button"
-                                    onClick={() => { setIsUploadDialogOpen(false); setPendingFile(null); }}
-                                    className="flex-1 bg-slate-700 hover:bg-slate-600 text-white font-medium py-2 rounded-lg transition-colors"
-                                >
-                                    Cancelar
-                                </button>
-                                <button
-                                    disabled={isSubmitting}
-                                    onClick={handleConfirmUpload}
-                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-medium py-2 rounded-lg transition-colors"
-                                >
-                                    {isSubmitting ? "Subiendo..." : "Subir Archivo"}
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            )}
-        </div>
-    );
+                    );
 }

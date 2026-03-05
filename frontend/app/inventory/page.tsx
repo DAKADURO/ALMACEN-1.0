@@ -303,14 +303,14 @@ export default function InventoryPage() {
 
             {/* Stock Table */}
             {tab === "stock" && (
-                <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20">
-                    <table className="w-full text-left">
-                        <thead className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/20">
+                    <table className="w-full text-left border-separate border-spacing-0">
+                        <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
                             <tr>
-                                <th className="p-4">Código</th>
+                                <th className="p-4 rounded-tl-2xl">Código</th>
                                 <th className="p-4">Producto</th>
                                 <th className="p-4">Almacén</th>
-                                <th className="p-4 text-right">Existencia</th>
+                                <th className="p-4 text-right rounded-tr-2xl">Existencia</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-700">
@@ -333,18 +333,18 @@ export default function InventoryPage() {
 
             {/* Products Catalog Table */}
             {tab === "products" && (
-                <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20">
-                    <table className="w-full text-left">
-                        <thead className="sticky top-0 z-10 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/20">
+                    <table className="w-full text-left border-separate border-spacing-0">
+                        <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
                             <tr>
-                                <th className="p-4">Código</th>
+                                <th className="p-4 rounded-tl-2xl">Código</th>
                                 <th className="p-4">Nombre</th>
                                 <th className="p-4">Marca</th>
                                 <th className="p-4">Familia</th>
                                 <th className="p-4">Unidad</th>
                                 <th className="p-4 text-right">Costo ($)</th>
                                 <th className="p-4 text-center">Estado</th>
-                                <th className="p-4 text-right">Acciones</th>
+                                <th className="p-4 text-right rounded-tr-2xl">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-slate-700">

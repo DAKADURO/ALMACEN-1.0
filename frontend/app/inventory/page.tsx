@@ -162,7 +162,7 @@ export default function InventoryPage() {
         const doc = new jsPDF();
         const date = new Date().toLocaleDateString();
         const context = localStorage.getItem("inventory-context") || "tuberia";
-        const title = context.toUpperCase() === "TUBERIA" ? "REPORTE DE EXISTENCIAS - TUBERIA Y ACCESORIOS" : "REPORTE DE EXISTENCIAS - REFACCIONES";
+        const title = context.toUpperCase() === "TUBERIA" ? "REPORTE DE EXISTENCIAS - AIRPIPE" : "REPORTE DE EXISTENCIAS - PROAIR";
 
         // Company Logo/Header Placeholder
         doc.setFontSize(18);

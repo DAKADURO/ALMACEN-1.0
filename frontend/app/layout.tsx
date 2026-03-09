@@ -90,7 +90,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`flex items-center gap-3 p-3 rounded-lg font-medium transition-all ${isActive
                       ? "bg-slate-700 text-white shadow-sm shadow-slate-950/20"
-                      : "text-slate-400 hover:bg-slate-700/50 hover:text-slate-100"
+                      : "text-white opacity-60 hover:bg-slate-700/50 hover:opacity-100"
                       }`}
                   >
                     <span className="grayscale-0">{item.icon}</span>

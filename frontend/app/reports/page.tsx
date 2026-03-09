@@ -62,7 +62,7 @@ export default function ReportsPage() {
                 ID: m.id,
                 Fecha: new Date(m.created_at).toLocaleString(),
                 Codigo: product?.code || "",
-                Producto: product?.name || "",
+                Producto: product?.description || product?.name || "",
                 Tipo: typeLabels[m.movement_type] || m.movement_type,
                 Cantidad: m.quantity,
                 Origen: originWh?.name || "N/A",
@@ -79,7 +79,7 @@ export default function ReportsPage() {
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">Reportes y Kardex</h1>
-                    <p className="text-slate-400">Historial de movimientos y exportación de datos.</p>
+                    <p className="text-white">Historial de movimientos y exportación de datos.</p>
                 </div>
                 <button
                     onClick={handleExport}
@@ -93,7 +93,7 @@ export default function ReportsPage() {
             {/* Filtros */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 rounded-2xl bg-slate-800/40 border border-slate-700 backdrop-blur-sm">
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Producto</label>
+                    <label className="text-xs font-bold text-white uppercase ml-1">Producto</label>
                     <select
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.product_id}
@@ -101,13 +101,13 @@ export default function ReportsPage() {
                     >
                         <option value="">Todos los productos</option>
                         {products.map((p: any) => (
-                            <option key={p.id} value={p.id}>{p.code} - {p.name}</option>
+                            <option key={p.id} value={p.id}>{p.code} - {p.description || p.name}</option>
                         ))}
                     </select>
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Almacén</label>
+                    <label className="text-xs font-bold text-white uppercase ml-1">Almacén</label>
                     <select
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.warehouse_id}
@@ -121,7 +121,7 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Desde</label>
+                    <label className="text-xs font-bold text-white uppercase ml-1">Desde</label>
                     <input
                         type="date"
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
@@ -131,7 +131,7 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-slate-500 uppercase ml-1">Hasta</label>
+                    <label className="text-xs font-bold text-white uppercase ml-1">Hasta</label>
                     <input
                         type="date"
                         className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
@@ -153,7 +153,7 @@ export default function ReportsPage() {
             {/* Tabla Kardex */}
             <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20 backdrop-blur-sm shadow-xl">
                 <table className="w-full text-left">
-                    <thead className="bg-slate-800/60 border-b border-slate-700 text-slate-400 text-xs uppercase tracking-wider">
+                    <thead className="bg-slate-800/60 border-b border-slate-700 text-white text-xs uppercase tracking-wider">
                         <tr>
                             <th className="p-4">Fecha</th>
                             <th className="p-4">Producto</th>
@@ -176,29 +176,29 @@ export default function ReportsPage() {
 
                             return (
                                 <tr key={m.id} className="hover:bg-slate-700/30 transition-colors">
-                                    <td className="p-4 whitespace-nowrap text-slate-400">
+                                    <td className="p-4 whitespace-nowrap text-white">
                                         {new Date(m.created_at).toLocaleString('es-MX', {
                                             day: '2-digit', month: '2-digit', year: '2-digit',
                                             hour: '2-digit', minute: '2-digit'
                                         })}
                                     </td>
                                     <td className="p-4">
-                                        <div className="font-bold text-slate-200">{product?.name || "Cargando..."}</div>
+                                        <div className="font-bold text-white">{product?.description || product?.name || "Cargando..."}</div>
                                         <div className="text-xs font-mono text-emerald-500">{product?.code}</div>
                                     </td>
                                     <td className="p-4">
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${m.movement_type === 'ENTRY' ? 'bg-emerald-900/40 text-emerald-400' :
-                                                m.movement_type === 'EXIT' ? 'bg-red-900/40 text-red-400' :
-                                                    m.movement_type === 'TRANSFER' ? 'bg-blue-900/40 text-blue-400' :
-                                                        'bg-slate-700 text-slate-300'
+                                            m.movement_type === 'EXIT' ? 'bg-red-900/40 text-red-400' :
+                                                m.movement_type === 'TRANSFER' ? 'bg-blue-900/40 text-blue-400' :
+                                                    'bg-slate-700 text-slate-300'
                                             }`}>
                                             {typeLabels[m.movement_type] || m.movement_type}
                                         </span>
                                     </td>
                                     <td className="p-4 font-bold text-center">{m.quantity}</td>
-                                    <td className="p-4 text-xs text-slate-400">{originWh?.name || "—"}</td>
-                                    <td className="p-4 text-xs text-slate-400">{destWh?.name || "—"}</td>
-                                    <td className="p-4 text-xs italic text-slate-500">{m.reference_doc || "—"}</td>
+                                    <td className="p-4 text-xs text-white">{originWh?.name || "—"}</td>
+                                    <td className="p-4 text-xs text-white">{destWh?.name || "—"}</td>
+                                    <td className="p-4 text-xs italic text-white">{m.reference_doc || "—"}</td>
                                 </tr>
                             );
                         })}

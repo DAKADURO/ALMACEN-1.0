@@ -108,8 +108,8 @@ function AppContent({ children }: { children: React.ReactNode }) {
               {user?.username?.substring(0, 2)}
             </div>
             <div className="flex flex-col">
-              <span className="text-sm font-bold text-slate-100 truncate w-32">{user?.full_name || user?.username}</span>
-              <span className="text-[10px] text-slate-400 uppercase tracking-tight">{user?.role}</span>
+              <span className="text-white font-bold truncate leading-tight">{user?.full_name || "Usuario"}</span>
+              <span className="text-[10px] text-white uppercase font-black tracking-widest">{user?.role || "Personal"}</span>
             </div>
           </div>
 

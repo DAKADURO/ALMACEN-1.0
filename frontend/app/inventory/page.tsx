@@ -140,7 +140,7 @@ export default function InventoryPage() {
     };
 
     const filteredData = data.filter((item: any) => {
-        const matchesSearch = item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch = (item.description || item.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
             item.code.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesWarehouse = selectedWarehouse === "all" || item.warehouse_name === selectedWarehouse;
 
@@ -152,7 +152,7 @@ export default function InventoryPage() {
     });
 
     const filteredProducts = products.filter((p: any) => {
-        const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        const matchesSearch = (p.description || p.name).toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.code.toLowerCase().includes(searchQuery.toLowerCase());
         const matchesSegment = selectedSegment === "all" || p.family === selectedSegment;
         return matchesSearch && matchesSegment;
@@ -178,14 +178,14 @@ export default function InventoryPage() {
 
         const tableData = filteredData.map((item: any) => [
             item.code,
-            item.name,
+            item.description || item.name,
             item.warehouse_name,
             item.current_stock.toString()
         ]);
 
         autoTable(doc, {
             startY: 50,
-            head: [['CÓDIGO', 'PRODUCTO', 'ALMACÉN', 'EXISTENCIA']],
+            head: [['CÓDIGO', 'DESCRIPCIÓN', 'ALMACÉN', 'EXISTENCIA']],
             body: tableData,
             headStyles: { fillColor: [16, 185, 129] }, // Emerald-500
             theme: 'striped'
@@ -199,7 +199,7 @@ export default function InventoryPage() {
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">Inventario</h1>
-                    <p className="text-slate-400">Existencias y catálogo de productos.</p>
+                    <p className="text-white">Existencias y catálogo de productos.</p>
                 </div>
                 <div className="flex gap-3">
                     <input
@@ -271,7 +271,7 @@ export default function InventoryPage() {
             <div className="flex gap-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700">
                 <input
                     type="text"
-                    placeholder="Buscar por código o nombre..."
+                    placeholder="Buscar por código o descripción..."
                     className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 flex-grow focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
@@ -306,10 +306,10 @@ export default function InventoryPage() {
                 <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
                     <div className="max-h-[calc(100vh-300px)] overflow-auto">
                         <table className="w-full text-left border-separate border-spacing-0">
-                            <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                            <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-white text-sm uppercase">
                                 <tr>
                                     <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>
-                                    <th className="p-4 bg-slate-800">Producto</th>
+                                    <th className="p-4 bg-slate-800">Descripción</th>
                                     <th className="p-4 bg-slate-800">Almacén</th>
                                     <th className="p-4 bg-slate-800 text-right rounded-tr-2xl">Existencia</th>
                                 </tr>
@@ -322,8 +322,8 @@ export default function InventoryPage() {
                                 ) : filteredData.map((item: any, i) => (
                                     <tr key={i} className="hover:bg-slate-700/30 transition-colors">
                                         <td className="p-4 font-mono text-emerald-400">{item.code}</td>
-                                        <td className="p-4">{item.name}</td>
-                                        <td className="p-4 text-sm text-slate-400">{item.warehouse_name}</td>
+                                        <td className="p-4 text-white">{item.description || item.name}</td>
+                                        <td className="p-4 text-sm text-white">{item.warehouse_name}</td>
                                         <td className="p-4 text-right font-bold">{item.current_stock}</td>
                                     </tr>
                                 ))}
@@ -338,10 +338,10 @@ export default function InventoryPage() {
                 <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
                     <div className="max-h-[calc(100vh-300px)] overflow-auto">
                         <table className="w-full text-left border-separate border-spacing-0">
-                            <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-slate-400 text-sm uppercase">
+                            <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-white text-sm uppercase">
                                 <tr>
                                     <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>
-                                    <th className="p-4 bg-slate-800">Nombre</th>
+                                    <th className="p-4 bg-slate-800">Descripción</th>
                                     <th className="p-4 bg-slate-800">Marca</th>
                                     <th className="p-4 bg-slate-800">Familia</th>
                                     <th className="p-4 bg-slate-800">Unidad</th>
@@ -358,10 +358,10 @@ export default function InventoryPage() {
                                 ) : filteredProducts.map((p: any) => (
                                     <tr key={p.id} className={`hover:bg-slate-700/30 transition-colors ${!p.active ? "opacity-50" : ""}`}>
                                         <td className="p-4 font-mono text-emerald-400">{p.code}</td>
-                                        <td className="p-4">{p.name}</td>
-                                        <td className="p-4 text-sm text-slate-300">{p.brand || "—"}</td>
-                                        <td className="p-4 text-sm text-slate-400">{p.family || "—"}</td>
-                                        <td className="p-4 text-sm">{p.unit_of_measure}</td>
+                                        <td className="p-4 text-white">{p.description || p.name}</td>
+                                        <td className="p-4 text-sm text-white">{p.brand || "—"}</td>
+                                        <td className="p-4 text-sm text-white">{p.family || "—"}</td>
+                                        <td className="p-4 text-sm text-white">{p.unit_of_measure}</td>
                                         <td className="p-4 text-right font-mono">${p.cost_price?.toLocaleString() || "0.00"}</td>
                                         <td className="p-4 text-center">
                                             <span className={`px-2 py-1 rounded-full text-xs font-medium ${p.active ? "bg-emerald-900/40 text-emerald-400" : "bg-red-900/40 text-red-400"}`}>

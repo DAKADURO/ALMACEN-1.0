@@ -47,7 +47,7 @@ export default function DashboardPage() {
           <div className="text-3xl font-black mt-2 text-emerald-500">
             ${stats.total_valuation?.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
           </div>
-          <div className="text-[10px] text-emerald-600 mt-1 uppercase font-bold tracking-tighter">Valor estimado de almacén</div>
+          <p className="text-white text-xs uppercase font-bold tracking-widest">Existencia Total</p>
         </div>
         <div className={`p-6 rounded-2xl backdrop-blur-sm ${stats.low_stock_count > 0 ? "bg-red-900/20 border border-red-900/30" : "bg-slate-800/40 border border-slate-700"}`}>
           <div className={`text-sm font-medium ${stats.low_stock_count > 0 ? "text-red-400" : "text-slate-400"}`}>
@@ -77,14 +77,14 @@ export default function DashboardPage() {
               stats.low_stock_items.map((item: any, i: number) => (
                 <div key={i} className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 border-red-500">
                   <div>
-                    <div className="font-semibold text-sm">{item.name}</div>
-                    <div className="text-xs text-slate-500">
+                    <div className="font-semibold text-sm text-white">{item.description || item.name}</div>
+                    <div className="text-xs text-white">
                       {item.code} · {item.warehouse_name}
                     </div>
                   </div>
                   <div className="text-right">
                     <div className="text-red-500 font-bold">{item.current_stock} {item.unit}</div>
-                    <div className="text-xs text-slate-500">Min: {item.min_stock} {item.unit}</div>
+                    <div className="text-xs text-white">Min: {item.min_stock} {item.unit}</div>
                   </div>
                 </div>
               ))
@@ -113,12 +113,12 @@ export default function DashboardPage() {
                 return (
                   <div key={i} className={`flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 ${borderColor}`}>
                     <div>
-                      <div className="font-semibold text-sm">{label}</div>
-                      <div className="text-xs text-slate-500">
-                        {m.product_name} ({m.quantity} uds)
+                      <div className="font-semibold text-sm text-white">{label}</div>
+                      <div className="text-xs text-white">
+                        {m.product_description || m.product_name} ({m.quantity} uds)
                       </div>
                     </div>
-                    <div className="text-xs text-slate-400">
+                    <div className="text-xs text-white">
                       {m.created_at ? new Date(m.created_at).toLocaleString("es-MX", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }) : ""}
                     </div>
                   </div>

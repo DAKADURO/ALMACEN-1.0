@@ -15,11 +15,12 @@ type MovementItem = {
 
 export default function MovementsPage() {
     const [mType, setMType] = useState("ENTRY");
+    const [entrySubType, setEntrySubType] = useState("PROVEEDOR");
     const [warehouses, setWarehouses] = useState<any[]>([]);
     const [products, setProducts] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
-    const [folio, setFolio] = useState(`TJ-${new Date().toISOString().slice(2, 10).replace(/-/g, "")}-01`);
+    const [folio, setFolio] = useState(`IN-${new Date().toISOString().slice(2, 4)}${new Date().toISOString().slice(5, 7)}${new Date().toISOString().slice(8, 10)}-01`);
 
     const [header, setHeader] = useState({
         client: "",
@@ -48,13 +49,13 @@ export default function MovementsPage() {
             let prefix = "AL";
 
             if (mType === "ENTRY") {
-                prefix = getWHPrefix(header.destination_warehouse_id);
+                prefix = "IN";
             } else if (mType === "EXIT") {
-                prefix = getWHPrefix(header.origin_warehouse_id);
+                prefix = "OUT";
             } else if (mType === "TRANSFER") {
                 const origin = getWHPrefix(header.origin_warehouse_id);
                 const dest = getWHPrefix(header.destination_warehouse_id);
-                prefix = `${origin}>${dest}`;
+                prefix = `${origin}-${dest}`;
             }
 
             try {
@@ -63,10 +64,10 @@ export default function MovementsPage() {
             } catch (error) {
                 console.error("Error fetching next folio:", error);
                 const now = new Date();
-                const day = String(now.getDate()).padStart(2, '0');
-                const month = String(now.getMonth() + 1).padStart(2, '0');
                 const year = String(now.getFullYear()).slice(2);
-                const dateStr = `${day}${month}${year}`;
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const day = String(now.getDate()).padStart(2, '0');
+                const dateStr = `${year}${month}${day}`;
                 setFolio(`${prefix}-${dateStr}-01`);
             }
         };
@@ -107,7 +108,7 @@ export default function MovementsPage() {
         newItems[index] = {
             ...newItems[index],
             product_id: p.id,
-            product_label: p.name,
+            product_label: p.description || p.name,
             product_code: p.code,
             unit: p.unit_of_measure,
             description: p.description || p.name
@@ -143,7 +144,7 @@ export default function MovementsPage() {
                 quantity: parseInt(item.quantity),
                 movement_type: mType,
                 reference_doc: header.reference_doc || folio,
-                notes: `Vale: ${folio}. ${header.notes || ""}`.trim()
+                notes: `Vale: ${folio}. Tipo: ${mType === 'ENTRY' ? entrySubType : mType}. ${header.notes || ""}`.trim()
             }));
 
             await recordBulkMovements(movements);
@@ -346,10 +347,10 @@ export default function MovementsPage() {
             <header className="flex justify-between items-end">
                 <div>
                     <h1 className="text-3xl font-bold">Carga de Vale</h1>
-                    <p className="text-slate-400">Digitalización de entradas y salidas de almacén.</p>
+                    <p className="text-white">Digitalización de entradas y salidas de almacén.</p>
                 </div>
                 <div className="text-right">
-                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest">Folio sugerido</span>
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">Folio sugerido</span>
                     <div className="text-xl font-mono font-bold text-emerald-500">{folio}</div>
                 </div>
             </header>
@@ -376,13 +377,32 @@ export default function MovementsPage() {
                                 ))}
                             </div>
 
+                            {/* Entry Sub-Type Selector */}
+                            {mType === "ENTRY" && (
+                                <div className="flex gap-2 p-1.5 bg-slate-900 rounded-2xl w-fit">
+                                    {[
+                                        { key: "PROVEEDOR", label: "Proveedor" },
+                                        { key: "COMPRA", label: "Compra" },
+                                        { key: "DEVOLUCION", label: "Devolución" }
+                                    ].map((st) => (
+                                        <button
+                                            key={st.key}
+                                            onClick={() => setEntrySubType(st.key)}
+                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${entrySubType === st.key ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30" : "text-white hover:text-white"}`}
+                                        >
+                                            {st.label}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+
                             <div className="grid grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Cliente / Proyecto</label>
+                                    <label className="text-[10px] font-bold text-white uppercase ml-2">Cliente / Proyecto</label>
                                     <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Solicitado por</label>
+                                    <label className="text-[10px] font-bold text-white uppercase ml-2">Solicitado por</label>
                                     <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.reference_doc} onChange={e => setHeader({ ...header, reference_doc: e.target.value })} />
                                 </div>
                             </div>
@@ -390,7 +410,7 @@ export default function MovementsPage() {
 
                         <div className="lg:col-span-2 grid grid-cols-2 gap-4 h-fit">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Origen</label>
+                                <label className="text-[10px] font-bold text-white uppercase ml-2">Almacén Origen</label>
                                 <select disabled={mType === "ENTRY"} value={header.origin_warehouse_id} onChange={e => setHeader({ ...header, origin_warehouse_id: e.target.value })}
                                     className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'ENTRY' ? 'EXTERNO' : 'Seleccionar...'}</option>
@@ -398,7 +418,7 @@ export default function MovementsPage() {
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Destino</label>
+                                <label className="text-[10px] font-bold text-white uppercase ml-2">Almacén Destino</label>
                                 <select disabled={mType === "EXIT"} value={header.destination_warehouse_id} onChange={e => setHeader({ ...header, destination_warehouse_id: e.target.value })}
                                     className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'EXIT' ? 'CONSUMO' : 'Seleccionar...'}</option>
@@ -412,7 +432,7 @@ export default function MovementsPage() {
                 {/* Table Section */}
                 <div className="p-8">
                     <table className="w-full text-left">
-                        <thead className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">
+                        <thead className="text-[10px] font-bold text-white uppercase tracking-widest">
                             <tr>
                                 <th className="pb-4 pl-2 w-[35%]">Producto / Código</th>
                                 <th className="pb-4 w-24 text-center">Cant.</th>
@@ -446,7 +466,7 @@ export default function MovementsPage() {
                                                         {filteredProducts.slice(0, 10).map(p => (
                                                             <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm border-b border-slate-700/50 flex justify-between">
                                                                 <span className="font-mono text-emerald-400">{p.code}</span>
-                                                                <span className="truncate ml-2">{p.name}</span>
+                                                                <span className="truncate ml-2 text-white">{p.description || p.name}</span>
                                                             </button>
                                                         ))}
                                                     </div>
@@ -458,9 +478,9 @@ export default function MovementsPage() {
                                         <input type="number" className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
                                     </td>
                                     <td className="py-4 text-center">
-                                        <span className="text-xs text-slate-400 font-bold">{item.unit || "—"}</span>
+                                        <span className="text-xs text-white font-bold">{item.unit || "—"}</span>
                                     </td>
-                                    <td className="py-4 pl-4 truncate max-w-xs text-xs text-slate-500 italic">
+                                    <td className="py-4 pl-4 truncate max-w-xs text-xs text-white italic">
                                         {item.description || "Selecciona producto..."}
                                     </td>
                                     <td className="py-4 text-right">
@@ -481,11 +501,11 @@ export default function MovementsPage() {
                 <div className="p-8 bg-slate-900/30 border-t border-slate-700">
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Entregó</label>
+                            <label className="text-[10px] font-bold text-white uppercase ml-2">Entregó</label>
                             <input type="text" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.delivery_person} onChange={e => setHeader({ ...header, delivery_person: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Recibió</label>
+                            <label className="text-[10px] font-bold text-white uppercase ml-2">Recibió</label>
                             <input type="text" placeholder="Firma / Nombre de quien recibe" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.receiver_person} onChange={e => setHeader({ ...header, receiver_person: e.target.value })} />
                         </div>
                         <div className="flex items-end">
@@ -499,6 +519,6 @@ export default function MovementsPage() {
                     </div>
                 </div>
             </div>
-        </div>
+        </div >
     );
 }

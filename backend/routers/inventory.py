@@ -146,7 +146,7 @@ def get_next_folio(prefix: str, db: Session = Depends(database.get_db)):
     Suggests the next folio for a given prefix (e.g., TJ, HE, TJ>HE).
     Format: PREFIX-YYMMDD-NN (where NN is a sequential number)
     """
-    today_str = datetime.now().strftime("%d%m%y")
+    today_str = datetime.now().strftime("%y%m%d")
     pattern = f"{prefix}-{today_str}-%"
     
     # Search for the highest correlative used today for this prefix

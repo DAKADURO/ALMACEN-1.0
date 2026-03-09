@@ -144,7 +144,7 @@ export default function MovementsPage() {
                 quantity: parseInt(item.quantity),
                 movement_type: mType,
                 reference_doc: header.reference_doc || folio,
-                notes: `Vale: ${folio}. Tipo: ${mType === 'ENTRY' ? entrySubType : mType}. ${header.notes || ""}`.trim()
+                notes: `Vale: ${folio}. Tipo: ${mType === 'ENTRY' ? entrySubType : 'ALMACEN'}. ${header.notes || ""}`.trim()
             }));
 
             await recordBulkMovements(movements);
@@ -194,7 +194,7 @@ export default function MovementsPage() {
         doc.setFont("helvetica", "normal");
         doc.text("MOVIMIENTO:", 15, 45);
         doc.setFont("helvetica", "bold");
-        doc.text(mType === 'ENTRY' ? 'ENTRADA' : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO', 55, 45);
+        doc.text(mType === 'ENTRY' ? `ENTRADA (${entrySubType})` : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO', 55, 45);
 
         doc.setFont("helvetica", "normal");
         doc.text("SOLICITADO POR:", 15, 50);
@@ -279,7 +279,7 @@ export default function MovementsPage() {
                         <div className="space-y-3">
                             <div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">Movimiento</div>
-                                <div className="font-semibold border-b border-slate-200 pb-1">{mType === 'ENTRY' ? 'ENTRADA' : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO'}</div>
+                                <div className="font-semibold border-b border-slate-200 pb-1">{mType === 'ENTRY' ? `ENTRADA (${entrySubType})` : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO'}</div>
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">Ubicación</div>
@@ -370,7 +370,7 @@ export default function MovementsPage() {
                                     <button
                                         key={t.key}
                                         onClick={() => setMType(t.key)}
-                                        className={`px-5 py-2 rounded-xl text-sm font-bold transition-all ${mType === t.key ? typeColors[t.key] : "text-slate-500 hover:text-slate-200"}`}
+                                        className={`px-5 py-2 rounded-xl text-sm font-black transition-all border-2 ${mType === t.key ? typeColors[t.key] : "border-slate-700 text-white/40 hover:text-white"}`}
                                     >
                                         {t.label}
                                     </button>
@@ -388,7 +388,7 @@ export default function MovementsPage() {
                                         <button
                                             key={st.key}
                                             onClick={() => setEntrySubType(st.key)}
-                                            className={`px-4 py-2 rounded-xl text-sm font-bold transition-all ${entrySubType === st.key ? "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30" : "text-white hover:text-white"}`}
+                                            className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all border-2 ${entrySubType === st.key ? "bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-900/40" : "border-slate-800 text-white/30 hover:text-white"}`}
                                         >
                                             {st.label}
                                         </button>

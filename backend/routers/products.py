@@ -85,8 +85,9 @@ async def upload_products(
     except Exception as e:
         raise HTTPException(status_code=400, detail=f"Error al leer el archivo: {str(e)}")
 
-    # Normalize columns to lowercase and strip spaces
-    df.columns = [c.lower().strip() for c in df.columns]
+    # Normalize columns to lowercase, strip spaces, replace newlines
+    import re
+    df.columns = [re.sub(r'\s+', ' ', str(c).lower().strip()) for c in df.columns]
     
     # Header Mapping for flexibility — supports both English and Spanish headers
     HEADER_MAPPING = {
@@ -205,8 +206,8 @@ async def upload_products(
             if family: existing.family = family
             if brand: existing.brand = brand
             if unit: existing.unit_of_measure = unit
-            if 'min_stock' in mapped_df.columns: existing.min_stock = min_stock
-            if 'cost_price' in mapped_df.columns: existing.cost_price = cost_price
+            if cost_price > 0: existing.cost_price = cost_price
+            if min_stock > 0: existing.min_stock = min_stock
             
             db.flush()
             new_prod = existing

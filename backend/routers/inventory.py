@@ -104,8 +104,9 @@ def get_inventory_summary(db: Session = Depends(database.get_db)):
             schemas.InventorySummary(
                 code=row[0],
                 name=row[1],
-                warehouse_name=row[2],
-                current_stock=row[3]
+                description=row[2],
+                warehouse_name=row[3],
+                current_stock=row[4]
             ) for row in results
         ]
     except Exception:

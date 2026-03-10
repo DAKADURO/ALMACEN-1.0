@@ -74,6 +74,7 @@ class AdjustmentCreate(BaseModel):
 class InventorySummary(BaseModel):
     code: str
     name: str
+    description: Optional[str] = None
     warehouse_name: str
     current_stock: int
 

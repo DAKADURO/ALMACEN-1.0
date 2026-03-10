@@ -4,6 +4,7 @@ import os
 from routers import products, inventory, warehouses, dashboard, auth
 import database
 import models
+from sqlalchemy import text
 
 app = FastAPI(
     title="Almacen 1.0 API",
@@ -37,9 +38,45 @@ def ensure_warehouses():
         except Exception as e:
             print(f"Error updating warehouses for {ctx}: {e}")
 
+def ensure_views():
+    """Ensure database views are up to date."""
+    contexts = ["tuberia", "refacciones"]
+    for ctx in contexts:
+        try:
+            _, SessionLocal = database.get_engine(ctx)
+            db = SessionLocal()
+            db.execute(text("DROP VIEW IF EXISTS v_inventory_summary"))
+            create_view_sql = """
+            CREATE VIEW v_inventory_summary AS
+            SELECT 
+                p.code,
+                p.name,
+                p.description,
+                w.name as warehouse_name,
+                COALESCE(SUM(
+                    CASE 
+                        WHEN sm.destination_warehouse_id = w.id THEN sm.quantity
+                        WHEN sm.origin_warehouse_id = w.id THEN -sm.quantity
+                        ELSE 0
+                    END
+                ), 0) as current_stock
+            FROM products p
+            CROSS JOIN warehouses w
+            LEFT JOIN stock_movements sm ON p.id = sm.product_id 
+                AND (sm.destination_warehouse_id = w.id OR sm.origin_warehouse_id = w.id)
+            WHERE w.active = 1
+            GROUP BY p.id, p.code, p.name, p.description, w.id, w.name
+            """
+            db.execute(text(create_view_sql))
+            db.commit()
+            db.close()
+        except Exception as e:
+            print(f"Error updating views for {ctx}: {e}")
+
 @app.on_event("startup")
 def startup_event():
     ensure_warehouses()
+    ensure_views()
 
 # CORS configuration
 app.add_middleware(

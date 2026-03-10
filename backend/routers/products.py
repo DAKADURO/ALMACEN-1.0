@@ -153,9 +153,6 @@ async def upload_products(
             
         # Check if exists
         existing = db.query(models.Product).filter(models.Product.code == code).first()
-        if existing:
-            skipped_count += 1
-            continue
             
         # Brand
         brand = str(row.get('brand', '')).strip() if 'brand' in mapped_df.columns else None
@@ -201,19 +198,34 @@ async def upload_products(
             except:
                 min_stock = 0
         
-        new_prod = models.Product(
-            code=code,
-            name=name,
-            description=final_desc,
-            family=family,
-            brand=brand,
-            unit_of_measure=unit,
-            min_stock=min_stock,
-            cost_price=cost_price,
-            active=True
-        )
-        db.add(new_prod)
-        db.flush()  # Get the product ID before creating stock movement
+        if existing:
+            # Update existing product
+            if name and name != code: existing.name = name
+            if final_desc: existing.description = final_desc
+            if family: existing.family = family
+            if brand: existing.brand = brand
+            if unit: existing.unit_of_measure = unit
+            if 'min_stock' in mapped_df.columns: existing.min_stock = min_stock
+            if 'cost_price' in mapped_df.columns: existing.cost_price = cost_price
+            
+            db.flush()
+            new_prod = existing
+            skipped_count += 1 # We count it as 'updated' but use skipped_count variable for simplicity
+        else:
+            new_prod = models.Product(
+                code=code,
+                name=name,
+                description=final_desc,
+                family=family,
+                brand=brand,
+                unit_of_measure=unit,
+                min_stock=min_stock,
+                cost_price=cost_price,
+                active=True
+            )
+            db.add(new_prod)
+            db.flush()  # Get the product ID before creating stock movement
+            added_count += 1
         
         # Create initial stock movement if stock data and warehouse are available
         if warehouse and 'initial_stock' in mapped_df.columns:
@@ -232,7 +244,7 @@ async def upload_products(
             except:
                 pass  # Skip invalid stock values
         
-        added_count += 1
+        # We don't increment added_count here because it's handled above depending on new/existing
 
     try:
         db.commit()
@@ -240,7 +252,7 @@ async def upload_products(
         db.rollback()
         raise HTTPException(status_code=500, detail=f"Error al guardar en base de datos: {str(e)}")
 
-    detail_parts = [f"Agregados: {added_count}", f"Duplicados saltados: {skipped_count}"]
+    detail_parts = [f"Nuevos agregados: {added_count}", f"Existentes actualizados: {skipped_count}"]
     if stock_count > 0:
         detail_parts.append(f"Con stock inicial: {stock_count}")
 

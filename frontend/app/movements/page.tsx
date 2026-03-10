@@ -379,6 +379,7 @@ export default function MovementsPage() {
                     </button>
                     <button onClick={() => window.print()} className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
                     <button onClick={() => window.location.reload()} className="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Nuevo Registro</button>
+                    <button onClick={() => window.location.href = '/'} className="bg-red-900/40 hover:bg-red-900/60 text-red-500 border border-red-800/50 px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Salir</button>
                 </div>
             </div>
         );

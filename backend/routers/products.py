@@ -92,14 +92,16 @@ async def upload_products(
     HEADER_MAPPING = {
         # Code
         'item': 'code', 'codigo': 'code', 'pn': 'code', 'part number': 'code', 'code': 'code',
-        # Name (DESCRIPCION maps to name as the primary product identifier)
-        'name': 'name', 'nombre': 'name', 'descripcion': 'name', 'description': 'name',
+        # Name
+        'name': 'name', 'nombre': 'name',
+        # Description
+        'descripcion': 'description', 'description': 'description',
         # Brand
         'marca': 'brand', 'brand': 'brand',
         # Initial stock
         'total en existencia': 'initial_stock', 'existencia': 'initial_stock',
         'stock': 'initial_stock', 'cantidad': 'initial_stock',
-        # Comments/notes → description field
+        # Comments/notes
         'comentarios': 'comments', 'comments': 'comments', 'notas': 'comments', 'notes': 'comments',
         # Price
         'price list usd': 'cost_price', 'costo': 'cost_price', 'precio': 'cost_price', 'cost': 'cost_price',
@@ -159,9 +161,20 @@ async def upload_products(
         brand = str(row.get('brand', '')).strip() if 'brand' in mapped_df.columns else None
         if brand == 'nan': brand = None
         
-        # Comments → description
-        description = str(row.get('comments', '')).strip() if 'comments' in mapped_df.columns else None
-        if description == 'nan': description = None
+        # Description & Comments
+        description = str(row.get('description', '')).strip() if 'description' in mapped_df.columns else ''
+        if description == 'nan': description = ''
+        
+        comments = str(row.get('comments', '')).strip() if 'comments' in mapped_df.columns else ''
+        if comments == 'nan': comments = ''
+        
+        final_desc = None
+        if description and comments:
+            final_desc = f"{description} | Notas: {comments}"
+        elif description:
+            final_desc = description
+        elif comments:
+            final_desc = comments
         
         # Family
         family = str(row.get('family', '')).strip() if 'family' in mapped_df.columns else 'REFACCIONES'
@@ -191,7 +204,7 @@ async def upload_products(
         new_prod = models.Product(
             code=code,
             name=name,
-            description=description,
+            description=final_desc,
             family=family,
             brand=brand,
             unit_of_measure=unit,

@@ -20,6 +20,14 @@ export default function MovementsPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
+    const [modalConfig, setModalConfig] = useState<{ isOpen: boolean, type: 'success' | 'error', message: string }>({ isOpen: false, type: 'success', message: '' });
+
+    const closeModal = () => {
+        setModalConfig({ ...modalConfig, isOpen: false });
+        if (modalConfig.type === 'success') {
+            setIsVoucherMode(true);
+        }
+    };
     const [folio, setFolio] = useState(`IN-${new Date().toISOString().slice(2, 4)}${new Date().toISOString().slice(5, 7)}${new Date().toISOString().slice(8, 10)}-01`);
 
     const [header, setHeader] = useState({
@@ -148,10 +156,9 @@ export default function MovementsPage() {
             }));
 
             await recordBulkMovements(movements);
-            alert("✅ Vale registrado exitosamente");
-            setIsVoucherMode(true);
+            setModalConfig({ isOpen: true, type: 'success', message: 'Vale registrado exitosamente' });
         } catch (error: any) {
-            alert("❌ Error: " + error.message);
+            setModalConfig({ isOpen: true, type: 'error', message: error.message || "Error al procesar la solicitud" });
         } finally {
             setIsSubmitting(false);
         }
@@ -248,9 +255,44 @@ export default function MovementsPage() {
         doc.save(`Vale_${folio}.pdf`);
     };
 
+    const ModalComponent = () => {
+        if (!modalConfig.isOpen) return null;
+        return (
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                <div className="bg-slate-900 border border-slate-700/50 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
+                    <button onClick={closeModal} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+                    </button>
+                    <div className="flex flex-col items-center gap-4 text-center">
+                        <div className="flex items-center gap-2 mb-2">
+                            <span className="text-4xl font-black tracking-tighter text-[#0070B8]">AIR<span className="text-white font-medium">pipe</span></span>
+                        </div>
+                        <div>
+                            {modalConfig.type === 'success' ? (
+                                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 ring-1 ring-emerald-500/30">
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
+                                </div>
+                            ) : (
+                                <div className="w-16 h-16 bg-red-500/10 text-red-400 rounded-full flex items-center justify-center mx-auto mb-4 ring-1 ring-red-500/30">
+                                    <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" /></svg>
+                                </div>
+                            )}
+                            <h3 className="text-xl font-bold text-white mb-2">{modalConfig.type === 'success' ? 'Vale Registrado' : 'Error'}</h3>
+                            <p className="text-slate-400 text-sm font-medium">{modalConfig.message}</p>
+                        </div>
+                        <button onClick={closeModal} className="mt-4 w-full py-3 rounded-xl font-bold transition-all bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">
+                            Aceptar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     if (isVoucherMode) {
         return (
             <div className="max-w-4xl mx-auto py-10">
+                <ModalComponent />
                 <div className="bg-white text-slate-900 p-10 rounded-sm shadow-2xl border-t-8 border-emerald-600 font-sans print:m-0 print:p-8">
                     {/* Header Vale */}
                     <div className="flex justify-between items-start mb-8">
@@ -344,6 +386,7 @@ export default function MovementsPage() {
 
     return (
         <div className="max-w-6xl mx-auto space-y-8">
+            <ModalComponent />
             <header className="flex justify-between items-end">
                 <div>
                     <h1 className="text-3xl font-bold">Carga de Vale</h1>

@@ -22,6 +22,7 @@ export default function MovementsPage() {
     const [products, setProducts] = useState<any[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
+    const [selectedCompany, setSelectedCompany] = useState<'PROAIR' | 'AIRPIPE'>('PROAIR');
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean, type: 'success' | 'error', message: string }>({ isOpen: false, type: 'success', message: '' });
 
     const closeModal = () => {
@@ -193,13 +194,27 @@ export default function MovementsPage() {
         const doc = new jsPDF();
         const pageWidth = doc.internal.pageSize.getWidth();
 
-        // Logo / Title
-        doc.setFontSize(22);
-        doc.setTextColor(5, 150, 105); // emerald-600
-        doc.text("AIRpipe", 15, 20);
+        // Branding Config
+        const isProAir = selectedCompany === 'PROAIR';
+        const primaryColor = isProAir ? [0, 173, 239] : [0, 112, 184]; // ProAir Blue vs AIRpipe Blue
+        const companyName = isProAir ? "Pro Air" : "AIRpipe";
+        const logoPath = isProAir ? "/logos/proair_logo.png" : "/logos/airpipe_logo.png";
+
+        // Add Logo
+        try {
+            // Note: In a real environment, we'd ensure the logo is pre-loaded or use base64
+            // Since this runs in browser, jsPDF can try to load via URL if same-origin
+            doc.addImage(logoPath, 'PNG', 15, 12, isProAir ? 25 : 35, isProAir ? 25 : 12);
+        } catch (e) {
+            console.warn("Logo could not be loaded for PDF", e);
+            doc.setFontSize(22);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text(companyName, 15, 20);
+        }
+
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
-        doc.text("ALMACEN", 15, 25);
+        doc.text("ALMACEN", 15, isProAir ? 40 : 28);
 
         // Folio & Date
         doc.setFontSize(10);
@@ -244,11 +259,11 @@ export default function MovementsPage() {
         ]);
 
         autoTable(doc, {
-            startY: 65,
+            startY: isProAir ? 75 : 65,
             head: [['Código', 'Cant.', 'Unid.', 'Descripción']],
             body: tableData,
             theme: 'striped',
-            headStyles: { fillColor: [5, 150, 105] }, // emerald-600
+            headStyles: { fillColor: primaryColor as [number, number, number] },
             styles: { fontSize: 8 },
         });
 
@@ -269,7 +284,8 @@ export default function MovementsPage() {
         // Footer
         doc.setFontSize(8);
         doc.setTextColor(150, 150, 150);
-        doc.text("AIRpipe de México S.A. de C.V. — Hermosillo, Sonora", pageWidth / 2, 285, { align: "center" });
+        const footerText = isProAir ? "Pro Air de México S.A. de C.V. — Hermosillo, Sonora" : "AIRpipe de México S.A. de C.V. — Hermosillo, Sonora";
+        doc.text(footerText, pageWidth / 2, 285, { align: "center" });
 
         doc.save(`Vale_${folio}.pdf`);
     };
@@ -284,11 +300,15 @@ export default function MovementsPage() {
                     </button>
                     <div className="flex flex-col items-center gap-4 text-center">
                         <div className="flex items-center gap-2 mb-2">
-                            <span className="text-4xl font-black tracking-tighter text-[#0070B8]">AIR<span className="text-white font-medium">pipe</span></span>
+                            {selectedCompany === 'PROAIR' ? (
+                                <img src="/logos/proair_logo.png" alt="Pro Air" className="h-12 w-auto" />
+                            ) : (
+                                <span className="text-4xl font-black tracking-tighter text-[#0070B8]">AIR<span className="text-white font-medium">pipe</span></span>
+                            )}
                         </div>
                         <div>
                             {modalConfig.type === 'success' ? (
-                                <div className="w-16 h-16 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-4 ring-1 ring-emerald-500/30">
+                                <div className={`w-16 h-16 ${selectedCompany === 'PROAIR' ? 'bg-blue-500/10 text-blue-400 ring-blue-500/30' : 'bg-emerald-500/10 text-emerald-400 ring-emerald-500/30'} rounded-full flex items-center justify-center mx-auto mb-4 ring-1`}>
                                     <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" /></svg>
                                 </div>
                             ) : (
@@ -312,16 +332,20 @@ export default function MovementsPage() {
         return (
             <div className="max-w-4xl mx-auto py-10 px-4">
                 <ModalComponent />
-                <div className="bg-white text-slate-900 p-6 sm:p-10 rounded-sm shadow-2xl border-t-8 border-emerald-600 font-sans print:m-0 print:p-8 overflow-x-auto">
+                <div className={`bg-white text-slate-900 p-6 sm:p-10 rounded-sm shadow-2xl border-t-8 ${selectedCompany === 'PROAIR' ? 'border-[#00ADEF]' : 'border-[#0070B8]'} font-sans print:m-0 print:p-8 overflow-x-auto`}>
                     {/* Header Vale */}
                     <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
-                        <div>
-                            <div className="text-3xl font-black tracking-tighter text-emerald-600 mb-1">AIRpipe <span className="text-slate-400 font-light">ALMACEN</span></div>
+                        <div className="flex flex-col gap-2">
+                            {selectedCompany === 'PROAIR' ? (
+                                <img src="/logos/proair_logo.png" alt="Pro Air" className="h-14 w-auto object-contain" />
+                            ) : (
+                                <div className="text-3xl font-black tracking-tighter text-[#0070B8] mb-1">AIRpipe <span className="text-slate-400 font-light">ALMACEN</span></div>
+                            )}
                             <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Vale de Entrada y Salida</div>
                         </div>
                         <div className="text-left sm:text-right">
                             <div className="text-xs font-bold text-slate-400 uppercase">Folio</div>
-                            <div className="text-xl font-mono font-bold text-emerald-600">{folio}</div>
+                            <div className={`text-xl font-mono font-bold ${selectedCompany === 'PROAIR' ? 'text-[#00ADEF]' : 'text-[#0070B8]'}`}>{folio}</div>
                             <div className="text-[10px] text-slate-400 font-mono mt-1">{new Date().toLocaleDateString('es-MX')}</div>
                         </div>
                     </div>
@@ -367,7 +391,7 @@ export default function MovementsPage() {
                             <tbody className="divide-y divide-slate-100">
                                 {items.map((item, i) => (
                                     <tr key={i}>
-                                        <td className="p-3 font-mono font-bold text-emerald-600">{item.product_code}</td>
+                                        <td className={`p-3 font-mono font-bold ${selectedCompany === 'PROAIR' ? 'text-blue-600' : 'text-[#0070B8]'}`}>{item.product_code}</td>
                                         <td className="p-3 font-bold text-center">{item.quantity}</td>
                                         <td className="p-3 text-slate-500 text-center">{item.unit}</td>
                                         <td className="p-3 text-slate-700">{item.description}</td>
@@ -390,16 +414,16 @@ export default function MovementsPage() {
                     </div>
 
                     <div className="mt-12 text-center">
-                        <div className="text-xs text-slate-400 italic">AIRpipe de México S.A. de C.V. — Hermosillo, Sonora</div>
+                        <div className="text-xs text-slate-400 italic">{selectedCompany === 'PROAIR' ? 'Pro Air' : 'AIRpipe'} de México S.A. de C.V. — Hermosillo, Sonora</div>
                     </div>
                 </div>
 
                 <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 no-print">
-                    <button onClick={downloadPDF} className="flex-grow sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2">
+                    <button onClick={downloadPDF} className={`flex-grow sm:flex-none ${selectedCompany === 'PROAIR' ? 'bg-blue-600 hover:bg-blue-500' : 'bg-[#0070B8] hover:bg-blue-600'} text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2`}>
                         <span>📄</span> Descargar PDF
                     </button>
                     <button onClick={() => window.print()} className="flex-grow sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
-                    <button onClick={() => window.location.reload()} className="flex-grow sm:flex-none bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Nuevo Registro</button>
+                    <button onClick={() => window.location.reload()} className={`flex-grow sm:flex-none ${selectedCompany === 'PROAIR' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'} px-8 py-3 rounded-xl font-bold transition-all shadow-xl border`}>Nuevo Registro</button>
                     <Link href="/" className="flex-grow sm:flex-none bg-red-900/10 hover:bg-red-900/20 text-red-500 border border-red-900/30 px-8 py-3 rounded-xl font-bold transition-all shadow-xl text-center">Salir</Link>
                 </div>
             </div>
@@ -414,9 +438,23 @@ export default function MovementsPage() {
                     <h1 className="text-2xl sm:text-3xl font-bold">Carga de Vale</h1>
                     <p className="text-white opacity-60 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
                 </div>
-                <div className="text-left sm:text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700 w-full sm:w-auto">
+                <div className="text-left sm:text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700 w-full sm:w-auto flex flex-col items-center sm:items-end gap-1">
+                    <div className="flex gap-2 mb-2 p-1 bg-slate-900 rounded-xl border border-slate-700">
+                        <button 
+                            onClick={() => setSelectedCompany('PROAIR')}
+                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${selectedCompany === 'PROAIR' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
+                        >
+                            PRO AIR
+                        </button>
+                        <button 
+                            onClick={() => setSelectedCompany('AIRPIPE')}
+                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${selectedCompany === 'AIRPIPE' ? 'bg-[#0070B8] text-white' : 'text-slate-500 hover:text-white'}`}
+                        >
+                            AIRPIPE
+                        </button>
+                    </div>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Folio sugerido</span>
-                    <div className="text-xl font-mono font-bold text-emerald-500">{folio}</div>
+                    <div className={`text-xl font-mono font-bold ${selectedCompany === 'PROAIR' ? 'text-blue-400' : 'text-[#0070B8]'}`}>{folio}</div>
                 </div>
             </header>
 

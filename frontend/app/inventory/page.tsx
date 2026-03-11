@@ -165,19 +165,27 @@ export default function InventoryPage() {
         const doc = new jsPDF();
         const date = new Date().toLocaleDateString();
         const context = localStorage.getItem("inventory-context") || "tuberia";
-        const title = context.toUpperCase() === "TUBERIA" ? "REPORTE DE EXISTENCIAS - AIRPIPE" : "REPORTE DE EXISTENCIAS - PROAIR";
+        const isProAir = context === "refacciones";
+        const primaryColor = isProAir ? [0, 173, 239] : [0, 112, 184];
+        const title = isProAir ? "REPORTE DE EXISTENCIAS - PRO AIR" : "REPORTE DE EXISTENCIAS - AIRpipe";
+        const logoPath = isProAir ? "/logos/proair_logo.png" : "/logos/airpipe_logo.png";
 
-        // Company Logo/Header Placeholder
-        doc.setFontSize(18);
-        doc.setTextColor(16, 185, 129); // Emerald-500
-        doc.text("AIRpipe", 14, 20);
+        // Company Logo
+        try {
+            doc.addImage(logoPath, 'PNG', 14, 12, isProAir ? 25 : 35, isProAir ? 25 : 12);
+        } catch (e) {
+            console.warn("Logo could not be loaded", e);
+            doc.setFontSize(18);
+            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
+            doc.text(isProAir ? "Pro Air" : "AIRpipe", 14, 20);
+        }
 
         doc.setFontSize(12);
         doc.setTextColor(100);
-        doc.text(title, 14, 30);
+        doc.text(title, 14, isProAir ? 40 : 28);
         doc.setFontSize(10);
-        doc.text(`Fecha: ${date}`, 14, 38);
-        doc.text(`Filtro Almacén: ${selectedWarehouse === "all" ? "Todos" : selectedWarehouse}`, 14, 44);
+        doc.text(`Fecha: ${date}`, 14, isProAir ? 48 : 36);
+        doc.text(`Filtro Almacén: ${selectedWarehouse === "all" ? "Todos" : selectedWarehouse}`, 14, isProAir ? 54 : 42);
 
         const tableData = filteredData.map((item: any) => [
             item.code,
@@ -187,10 +195,10 @@ export default function InventoryPage() {
         ]);
 
         autoTable(doc, {
-            startY: 50,
+            startY: isProAir ? 60 : 50,
             head: [['CÓDIGO', 'DESCRIPCIÓN', 'ALMACÉN', 'EXISTENCIA']],
             body: tableData,
-            headStyles: { fillColor: [16, 185, 129] }, // Emerald-500
+            headStyles: { fillColor: primaryColor as [number, number, number] },
             theme: 'striped'
         });
 

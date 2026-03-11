@@ -117,15 +117,16 @@ def get_inventory_summary(db: Session = Depends(database.get_db)):
             ).scalar()
             current_stock = int(incoming) - int(outgoing)
 
-            results.append(
-                schemas.InventorySummary(
-                    code=product.code,
-                    name=product.name,
-                    description=product.description or product.name,
-                    warehouse_name=warehouse.name,
-                    current_stock=current_stock
+            if current_stock > 0:
+                results.append(
+                    schemas.InventorySummary(
+                        code=product.code,
+                        name=product.name,
+                        description=product.description or product.name,
+                        warehouse_name=warehouse.name,
+                        current_stock=current_stock
+                    )
                 )
-            )
 
     return results
 

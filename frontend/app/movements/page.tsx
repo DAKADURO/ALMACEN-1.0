@@ -458,7 +458,7 @@ export default function MovementsPage() {
                 </div>
             </header>
 
-            <div className="bg-slate-800/40 border border-slate-700 rounded-3xl overflow-hidden backdrop-blur-md shadow-2xl">
+            <div className="bg-slate-800/40 border border-slate-700 rounded-3xl backdrop-blur-md shadow-2xl relative">
                 {/* Header Section */}
                 <div className="p-4 sm:p-8 border-b border-slate-700 bg-slate-800/20">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
@@ -534,7 +534,7 @@ export default function MovementsPage() {
 
                 {/* Table Section */}
                 <div className="p-4 sm:p-8">
-                    <div className="overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
+                    <div className="lg:overflow-visible overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
                         <table className="w-full text-left min-w-[700px]">
                             <thead className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50">
                                 <tr>
@@ -573,7 +573,7 @@ export default function MovementsPage() {
                                                         📸
                                                     </button>
                                                     {searchIndex === idx && searchQuery.length > 0 && (
-                                                        <div className="absolute z-50 left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in zoom-in-95 duration-200">
+                                                        <div className="absolute z-[100] left-0 right-0 mt-2 bg-slate-800 border-2 border-slate-600 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[min(500px,70vh)] overflow-auto animate-in fade-in zoom-in-95 duration-200">
                                                             {filteredProducts.slice(0, 15).map(p => (
                                                                 <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 transition-colors border-b border-slate-700 last:border-0 flex justify-between items-center">
                                                                     <div className="flex flex-col">

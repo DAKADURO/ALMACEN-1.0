@@ -214,7 +214,7 @@ export default function MovementsPage() {
 
         doc.setFontSize(10);
         doc.setTextColor(150, 150, 150);
-        doc.text("ALMACEN", 15, isProAir ? 40 : 28);
+        doc.text("ALMACEN", 15, isProAir ? 42 : 28);
 
         // Folio & Date
         doc.setFontSize(10);
@@ -224,31 +224,31 @@ export default function MovementsPage() {
 
         // Header Info
         doc.setDrawColor(220, 220, 220);
-        doc.line(15, 30, pageWidth - 15, 30);
+        doc.line(15, isProAir ? 45 : 30, pageWidth - 15, isProAir ? 45 : 30);
 
         doc.setFontSize(9);
         doc.setTextColor(50, 50, 50);
-        doc.text("CLIENTE / PROYECTO:", 15, 40);
+        doc.text("CLIENTE / PROYECTO:", 15, isProAir ? 55 : 40);
         doc.setFont("helvetica", "bold");
-        doc.text(header.client || "—", 55, 40);
+        doc.text(header.client || "—", 55, isProAir ? 55 : 40);
 
         doc.setFont("helvetica", "normal");
-        doc.text("MOVIMIENTO:", 15, 45);
+        doc.text("MOVIMIENTO:", 15, isProAir ? 60 : 45);
         doc.setFont("helvetica", "bold");
-        doc.text(mType === 'ENTRY' ? `ENTRADA (${entrySubType})` : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO', 55, 45);
+        doc.text(mType === 'ENTRY' ? `ENTRADA (${entrySubType})` : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO', 55, isProAir ? 60 : 45);
 
         doc.setFont("helvetica", "normal");
-        doc.text("SOLICITADO POR:", 15, 50);
+        doc.text("SOLICITADO POR:", 15, isProAir ? 65 : 50);
         doc.setFont("helvetica", "bold");
-        doc.text(header.reference_doc || "—", 55, 50);
+        doc.text(header.reference_doc || "—", 55, isProAir ? 65 : 50);
 
         doc.setFont("helvetica", "normal");
-        doc.text("UBICACIÓN:", 15, 55);
+        doc.text("UBICACIÓN:", 15, isProAir ? 70 : 55);
         doc.setFont("helvetica", "bold");
         const location = mType === 'ENTRY' ? (warehouses.find(w => w.id == header.destination_warehouse_id)?.name) :
             mType === 'EXIT' ? (warehouses.find(w => w.id == header.origin_warehouse_id)?.name) :
                 `${warehouses.find(w => w.id == header.origin_warehouse_id)?.name} -> ${warehouses.find(w => w.id == header.destination_warehouse_id)?.name}`;
-        doc.text(location || "—", 55, 55);
+        doc.text(location || "—", 55, isProAir ? 70 : 55);
 
         // Table
         const tableData = items.map(item => [
@@ -259,7 +259,7 @@ export default function MovementsPage() {
         ]);
 
         autoTable(doc, {
-            startY: isProAir ? 75 : 65,
+            startY: isProAir ? 85 : 65,
             head: [['Código', 'Cant.', 'Unid.', 'Descripción']],
             body: tableData,
             theme: 'striped',

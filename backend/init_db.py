@@ -46,6 +46,7 @@ def seed_schema(engine):
         FROM products p
         CROSS JOIN warehouses w
         LEFT JOIN stock_movements sm ON (sm.product_id = p.id AND (sm.origin_warehouse_id = w.id OR sm.destination_warehouse_id = w.id))
+        WHERE w.active
         GROUP BY p.code, p.name, w.name;
         """
         # For SQLite, "CREATE OR REPLACE VIEW" doesn't exist, we must drop first

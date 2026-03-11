@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from typing import List
 from datetime import datetime
 import models, schemas, database
@@ -98,37 +98,23 @@ def record_adjustment(adjustment: schemas.AdjustmentCreate, db: Session = Depend
 
 @router.get("/summary", response_model=List[schemas.InventorySummary])
 def get_inventory_summary(db: Session = Depends(database.get_db)):
-    """Compute inventory summary dynamically using ORM (no SQL view dependency)."""
-    # Get all active warehouses
-    warehouses = db.query(models.Warehouse).filter(models.Warehouse.active == True).all()
-    # Get all products
-    products = db.query(models.Product).filter(models.Product.active == True).all()
-
-    results = []
-    for product in products:
-        for warehouse in warehouses:
-            incoming = db.query(func.coalesce(func.sum(models.StockMovement.quantity), 0)).filter(
-                models.StockMovement.product_id == product.id,
-                models.StockMovement.destination_warehouse_id == warehouse.id
-            ).scalar()
-            outgoing = db.query(func.coalesce(func.sum(models.StockMovement.quantity), 0)).filter(
-                models.StockMovement.product_id == product.id,
-                models.StockMovement.origin_warehouse_id == warehouse.id
-            ).scalar()
-            current_stock = int(incoming) - int(outgoing)
-
-            if current_stock > 0:
-                results.append(
-                    schemas.InventorySummary(
-                        code=product.code,
-                        name=product.name,
-                        description=product.description or product.name,
-                        warehouse_name=warehouse.name,
-                        current_stock=current_stock
-                    )
-                )
-
-    return results
+    """Compute inventory summary efficiently using the SQL view."""
+    try:
+        # Use the view but filter by stock > 0 as requested
+        query = text("SELECT code, name, description, warehouse_name, current_stock FROM v_inventory_summary WHERE current_stock > 0")
+        results = db.execute(query).fetchall()
+        return [
+            schemas.InventorySummary(
+                code=row[0],
+                name=row[1],
+                description=row[2],
+                warehouse_name=row[3],
+                current_stock=int(row[4])
+            ) for row in results
+        ]
+    except Exception as e:
+        print(f"Error fetching inventory summary: {e}")
+        return []
 
 @router.get("/movements", response_model=List[schemas.Movement])
 def get_movements(

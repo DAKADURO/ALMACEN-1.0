@@ -64,7 +64,7 @@ def ensure_views():
             CROSS JOIN warehouses w
             LEFT JOIN stock_movements sm ON p.id = sm.product_id 
                 AND (sm.destination_warehouse_id = w.id OR sm.origin_warehouse_id = w.id)
-            WHERE w.active = 1
+            WHERE w.active
             GROUP BY p.id, p.code, p.name, p.description, w.id, w.name
             """
             db.execute(text(create_view_sql))

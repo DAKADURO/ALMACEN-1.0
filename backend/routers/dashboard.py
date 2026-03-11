@@ -72,6 +72,23 @@ def get_dashboard_stats(db: Session = Depends(database.get_db)):
     # Active warehouses
     active_warehouses = db.query(func.count(models.Warehouse.id)).filter(models.Warehouse.active == True).scalar() or 0
 
+    # Top products by rotation (last 30 days)
+    thirty_days_ago = datetime.now() - timedelta(days=30)
+    top_products_query = db.query(
+        models.Product.code,
+        models.Product.name,
+        func.count(models.StockMovement.id).label("movement_count")
+    ).join(models.StockMovement, models.Product.id == models.StockMovement.product_id)\
+     .filter(models.StockMovement.created_at >= thirty_days_ago)\
+     .group_by(models.Product.id, models.Product.code, models.Product.name)\
+     .order_by(text("movement_count DESC"))\
+     .limit(5).all()
+
+    top_products_list = [
+        {"code": row[0], "name": row[1], "count": row[2]}
+        for row in top_products_query
+    ]
+
     return {
         "total_products": total_products,
         "total_valuation": total_valuation,
@@ -79,5 +96,6 @@ def get_dashboard_stats(db: Session = Depends(database.get_db)):
         "low_stock_items": low_stock_items,
         "movements_today": movements_today,
         "active_warehouses": active_warehouses,
-        "recent_movements": recent_list
+        "recent_movements": recent_list,
+        "top_products": top_products_list
     }

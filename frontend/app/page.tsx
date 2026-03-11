@@ -65,7 +65,9 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Low Stock */}
         <section className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col">
-          <h2 className="text-xl font-bold mb-4">Stock Bajo (Crítico)</h2>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <span>⚠️</span> Stock Bajo (Crítico)
+          </h2>
           <div className="space-y-3">
             {stats.low_stock_items.length === 0 ? (
               <div className="text-sm text-white/50 py-4 text-center">
@@ -90,12 +92,56 @@ export default function DashboardPage() {
           </div>
         </section>
 
-        {/* Recent Movements */}
-        <section className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col">
-          <h2 className="text-xl font-bold mb-4">Últimos Movimientos</h2>
-          <div className="space-y-3">
-            {stats.recent_movements.length === 0 ? (
+        {/* Top Products (Rotation) */}
+        <section className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col shadow-lg shadow-emerald-900/10">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <span>📈</span> Top Movimientos (30 días)
+          </h2>
+          <div className="space-y-4">
+            {stats.top_products.length === 0 ? (
               <div className="text-sm text-white/50 py-4 text-center">
+                Sin rotación registrada en los últimos 30 días.
+              </div>
+            ) : (
+              stats.top_products.map((item: any, i: number) => {
+                // Calculate color intensity based on rank (i)
+                const colors = ["bg-emerald-500", "bg-emerald-600", "bg-emerald-700", "bg-slate-600", "bg-slate-700"];
+                const progress = ((item.count / stats.top_products[0].count) * 100);
+                
+                return (
+                  <div key={i} className="space-y-2">
+                    <div className="flex justify-between text-sm items-end">
+                      <div className="flex-grow">
+                        <span className="font-bold text-emerald-400 mr-2">#{i + 1}</span>
+                        <span className="font-medium text-white line-clamp-1">{item.name}</span>
+                        <div className="text-[10px] opacity-40 font-mono">{item.code}</div>
+                      </div>
+                      <div className="text-right ml-4">
+                        <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">{item.count} mov.</span>
+                      </div>
+                    </div>
+                    <div className="h-1.5 w-full bg-slate-700/50 rounded-full overflow-hidden">
+                      <div 
+                        className={`h-full ${colors[i] || "bg-slate-600"} transition-all duration-1000`} 
+                        style={{ width: `${progress}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+          <p className="text-[10px] opacity-30 mt-auto pt-4 text-center italic">Este panel ayuda a identificar el material con mayor rotación.</p>
+        </section>
+
+        {/* Recent Movements */}
+        <section className="lg:col-span-2 p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col overflow-hidden">
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+            <span>🕒</span> Últimos Movimientos
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {stats.recent_movements.length === 0 ? (
+              <div className="col-span-2 text-sm text-white/50 py-4 text-center">
                 Sin movimientos registrados aún.
               </div>
             ) : (
@@ -111,12 +157,12 @@ export default function DashboardPage() {
                 return (
                   <div key={i} className={`flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 ${borderColor}`}>
                     <div>
-                      <div className="font-semibold text-sm">{label}</div>
-                      <div className="text-xs opacity-60">
+                      <div className="font-semibold text-sm line-clamp-1">{label}</div>
+                      <div className="text-xs opacity-60 line-clamp-1">
                         {m.product_description || m.product_name} ({m.quantity} uds)
                       </div>
                     </div>
-                    <div className="text-xs opacity-40">
+                    <div className="text-[10px] opacity-40 ml-4 whitespace-nowrap">
                       {m.created_at ? new Date(m.created_at).toLocaleString("es-MX", { hour: "2-digit", minute: "2-digit", day: "2-digit", month: "short" }) : ""}
                     </div>
                   </div>

@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Link from "next/link";
 
 export default function InventoryPage() {
     const [tab, setTab] = useState<"stock" | "products">("stock");
@@ -254,19 +255,25 @@ export default function InventoryPage() {
             )}
 
             {/* Tabs */}
-            <div className="flex gap-2 p-1 bg-slate-800/60 rounded-xl w-fit">
+            <div className="flex bg-slate-800/60 p-1.5 rounded-2xl border border-slate-700/50 backdrop-blur-sm shadow-xl">
                 <button
-                    onClick={() => setTab("stock")}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all ${tab === "stock" ? "bg-emerald-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${tab === 'stock' ? 'bg-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                    onClick={() => setTab('stock')}
                 >
-                    📦 Existencias
+                    <span>📦</span> Existencias
                 </button>
                 <button
-                    onClick={() => setTab("products")}
-                    className={`px-4 py-2 rounded-lg font-medium transition-all ${tab === "products" ? "bg-emerald-600 text-white shadow-lg" : "text-slate-400 hover:text-white"}`}
+                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${tab === 'products' ? 'bg-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                    onClick={() => setTab('products')}
                 >
-                    📋 Catálogo de Productos
+                    <span>📋</span> Catálogo de Productos
                 </button>
+                <Link
+                    href="/inventory/audit"
+                    className="px-6 py-2 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
+                >
+                    <span>📝</span> Auditoría (Corte Mes)
+                </Link>
             </div>
 
             {/* Filters */}

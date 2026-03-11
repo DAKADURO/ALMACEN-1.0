@@ -105,3 +105,35 @@ class User(UserBase):
 
     class Config:
         from_attributes = True
+
+# --- Audit Schemas ---
+class AuditItemBase(BaseModel):
+    product_id: int
+    counted_stock: Optional[int] = None
+    notes: Optional[str] = None
+
+class AuditItem(AuditItemBase):
+    id: int
+    audit_id: int
+    system_stock: int
+    product: Product
+
+    class Config:
+        from_attributes = True
+
+class AuditBase(BaseModel):
+    warehouse_id: int
+
+class AuditCreate(AuditBase):
+    pass
+
+class Audit(AuditBase):
+    id: int
+    status: str
+    created_by: Optional[str] = None
+    created_at: datetime
+    completed_at: Optional[datetime] = None
+    items: List[AuditItem] = []
+
+    class Config:
+        from_attributes = True

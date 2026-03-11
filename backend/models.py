@@ -56,3 +56,29 @@ class StockMovement(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     product = relationship("Product", back_populates="movements")
+
+class Audit(Base):
+    __tablename__ = "audits"
+
+    id = Column(Integer, primary_key=True, index=True)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"))
+    status = Column(String(20), default="IN_PROGRESS") # IN_PROGRESS, COMPLETED
+    created_by = Column(String(100))
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    completed_at = Column(DateTime(timezone=True))
+
+    warehouse = relationship("Warehouse")
+    items = relationship("AuditItem", back_populates="audit", cascade="all, delete-orphan")
+
+class AuditItem(Base):
+    __tablename__ = "audit_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    audit_id = Column(Integer, ForeignKey("audits.id"))
+    product_id = Column(Integer, ForeignKey("products.id"))
+    system_stock = Column(Integer, nullable=False) # Snapshot at start
+    counted_stock = Column(Integer, nullable=True) # Actual count
+    notes = Column(Text)
+
+    audit = relationship("Audit", back_populates="items")
+    product = relationship("Product")

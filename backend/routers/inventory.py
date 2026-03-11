@@ -263,3 +263,101 @@ def check_bom_availability(items: List[schemas.BOMItemCheck], db: Session = Depe
         })
         
     return results
+
+# --- Inventory Audit Endpoints ---
+
+@router.post("/audit/start", response_model=schemas.Audit)
+def start_audit(audit_in: schemas.AuditCreate, db: Session = Depends(database.get_db)):
+    """Initialize a new audit session by taking a snapshot of the current stock."""
+    # Create the Audit header
+    new_audit = models.Audit(
+        warehouse_id=audit_in.warehouse_id,
+        status="IN_PROGRESS",
+        created_by="Administrador" # Placeholder until AUTH is fully integrated for this router
+    )
+    db.add(new_audit)
+    db.flush() # Get audit ID
+
+    # Take a snapshot from the view
+    snapshot_query = text("""
+        SELECT code, current_stock FROM v_inventory_summary 
+        WHERE warehouse_name = (SELECT name FROM warehouses WHERE id = :wh_id)
+    """)
+    rows = db.execute(snapshot_query, {"wh_id": audit_in.warehouse_id}).fetchall()
+    
+    # Map codes to IDs
+    products_map = {p.code: p.id for p in db.query(models.Product).all()}
+
+    # Create AuditItems
+    for row in rows:
+        code, stock = row[0], int(row[1])
+        product_id = products_map.get(code)
+        if product_id:
+            db.add(models.AuditItem(
+                audit_id=new_audit.id,
+                product_id=product_id,
+                system_stock=stock
+            ))
+    
+    db.commit()
+    db.refresh(new_audit)
+    return new_audit
+
+@router.get("/audit/{audit_id}", response_model=schemas.Audit)
+def get_audit(audit_id: int, db: Session = Depends(database.get_db)):
+    audit = db.query(models.Audit).filter(models.Audit.id == audit_id).first()
+    if not audit:
+        raise HTTPException(status_code=404, detail="Audit not found")
+    return audit
+
+@router.put("/audit/{audit_id}/items")
+def update_audit_items(audit_id: int, items_in: List[schemas.AuditItemBase], db: Session = Depends(database.get_db)):
+    """Bulk update counted quantities for an audit session."""
+    for item in items_in:
+        db.query(models.AuditItem).filter(
+            models.AuditItem.audit_id == audit_id,
+            models.AuditItem.product_id == item.product_id
+        ).update({
+            "counted_stock": item.counted_stock,
+            "notes": item.notes
+        })
+    db.commit()
+    return {"status": "updated"}
+
+@router.get("/audits/active/{warehouse_id}")
+def get_active_audit(warehouse_id: int, db: Session = Depends(database.get_db)):
+    """Check if there's an active audit for a warehouse."""
+    return db.query(models.Audit).filter(
+        models.Audit.warehouse_id == warehouse_id, 
+        models.Audit.status == "IN_PROGRESS"
+    ).first()
+
+@router.post("/audit/{audit_id}/finish", response_model=schemas.Audit)
+def finish_audit(audit_id: int, db: Session = Depends(database.get_db)):
+    """Finalize audit and generate adjustments for discrepancies."""
+    audit = db.query(models.Audit).filter(models.Audit.id == audit_id).first()
+    if not audit or audit.status != "IN_PROGRESS":
+        raise HTTPException(status_code=400, detail="Audit not found or already finished")
+    
+    # Process adjustments
+    for item in audit.items:
+        if item.counted_stock is not None:
+            diff = item.counted_stock - item.system_stock
+            if diff != 0:
+                # Create a StockMovement for adjustment
+                new_movement = models.StockMovement(
+                    product_id=item.product_id,
+                    quantity=abs(diff),
+                    movement_type="ENTRY_ADJUSTMENT" if diff > 0 else "EXIT_ADJUSTMENT",
+                    destination_warehouse_id=audit.warehouse_id if diff > 0 else None,
+                    origin_warehouse_id=audit.warehouse_id if diff < 0 else None,
+                    notes=f"Ajuste automático por Auditoría #{audit.id}. Diferencia: {diff}",
+                    reference_doc=f"AUD-{audit.id}"
+                )
+                db.add(new_movement)
+    
+    audit.status = "COMPLETED"
+    audit.completed_at = datetime.now()
+    db.commit()
+    db.refresh(audit)
+    return audit

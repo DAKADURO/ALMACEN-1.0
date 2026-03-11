@@ -168,3 +168,48 @@ export async function recordAdjustment(data: any) {
     }
     return res.json();
 }
+
+export async function startAudit(warehouseId: number) {
+    const res = await fetch(`${API_URL}/inventory/audit/start`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ warehouse_id: warehouseId }),
+    });
+    if (!res.ok) throw new Error("Failed to start audit");
+    return res.json();
+}
+
+export async function fetchAudit(auditId: number) {
+    const res = await fetch(`${API_URL}/inventory/audit/${auditId}`, {
+        headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch audit");
+    return res.json();
+}
+
+export async function updateAuditItems(auditId: number, items: any[]) {
+    const res = await fetch(`${API_URL}/inventory/audit/${auditId}/items`, {
+        method: "PUT",
+        headers: getHeaders(),
+        body: JSON.stringify(items),
+    });
+    if (!res.ok) throw new Error("Failed to update audit items");
+    return res.json();
+}
+
+export async function fetchActiveAudit(warehouseId: number) {
+    const res = await fetch(`${API_URL}/inventory/audits/active/${warehouseId}`, {
+        headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to fetch active audit");
+    return res.json();
+}
+
+export async function finishAudit(auditId: number) {
+    const res = await fetch(`${API_URL}/inventory/audit/${auditId}/finish`, {
+        method: "POST",
+        headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to finish audit");
+    return res.json();
+}

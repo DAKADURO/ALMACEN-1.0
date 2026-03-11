@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import QRCode from "qrcode";
 import Link from "next/link";
 
 export default function InventoryPage() {
@@ -205,6 +206,65 @@ export default function InventoryPage() {
         doc.save(`Existencias_${context}_${date.replace(/\//g, '-')}.pdf`);
     };
 
+    const generateLabelPDF = async (product: any) => {
+        try {
+            const context = localStorage.getItem("inventory-context") || "tuberia";
+            const isProAir = context === "refacciones";
+            const primaryColor = isProAir ? "#00ADEF" : "#0070B8";
+
+            // Small format: 50x30 mm
+            const doc = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: [50, 30]
+            });
+
+            // Generate QR Code
+            const qrDataUrl = await QRCode.toDataURL(product.code, {
+                margin: 0,
+                color: { dark: '#000000', light: '#ffffff' }
+            });
+
+            // Draw Label Content
+            // 1. QR Code (Left side)
+            doc.addImage(qrDataUrl, 'PNG', 2, 4, 22, 22);
+
+            // 2. Company Brand Indicator
+            doc.setFillColor(primaryColor);
+            doc.rect(26, 4, 22, 2, 'F');
+            doc.setFontSize(6);
+            doc.setTextColor(255, 255, 255);
+            doc.setFont("helvetica", "bold");
+            doc.text(isProAir ? "PRO AIR" : "AIRpipe", 37, 5.5, { align: "center" });
+
+            // 3. Product Info (Right side)
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(8);
+            doc.text(product.code, 26, 10);
+            
+            doc.setFont("helvetica", "normal");
+            doc.setFontSize(5);
+            const splitName = doc.splitTextToSize(product.description || product.name, 22);
+            doc.text(splitName, 26, 13);
+
+            // 4. Brand & Unit
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(4);
+            doc.text(`MARCA: ${product.brand || "N/A"}`, 26, 24);
+            doc.text(`UNID: ${product.unit_of_measure}`, 26, 26);
+
+            // Footer / Border
+            doc.setDrawColor(primaryColor);
+            doc.setLineWidth(0.5);
+            doc.line(2, 28, 48, 28);
+
+            doc.save(`Etiqueta_${product.code}.pdf`);
+        } catch (error) {
+            console.error("Error generating label:", error);
+            alert("Error al generar la etiqueta");
+        }
+    };
+
     return (
         <div className="space-y-6">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
@@ -392,6 +452,13 @@ export default function InventoryPage() {
                                         </td>
                                         <td className="p-4 text-right">
                                             <div className="flex gap-2 justify-end">
+                                                <button
+                                                    onClick={() => generateLabelPDF(p)}
+                                                    className="px-3 py-1.5 bg-emerald-600/20 text-emerald-400 rounded-lg text-sm font-medium hover:bg-emerald-600/30 transition-colors flex items-center gap-1"
+                                                    title="Descargar Etiqueta QR"
+                                                >
+                                                    🏷️ <span className="hidden sm:inline">Etiqueta</span>
+                                                </button>
                                                 <button
                                                     onClick={() => openEditModal(p)}
                                                     className="px-3 py-1.5 bg-blue-600/20 text-blue-400 rounded-lg text-sm font-medium hover:bg-blue-600/30 transition-colors"

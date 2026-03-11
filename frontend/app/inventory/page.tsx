@@ -199,12 +199,12 @@ export default function InventoryPage() {
 
     return (
         <div className="space-y-6">
-            <header className="flex justify-between items-center">
+            <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
                     <h1 className="text-3xl font-bold">Inventario</h1>
-                    <p className="text-white">Existencias y catálogo de productos.</p>
+                    <p className="text-white opacity-80">Existencias y catálogo de productos.</p>
                 </div>
-                <div className="flex gap-3">
+                <div className="flex flex-wrap gap-2 w-full md:w-auto">
                     <input
                         type="file"
                         ref={fileInputRef}
@@ -215,20 +215,20 @@ export default function InventoryPage() {
                     <button
                         onClick={() => fileInputRef.current?.click()}
                         disabled={isSubmitting}
-                        className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2"
+                        className="flex-grow md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
                     >
                         <span>📁</span> Cargar Excel/CSV
                     </button>
                     <button
                         onClick={openCreateModal}
-                        className="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors"
+                        className="flex-grow md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                     >
                         + Nuevo Producto
                     </button>
                     {tab === "stock" && (
                         <button
                             onClick={downloadPDF}
-                            className="bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 border border-slate-600 shadow-sm"
+                            className="flex-grow md:flex-none bg-slate-700 hover:bg-slate-600 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 border border-slate-600 shadow-sm text-sm"
                         >
                             <span>📄</span> PDF
                         </button>
@@ -255,66 +255,71 @@ export default function InventoryPage() {
             )}
 
             {/* Tabs */}
-            <div className="flex bg-slate-800/60 p-1.5 rounded-2xl border border-slate-700/50 backdrop-blur-sm shadow-xl">
+            <div className="flex bg-slate-800/60 p-1 rounded-xl border border-slate-700/50 backdrop-blur-sm self-stretch lg:self-auto overflow-x-auto no-scrollbar">
                 <button
-                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${tab === 'stock' ? 'bg-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                    className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${tab === 'stock' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                     onClick={() => setTab('stock')}
                 >
                     <span>📦</span> Existencias
                 </button>
                 <button
-                    className={`px-6 py-2 rounded-xl text-sm font-bold transition-all flex items-center gap-2 ${tab === 'products' ? 'bg-emerald-500 text-slate-900 shadow-lg shadow-emerald-500/20' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
+                    className={`whitespace-nowrap px-4 py-2 rounded-lg text-sm font-bold transition-all flex items-center gap-2 ${tab === 'products' ? 'bg-emerald-500 text-slate-900 shadow-lg' : 'text-slate-400 hover:text-white hover:bg-white/5'}`}
                     onClick={() => setTab('products')}
                 >
                     <span>📋</span> Catálogo de Productos
                 </button>
                 <Link
                     href="/inventory/audit"
-                    className="px-6 py-2 rounded-xl text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
+                    className="whitespace-nowrap px-4 py-2 rounded-lg text-sm font-bold text-slate-400 hover:text-white hover:bg-white/5 transition-all flex items-center gap-2"
                 >
                     <span>📝</span> Auditoría (Corte Mes)
                 </Link>
             </div>
 
             {/* Filters */}
-            <div className="flex gap-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700">
-                <input
-                    type="text"
-                    placeholder="Buscar por código o descripción..."
-                    className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 flex-grow focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                />
+            <div className="flex flex-col md:flex-row gap-4 p-4 rounded-xl bg-slate-800/40 border border-slate-700">
+                <div className="relative flex-grow">
+                    <span className="absolute left-3 top-1/2 -translate-y-1/2 opacity-40 text-xs">🔍</span>
+                    <input
+                        type="text"
+                        placeholder="Buscar por código o descripción..."
+                        className="w-full bg-slate-900 border border-slate-700 rounded-lg pl-9 pr-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500 text-white text-sm transition-all"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                    />
+                </div>
 
-                <select
-                    className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500 font-bold"
-                    value={selectedSegment}
-                    onChange={(e) => setSelectedSegment(e.target.value)}
-                >
-                    <option value="all">📁 Todos los Segmentos</option>
-                    <option value="TUBERIA">🛠️ Tubería y Accesorios</option>
-                    <option value="REFACCIONES">⚙️ Refacciones</option>
-                </select>
-
-                {tab === "stock" && (
+                <div className="flex gap-2 w-full md:w-auto">
                     <select
-                        className="bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
-                        value={selectedWarehouse}
-                        onChange={(e) => setSelectedWarehouse(e.target.value)}
+                        className="flex-grow md:flex-none bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500 font-bold text-xs"
+                        value={selectedSegment}
+                        onChange={(e) => setSelectedSegment(e.target.value)}
                     >
-                        <option value="all">Todos los Almacenes</option>
-                        {warehouses.map((w: any) => (
-                            <option key={w.id} value={w.name}>{w.name}</option>
-                        ))}
+                        <option value="all">📁 Segmentos</option>
+                        <option value="TUBERIA">🛠️ Airpipe</option>
+                        <option value="REFACCIONES">⚙️ Proair</option>
                     </select>
-                )}
+
+                    {tab === "stock" && (
+                        <select
+                            className="flex-grow md:flex-none bg-slate-900 border border-slate-700 rounded-lg px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500 text-xs"
+                            value={selectedWarehouse}
+                            onChange={(e) => setSelectedWarehouse(e.target.value)}
+                        >
+                            <option value="all">📍 Almacenes</option>
+                            {warehouses.map((w: any) => (
+                                <option key={w.id} value={w.name}>{w.name}</option>
+                            ))}
+                        </select>
+                    )}
+                </div>
             </div>
 
             {/* Stock Table */}
             {tab === "stock" && (
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
-                    <div className="max-h-[calc(100vh-300px)] overflow-auto">
-                        <table className="w-full text-left border-separate border-spacing-0">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden shadow-xl">
+                    <div className="max-h-[calc(100vh-350px)] overflow-auto no-scrollbar">
+                        <table className="w-full text-left border-separate border-spacing-0 min-w-[600px]">
                             <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-white text-sm uppercase">
                                 <tr>
                                     <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>
@@ -344,9 +349,9 @@ export default function InventoryPage() {
 
             {/* Products Catalog Table */}
             {tab === "products" && (
-                <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden">
-                    <div className="max-h-[calc(100vh-300px)] overflow-auto">
-                        <table className="w-full text-left border-separate border-spacing-0">
+                <div className="rounded-2xl border border-slate-700 bg-slate-800/20 overflow-hidden shadow-xl">
+                    <div className="max-h-[calc(100vh-350px)] overflow-auto no-scrollbar">
+                        <table className="w-full text-left border-separate border-spacing-0 min-w-[800px]">
                             <thead className="sticky top-0 z-20 bg-slate-800 border-b border-slate-700 text-white text-sm uppercase">
                                 <tr>
                                     <th className="p-4 bg-slate-800 rounded-tl-2xl">Código</th>

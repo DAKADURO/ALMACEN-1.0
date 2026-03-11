@@ -3,6 +3,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
+import Link from "next/link";
 
 type MovementItem = {
     product_id: number | null;
@@ -89,7 +90,6 @@ export default function MovementsPage() {
 
     const [searchIndex, setSearchIndex] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
-    const dropdownRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         fetchWarehouses().then(setWarehouses).catch(console.error);
@@ -165,9 +165,9 @@ export default function MovementsPage() {
     };
 
     const typeColors: Record<string, string> = {
-        ENTRY: "bg-emerald-600 text-white shadow-lg shadow-emerald-900/30",
-        EXIT: "bg-blue-600 text-white shadow-lg shadow-blue-900/30",
-        TRANSFER: "bg-amber-500 text-white shadow-lg shadow-amber-900/30"
+        ENTRY: "bg-emerald-600 text-white shadow-lg",
+        EXIT: "bg-blue-600 text-white shadow-lg",
+        TRANSFER: "bg-amber-500 text-white shadow-lg"
     };
 
     const downloadPDF = () => {
@@ -291,23 +291,23 @@ export default function MovementsPage() {
 
     if (isVoucherMode) {
         return (
-            <div className="max-w-4xl mx-auto py-10">
+            <div className="max-w-4xl mx-auto py-10 px-4">
                 <ModalComponent />
-                <div className="bg-white text-slate-900 p-10 rounded-sm shadow-2xl border-t-8 border-emerald-600 font-sans print:m-0 print:p-8">
+                <div className="bg-white text-slate-900 p-6 sm:p-10 rounded-sm shadow-2xl border-t-8 border-emerald-600 font-sans print:m-0 print:p-8 overflow-x-auto">
                     {/* Header Vale */}
-                    <div className="flex justify-between items-start mb-8">
+                    <div className="flex flex-col sm:flex-row justify-between items-start mb-8 gap-4">
                         <div>
                             <div className="text-3xl font-black tracking-tighter text-emerald-600 mb-1">AIRpipe <span className="text-slate-400 font-light">ALMACEN</span></div>
                             <div className="text-[10px] text-slate-500 uppercase tracking-widest font-bold">Vale de Entrada y Salida</div>
                         </div>
-                        <div className="text-right">
+                        <div className="text-left sm:text-right">
                             <div className="text-xs font-bold text-slate-400 uppercase">Folio</div>
                             <div className="text-xl font-mono font-bold text-emerald-600">{folio}</div>
                             <div className="text-[10px] text-slate-400 font-mono mt-1">{new Date().toLocaleDateString('es-MX')}</div>
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-2 gap-8 mb-8 text-sm">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 sm:gap-8 mb-8 text-sm">
                         <div className="space-y-3">
                             <div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">Cliente / Proyecto</div>
@@ -335,29 +335,31 @@ export default function MovementsPage() {
                     </div>
 
                     {/* Table Items */}
-                    <table className="w-full mb-12 text-sm">
-                        <thead>
-                            <tr className="bg-slate-50 border-y border-slate-200 text-[10px] font-bold text-slate-500 uppercase">
-                                <th className="p-3 text-left w-24">Item</th>
-                                <th className="p-3 text-left w-20 text-center">Cant.</th>
-                                <th className="p-3 text-left w-16 text-center">Unid.</th>
-                                <th className="p-3 text-left">Descripción / Especificación</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-slate-100">
-                            {items.map((item, i) => (
-                                <tr key={i}>
-                                    <td className="p-3 font-mono font-bold text-emerald-600">{item.product_code}</td>
-                                    <td className="p-3 font-bold text-center">{item.quantity}</td>
-                                    <td className="p-3 text-slate-500 text-center">{item.unit}</td>
-                                    <td className="p-3 text-slate-700">{item.description}</td>
+                    <div className="overflow-x-auto">
+                        <table className="w-full mb-12 text-sm min-w-[500px]">
+                            <thead>
+                                <tr className="bg-slate-50 border-y border-slate-200 text-[10px] font-bold text-slate-500 uppercase">
+                                    <th className="p-3 text-left w-24">Item</th>
+                                    <th className="p-3 text-left w-20 text-center">Cant.</th>
+                                    <th className="p-3 text-left w-16 text-center">Unid.</th>
+                                    <th className="p-3 text-left">Descripción / Especificación</th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-100">
+                                {items.map((item, i) => (
+                                    <tr key={i}>
+                                        <td className="p-3 font-mono font-bold text-emerald-600">{item.product_code}</td>
+                                        <td className="p-3 font-bold text-center">{item.quantity}</td>
+                                        <td className="p-3 text-slate-500 text-center">{item.unit}</td>
+                                        <td className="p-3 text-slate-700">{item.description}</td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {/* Footer / Signatures */}
-                    <div className="grid grid-cols-2 gap-16 mt-20">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-10 sm:gap-16 mt-16 sm:mt-20">
                         <div className="text-center pt-4 border-t border-slate-300">
                             <div className="text-[10px] font-bold text-slate-400 uppercase mb-1">Entregó</div>
                             <div className="font-bold text-sm tracking-tight">{header.delivery_person}</div>
@@ -373,39 +375,39 @@ export default function MovementsPage() {
                     </div>
                 </div>
 
-                <div className="mt-8 flex justify-center gap-4 no-print">
-                    <button onClick={downloadPDF} className="bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl flex items-center gap-2">
+                <div className="mt-8 flex flex-wrap justify-center gap-3 sm:gap-4 no-print">
+                    <button onClick={downloadPDF} className="flex-grow sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2">
                         <span>📄</span> Descargar PDF
                     </button>
-                    <button onClick={() => window.print()} className="bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
-                    <button onClick={() => window.location.reload()} className="bg-slate-500 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Nuevo Registro</button>
-                    <button onClick={() => window.location.href = '/'} className="bg-red-900/40 hover:bg-red-900/60 text-red-500 border border-red-800/50 px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Salir</button>
+                    <button onClick={() => window.print()} className="flex-grow sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
+                    <button onClick={() => window.location.reload()} className="flex-grow sm:flex-none bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Nuevo Registro</button>
+                    <Link href="/" className="flex-grow sm:flex-none bg-red-900/10 hover:bg-red-900/20 text-red-500 border border-red-900/30 px-8 py-3 rounded-xl font-bold transition-all shadow-xl text-center">Salir</Link>
                 </div>
             </div>
         );
     }
 
     return (
-        <div className="max-w-6xl mx-auto space-y-8">
+        <div className="max-w-6xl mx-auto space-y-6 sm:space-y-8 p-4">
             <ModalComponent />
-            <header className="flex justify-between items-end">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Carga de Vale</h1>
-                    <p className="text-white">Digitalización de entradas y salidas de almacén.</p>
+                    <h1 className="text-2xl sm:text-3xl font-bold">Carga de Vale</h1>
+                    <p className="text-white opacity-60 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
                 </div>
-                <div className="text-right">
-                    <span className="text-xs font-bold text-white uppercase tracking-widest">Folio sugerido</span>
+                <div className="text-left sm:text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700 w-full sm:w-auto">
+                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Folio sugerido</span>
                     <div className="text-xl font-mono font-bold text-emerald-500">{folio}</div>
                 </div>
             </header>
 
             <div className="bg-slate-800/40 border border-slate-700 rounded-3xl overflow-hidden backdrop-blur-md shadow-2xl">
                 {/* Header Section */}
-                <div className="p-8 border-b border-slate-700 bg-slate-800/20">
+                <div className="p-4 sm:p-8 border-b border-slate-700 bg-slate-800/20">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             {/* Type selector */}
-                            <div className="flex gap-2 p-1.5 bg-slate-900 rounded-2xl w-fit">
+                            <div className="flex flex-wrap gap-2 p-1 bg-slate-950 rounded-2xl w-full sm:w-fit">
                                 {[
                                     { key: "ENTRY", label: "Entrada" },
                                     { key: "EXIT", label: "Salida" },
@@ -414,7 +416,7 @@ export default function MovementsPage() {
                                     <button
                                         key={t.key}
                                         onClick={() => setMType(t.key)}
-                                        className={`px-5 py-2 rounded-xl text-sm font-black transition-all border-2 ${mType === t.key ? typeColors[t.key] : "border-slate-700 text-white/40 hover:text-white"}`}
+                                        className={`flex-grow sm:flex-none px-6 py-2 rounded-xl text-sm font-black transition-all border-2 ${mType === t.key ? typeColors[t.key] + " border-transparent" : "border-slate-800 text-white/30 hover:text-white"}`}
                                     >
                                         {t.label}
                                     </button>
@@ -423,7 +425,7 @@ export default function MovementsPage() {
 
                             {/* Entry Sub-Type Selector */}
                             {mType === "ENTRY" && (
-                                <div className="flex gap-2 p-1.5 bg-slate-900 rounded-2xl w-fit">
+                                <div className="flex flex-wrap gap-2 p-1 bg-slate-950 rounded-2xl w-full sm:w-fit animate-in slide-in-from-top-2">
                                     {[
                                         { key: "PROVEEDOR", label: "Proveedor" },
                                         { key: "COMPRA", label: "Compra" },
@@ -432,7 +434,7 @@ export default function MovementsPage() {
                                         <button
                                             key={st.key}
                                             onClick={() => setEntrySubType(st.key)}
-                                            className={`px-6 py-2.5 rounded-xl text-xs font-black tracking-widest uppercase transition-all border-2 ${entrySubType === st.key ? "bg-emerald-600 border-emerald-400 text-white shadow-lg shadow-emerald-900/40" : "border-slate-800 text-white/30 hover:text-white"}`}
+                                            className={`flex-grow sm:flex-none px-4 py-2 rounded-xl text-[10px] font-black tracking-widest uppercase transition-all border-2 ${entrySubType === st.key ? "bg-emerald-600 border-transparent text-white shadow-lg" : "border-slate-800 text-white/20 hover:text-white"}`}
                                         >
                                             {st.label}
                                         </button>
@@ -440,31 +442,31 @@ export default function MovementsPage() {
                                 </div>
                             )}
 
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-white uppercase ml-2">Cliente / Proyecto</label>
-                                    <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Cliente / Proyecto</label>
+                                    <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-white uppercase ml-2">Solicitado por</label>
-                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.reference_doc} onChange={e => setHeader({ ...header, reference_doc: e.target.value })} />
+                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Solicitado por</label>
+                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.reference_doc} onChange={e => setHeader({ ...header, reference_doc: e.target.value })} />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="lg:col-span-2 grid grid-cols-2 gap-4 h-fit">
+                        <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 h-fit">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-white uppercase ml-2">Almacén Origen</label>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Origen</label>
                                 <select disabled={mType === "ENTRY"} value={header.origin_warehouse_id} onChange={e => setHeader({ ...header, origin_warehouse_id: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'ENTRY' ? 'EXTERNO' : 'Seleccionar...'}</option>
                                     {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-white uppercase ml-2">Almacén Destino</label>
+                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Destino</label>
                                 <select disabled={mType === "EXIT"} value={header.destination_warehouse_id} onChange={e => setHeader({ ...header, destination_warehouse_id: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
+                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'EXIT' ? 'CONSUMO' : 'Seleccionar...'}</option>
                                     {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
@@ -474,95 +476,104 @@ export default function MovementsPage() {
                 </div>
 
                 {/* Table Section */}
-                <div className="p-8">
-                    <table className="w-full text-left">
-                        <thead className="text-[10px] font-bold text-white uppercase tracking-widest">
-                            <tr>
-                                <th className="pb-4 pl-2 w-[35%]">Producto / Código</th>
-                                <th className="pb-4 w-24 text-center">Cant.</th>
-                                <th className="pb-4 w-24 text-center">Unidad</th>
-                                <th className="pb-4">Descripción</th>
-                                <th className="pb-4 w-12"></th>
-                            </tr>
-                        </thead>
-                        <tbody className="space-y-2">
-                            {items.map((item, idx) => (
-                                <tr key={idx} className="group border-b border-slate-700/50 last:border-0 hover:bg-slate-700/10 transition-colors">
-                                    <td className="py-4 relative">
-                                        {item.product_id ? (
-                                            <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2">
-                                                <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-mono text-xs font-bold">{item.product_code}</span>
-                                                <span className="text-sm font-medium truncate flex-grow">{item.product_label}</span>
-                                                <button onClick={() => updateItem(idx, 'product_id', null)} className="text-slate-500 hover:text-red-400">✕</button>
-                                            </div>
-                                        ) : (
-                                            <>
-                                                <input
-                                                    type="text"
-                                                    placeholder="Escribe código o nombre..."
-                                                    className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500"
-                                                    value={searchIndex === idx ? searchQuery : ""}
-                                                    onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
-                                                    onChange={e => setSearchQuery(e.target.value)}
-                                                />
-                                                {searchIndex === idx && searchQuery.length > 0 && (
-                                                    <div className="absolute z-20 left-0 right-0 mt-1 bg-slate-800 border border-slate-700 rounded-xl shadow-2xl max-h-48 overflow-auto">
-                                                        {filteredProducts.slice(0, 10).map(p => (
-                                                            <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-2 hover:bg-slate-700 text-sm border-b border-slate-700/50 flex justify-between">
-                                                                <span className="font-mono text-emerald-400">{p.code}</span>
-                                                                <span className="truncate ml-2 text-white">{p.description || p.name}</span>
-                                                            </button>
-                                                        ))}
-                                                    </div>
-                                                )}
-                                            </>
-                                        )}
-                                    </td>
-                                    <td className="py-4 px-2">
-                                        <input type="number" className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3 py-2 text-center text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
-                                    </td>
-                                    <td className="py-4 text-center">
-                                        <span className="text-xs text-white font-bold">{item.unit || "—"}</span>
-                                    </td>
-                                    <td className="py-4 pl-4 truncate max-w-xs text-xs text-white italic">
-                                        {item.description || "Selecciona producto..."}
-                                    </td>
-                                    <td className="py-4 text-right">
-                                        <button onClick={() => removeItem(idx)} className="text-slate-600 hover:text-red-500 transition-colors p-2">✕</button>
-                                    </td>
+                <div className="p-4 sm:p-8">
+                    <div className="overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
+                        <table className="w-full text-left min-w-[700px]">
+                            <thead className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50">
+                                <tr>
+                                    <th className="pb-4 px-4 w-[35%]">Producto / Código</th>
+                                    <th className="pb-4 w-28 text-center">Cant.</th>
+                                    <th className="pb-4 w-24 text-center">Unidad</th>
+                                    <th className="pb-4 px-4">Descripción</th>
+                                    <th className="pb-4 w-12 text-center"></th>
                                 </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody className="divide-y divide-slate-700/30">
+                                {items.map((item, idx) => (
+                                    <tr key={idx} className="group hover:bg-white/5 transition-colors">
+                                        <td className="py-4 px-4 relative">
+                                            {item.product_id ? (
+                                                <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2">
+                                                    <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-mono text-xs font-bold">{item.product_code}</span>
+                                                    <span className="text-sm font-medium truncate flex-grow">{item.product_label}</span>
+                                                    <button onClick={() => updateItem(idx, 'product_id', null)} className="text-slate-500 hover:text-red-400">✕</button>
+                                                </div>
+                                            ) : (
+                                                <div className="relative">
+                                                    <input
+                                                        type="text"
+                                                        placeholder="Escribe código o nombre..."
+                                                        className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all font-medium"
+                                                        value={searchIndex === idx ? searchQuery : ""}
+                                                        onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
+                                                        onChange={e => setSearchQuery(e.target.value)}
+                                                    />
+                                                    {searchIndex === idx && searchQuery.length > 0 && (
+                                                        <div className="absolute z-50 left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in zoom-in-95 duration-200">
+                                                            {filteredProducts.slice(0, 15).map(p => (
+                                                                <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 transition-colors border-b border-slate-700 last:border-0 flex justify-between items-center">
+                                                                    <div className="flex flex-col">
+                                                                        <span className="font-mono text-xs opacity-60 group-hover:text-current">{p.code}</span>
+                                                                        <span className="font-bold text-sm">{p.description || p.name}</span>
+                                                                    </div>
+                                                                    <span className="text-[10px] font-black uppercase opacity-40">{p.unit_of_measure}</span>
+                                                                </button>
+                                                            ))}
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </td>
+                                        <td className="py-4 px-2">
+                                            <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-center text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
+                                        </td>
+                                        <td className="py-4 text-center">
+                                            <span className="text-xs text-slate-400 font-black uppercase tracking-widest">{item.unit || "N/A"}</span>
+                                        </td>
+                                        <td className="py-4 px-4 max-w-xs">
+                                            <div className="text-[10px] text-slate-500 italic truncate">{item.description || "Pendiente de selección..."}</div>
+                                        </td>
+                                        <td className="py-4 text-center">
+                                            <button onClick={() => removeItem(idx)} className="text-slate-700 hover:text-red-500 transition-colors p-2">
+                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
 
-                    <button onClick={addItem} className="mt-6 flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-bold text-sm transition-all group">
-                        <span className="bg-emerald-500/20 w-6 h-6 rounded-full flex items-center justify-center group-hover:bg-emerald-500/30">+</span>
-                        Agregar Producto
+                <div className="px-4 sm:px-8 pb-8">
+                    <button onClick={addItem} className="flex items-center gap-2 text-emerald-400 hover:text-emerald-300 font-black text-xs uppercase tracking-widest transition-all group">
+                        <span className="bg-emerald-500/10 w-8 h-8 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/20 transition-all border border-emerald-500/20">+</span>
+                        Añadir Producto
                     </button>
                 </div>
 
                 {/* Footer Section Entries */}
-                <div className="p-8 bg-slate-900/30 border-t border-slate-700">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="p-4 sm:p-8 bg-slate-950/40 border-t border-slate-700">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-white uppercase ml-2">Entregó</label>
-                            <input type="text" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.delivery_person} onChange={e => setHeader({ ...header, delivery_person: e.target.value })} />
+                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Entregó / Delivery</label>
+                            <input type="text" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.delivery_person} onChange={e => setHeader({ ...header, delivery_person: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-white uppercase ml-2">Recibió</label>
-                            <input type="text" placeholder="Firma / Nombre de quien recibe" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white outline-none focus:ring-2 focus:ring-emerald-500" value={header.receiver_person} onChange={e => setHeader({ ...header, receiver_person: e.target.value })} />
+                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Recibió / Receiver</label>
+                            <input type="text" placeholder="Nombre de quien recibe" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.receiver_person} onChange={e => setHeader({ ...header, receiver_person: e.target.value })} />
                         </div>
                         <div className="flex items-end">
                             <button
                                 onClick={handleSubmit}
                                 disabled={isSubmitting}
-                                className={`w-full py-4 rounded-2xl font-black text-xl shadow-2xl transition-all active:scale-95 disabled:opacity-50 ${mType === 'ENTRY' ? 'bg-emerald-600 hover:bg-emerald-500' : mType === 'EXIT' ? 'bg-blue-600 hover:bg-blue-500' : 'bg-amber-500 hover:bg-amber-400'}`}>
-                                {isSubmitting ? "Procesando..." : "Registrar Vale"}
+                                className={`w-full py-4 rounded-2xl font-black text-sm uppercase tracking-widest shadow-xl transition-all active:scale-95 disabled:opacity-50 ${mType === 'ENTRY' ? 'bg-emerald-600 hover:bg-emerald-500 shadow-emerald-600/20' : mType === 'EXIT' ? 'bg-blue-600 hover:bg-blue-500 shadow-blue-600/20' : 'bg-orange-500 hover:bg-orange-400 shadow-orange-500/20'}`}>
+                                {isSubmitting ? "Procesando..." : "Registrar Movimiento"}
                             </button>
                         </div>
                     </div>
                 </div>
             </div>
-        </div >
+        </div>
     );
 }

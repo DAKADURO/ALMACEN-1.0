@@ -4,6 +4,7 @@ import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio } f
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Link from "next/link";
+import BarcodeScanner from "@/components/BarcodeScanner";
 
 type MovementItem = {
     product_id: number | null;
@@ -90,6 +91,7 @@ export default function MovementsPage() {
 
     const [searchIndex, setSearchIndex] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState("");
+    const [scanningIndex, setScanningIndex] = useState<number | null>(null);
 
     useEffect(() => {
         fetchWarehouses().then(setWarehouses).catch(console.error);
@@ -131,6 +133,23 @@ export default function MovementsPage() {
             p.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    const handleScanSuccess = (decodedText: string) => {
+        if (scanningIndex === null) return;
+        
+        // Find product by code (exact match)
+        const product = products.find(p => 
+            p.code.trim().toUpperCase() === decodedText.trim().toUpperCase()
+        );
+
+        if (product) {
+            selectProduct(scanningIndex, product);
+            setScanningIndex(null);
+        } else {
+            alert(`Producto con código "${decodedText}" no encontrado.`);
+            setScanningIndex(null);
+        }
+    };
 
     const handleSubmit = async () => {
         const validItems = items.filter(i => i.product_id && parseInt(i.quantity) > 0);
@@ -508,6 +527,13 @@ export default function MovementsPage() {
                                                         onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
                                                         onChange={e => setSearchQuery(e.target.value)}
                                                     />
+                                                    <button 
+                                                        onClick={() => setScanningIndex(idx)}
+                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors p-1"
+                                                        title="Escanear Código"
+                                                    >
+                                                        📸
+                                                    </button>
                                                     {searchIndex === idx && searchQuery.length > 0 && (
                                                         <div className="absolute z-50 left-0 right-0 mt-2 bg-slate-800 border border-slate-700 rounded-2xl shadow-2xl max-h-64 overflow-auto animate-in fade-in zoom-in-95 duration-200">
                                                             {filteredProducts.slice(0, 15).map(p => (
@@ -574,6 +600,13 @@ export default function MovementsPage() {
                     </div>
                 </div>
             </div>
+            
+            {scanningIndex !== null && (
+                <BarcodeScanner 
+                    onScanSuccess={handleScanSuccess} 
+                    onClose={() => setScanningIndex(null)} 
+                />
+            )}
         </div>
     );
 }

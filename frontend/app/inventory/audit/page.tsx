@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { fetchWarehouses, startAudit, fetchAudit, updateAuditItems, finishAudit, fetchActiveAudit } from "@/lib/api";
 import Link from "next/link";
+import BarcodeScanner from "@/components/BarcodeScanner";
 
 export default function AuditPage() {
     const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -10,6 +11,8 @@ export default function AuditPage() {
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ text: "", type: "" });
+    const [showGlobalScanner, setShowGlobalScanner] = useState(false);
+    const [highlightedProductId, setHighlightedProductId] = useState<number | null>(null);
 
     useEffect(() => {
         fetchWarehouses()
@@ -93,6 +96,27 @@ export default function AuditPage() {
         }
     };
 
+    const handleGlobalScanSuccess = (decodedText: string) => {
+        const productItem = audit.items.find((it: any) => 
+            it.product.code.trim().toUpperCase() === decodedText.trim().toUpperCase()
+        );
+
+        if (productItem) {
+            setShowGlobalScanner(false);
+            setHighlightedProductId(productItem.product_id);
+            // Scroll to the element
+            const element = document.getElementById(`audit-item-${productItem.product_id}`);
+            if (element) {
+                element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+            // Clear highlight after 3 seconds
+            setTimeout(() => setHighlightedProductId(null), 3000);
+        } else {
+            alert(`Producto con código "${decodedText}" no encontrado en esta auditoría.`);
+            setShowGlobalScanner(false);
+        }
+    };
+
     if (loading) return <div className="text-white p-8 animate-pulse text-center">Cargando...</div>;
 
     if (!audit) {
@@ -153,6 +177,12 @@ export default function AuditPage() {
                 </div>
                 {audit.status === 'IN_PROGRESS' && (
                     <div className="flex gap-2 w-full md:w-auto">
+                        <button 
+                            onClick={() => setShowGlobalScanner(true)}
+                            className="flex-grow md:flex-none px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded-lg text-xs font-bold transition-all flex items-center justify-center gap-2 shadow-lg shadow-emerald-900/40"
+                        >
+                            <span>📸</span> Escanear
+                        </button>
                         <button onClick={handleSaveProgress} disabled={saving} className="flex-grow md:flex-none px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg text-xs font-semibold transition-colors active:scale-95">
                             Guardar Avance
                         </button>
@@ -201,9 +231,14 @@ export default function AuditPage() {
                             const isCounted = item.counted_stock !== null;
                             const diff = isCounted ? item.counted_stock - item.system_stock : 0;
                             const hasDiff = isCounted && diff !== 0;
+                            const isHighlighted = highlightedProductId === item.product_id;
 
                             return (
-                                <tr key={item.id} className={`hover:bg-white/5 transition-colors ${hasDiff ? "bg-red-500/5" : ""}`}>
+                                <tr 
+                                    key={item.id} 
+                                    id={`audit-item-${item.product_id}`}
+                                    className={`hover:bg-white/5 transition-all duration-500 ${hasDiff ? "bg-red-500/5" : ""} ${isHighlighted ? "bg-emerald-500/20 ring-2 ring-emerald-500 ring-inset" : ""}`}
+                                >
                                     <td className="px-6 py-4">
                                         <div className="font-bold text-sm text-emerald-400">{item.product.code}</div>
                                         <div className="text-xs opacity-60 line-clamp-1">{item.product.name}</div>
@@ -252,6 +287,13 @@ export default function AuditPage() {
                     </tbody>
                 </table>
             </div>
+
+            {showGlobalScanner && (
+                <BarcodeScanner 
+                    onScanSuccess={handleGlobalScanSuccess} 
+                    onClose={() => setShowGlobalScanner(false)} 
+                />
+            )}
         </div>
 
             <div className="flex justify-between items-center pt-8">

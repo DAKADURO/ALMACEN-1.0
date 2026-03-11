@@ -23,7 +23,7 @@ export default function InventoryPage() {
 
     const [newProduct, setNewProduct] = useState({
         code: "", name: "", family: "", description: "", brand: "", unit: "PZA",
-        warehouse_id: "", initial_stock: "0", cost_price: "0"
+        warehouse_id: "", initial_stock: "0", cost_price: "0", min_stock: "0"
     });
 
     const refreshData = () => {
@@ -50,7 +50,8 @@ export default function InventoryPage() {
             brand: product.brand || "",
             unit: product.unit_of_measure || "PZA",
             warehouse_id: "", initial_stock: "0",
-            cost_price: product.cost_price?.toString() || "0"
+            cost_price: product.cost_price?.toString() || "0",
+            min_stock: product.min_stock?.toString() || "0"
         });
         setIsModalOpen(true);
     };
@@ -59,7 +60,7 @@ export default function InventoryPage() {
         setEditingProduct(null);
         setNewProduct({
             code: "", name: "", family: "", description: "", brand: "", unit: "PZA",
-            warehouse_id: "", initial_stock: "0", cost_price: "0"
+            warehouse_id: "", initial_stock: "0", cost_price: "0", min_stock: "0"
         });
         setIsModalOpen(true);
     };
@@ -111,7 +112,8 @@ export default function InventoryPage() {
                 brand: newProduct.brand || null,
                 description: newProduct.description,
                 unit_of_measure: newProduct.unit,
-                cost_price: parseFloat(newProduct.cost_price) || 0
+                cost_price: parseFloat(newProduct.cost_price) || 0,
+                min_stock: parseInt(newProduct.min_stock) || 0
             };
 
             if (editingProduct) {
@@ -452,6 +454,14 @@ export default function InventoryPage() {
                                         className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
                                         value={newProduct.cost_price}
                                         onChange={(e) => setNewProduct({ ...newProduct, cost_price: e.target.value })}
+                                    />
+                                </div>
+                                <div className="space-y-1">
+                                    <label className="text-xs font-semibold text-slate-400 uppercase">Stock Mínimo (Alerta)</label>
+                                    <input required type="number" placeholder="0"
+                                        className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                        value={newProduct.min_stock}
+                                        onChange={(e) => setNewProduct({ ...newProduct, min_stock: e.target.value })}
                                     />
                                 </div>
                             </div>

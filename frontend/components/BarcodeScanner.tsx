@@ -11,40 +11,83 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [isScannerInitialized, setIsScannerInitialized] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [cameras, setCameras] = useState<any[]>([]);
+    const [currentCameraId, setCurrentCameraId] = useState<string | null>(null);
 
     useEffect(() => {
-        const startScanner = async () => {
-            try {
-                const html5QrCode = new Html5Qrcode("reader");
-                scannerRef.current = html5QrCode;
-
-                const config = { fps: 10, qrbox: { width: 250, height: 150 } };
-
-                await html5QrCode.start(
-                    { facingMode: "environment" },
-                    config,
-                    (decodedText) => {
-                        onScanSuccess(decodedText);
-                        stopScanner();
-                    },
-                    (errorMessage) => {
-                        // Suppress scanning noise errors
-                        // console.log(errorMessage);
-                    }
-                );
-                setIsScannerInitialized(true);
-            } catch (err) {
-                console.error("Error starting scanner:", err);
-                setError("No se pudo acceder a la cámara. Asegúrate de estar usando HTTPS y de haber dado permisos.");
+        Html5Qrcode.getCameras().then(devices => {
+            if (devices && devices.length > 0) {
+                setCameras(devices);
+                // Try to find the back camera by default
+                const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('trasera'));
+                setCurrentCameraId(backCamera ? backCamera.id : devices[0].id);
             }
-        };
-
-        startScanner();
+        }).catch(err => {
+            console.error("Error getting cameras", err);
+        });
 
         return () => {
             stopScanner();
         };
     }, []);
+
+    useEffect(() => {
+        if (currentCameraId) {
+            startScanner(currentCameraId);
+        }
+    }, [currentCameraId]);
+
+    const startScanner = async (cameraId: string) => {
+        try {
+            if (scannerRef.current && scannerRef.current.isScanning) {
+                await scannerRef.current.stop();
+            }
+
+            const html5QrCode = new Html5Qrcode("reader");
+            scannerRef.current = html5QrCode;
+
+            const config = { 
+                fps: 20, 
+                qrbox: { width: 250, height: 150 },
+                aspectRatio: 1.777778, // 16:9
+                experimentalFeatures: {
+                    useBarCodeDetectorIfSupported: true
+                }
+            };
+
+            await html5QrCode.start(
+                cameraId,
+                config,
+                (decodedText) => {
+                    onScanSuccess(decodedText);
+                    stopScanner();
+                },
+                () => {} // Suppress errors
+            );
+
+            // Try to apply advanced constraints for focus if supported after a short delay
+            setTimeout(async () => {
+                try {
+                    if (scannerRef.current) {
+                        await scannerRef.current.applyVideoConstraints({
+                            focusMode: "continuous",
+                            advanced: [
+                                { focusMode: "continuous" } as any
+                            ]
+                        } as any);
+                    }
+                } catch (e) {
+                    console.warn("Advanced focus constraints not supported", e);
+                }
+            }, 1000);
+
+            setIsScannerInitialized(true);
+            setError(null);
+        } catch (err) {
+            console.error("Error starting scanner:", err);
+            setError("No se pudo acceder a la cámara seleccionada.");
+        }
+    };
 
     const stopScanner = async () => {
         if (scannerRef.current && scannerRef.current.isScanning) {
@@ -66,12 +109,25 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                         <span className="text-xl">📸</span>
                         <h3 className="text-sm font-black text-white uppercase tracking-widest">Escáner de Almacén</h3>
                     </div>
-                    <button 
-                        onClick={()=>{ stopScanner().then(onClose); }} 
-                        className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-all"
-                    >
-                        ✕
-                    </button>
+                    <div className="flex items-center gap-4">
+                        {cameras.length > 1 && (
+                            <select 
+                                className="bg-slate-800 border-none text-[10px] text-emerald-400 font-bold px-2 py-1 rounded-lg outline-none max-w-[100px]"
+                                value={currentCameraId || ""}
+                                onChange={(e) => setCurrentCameraId(e.target.value)}
+                            >
+                                {cameras.map((cam, idx) => (
+                                    <option key={cam.id} value={cam.id}>Lente {idx + 1}</option>
+                                ))}
+                            </select>
+                        )}
+                        <button 
+                            onClick={()=>{ stopScanner().then(onClose); }} 
+                            className="w-8 h-8 flex items-center justify-center rounded-xl bg-slate-800 text-slate-400 hover:text-white transition-all"
+                        >
+                            ✕
+                        </button>
+                    </div>
                 </div>
 
                 {/* Scanner Area */}
@@ -120,7 +176,7 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 {/* Footer Info */}
                 <div className="p-6 bg-slate-900 text-center">
                     <p className="text-slate-400 text-xs font-medium">
-                        Apunta al código de barras o QR para escanear automáticamente.
+                        Apunta al código para escanear. Si no enfoca, busca una zona con más luz o prueba cambiando de lente arriba.
                     </p>
                     <div className="mt-4 flex justify-center gap-8 opacity-40">
                         <div className="flex flex-col items-center gap-1">

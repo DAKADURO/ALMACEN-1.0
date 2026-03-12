@@ -157,8 +157,16 @@ export default function DashboardPage() {
                 return (
                   <div key={i} className={`flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 ${borderColor}`}>
                     <div>
-                      <div className="font-semibold text-sm line-clamp-1">{label}</div>
+                      <div className="font-semibold text-sm line-clamp-1 flex items-center gap-2">
+                        {label}
+                        {m.reference_doc && (
+                          <span className="text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded font-mono border border-emerald-500/20">
+                            {m.reference_doc}
+                          </span>
+                        )}
+                      </div>
                       <div className="text-xs opacity-60 line-clamp-1">
+                        <span className="font-mono text-[10px] text-emerald-500/80 mr-1">{m.product_code || ""}</span>
                         {m.product_description || m.product_name} ({m.quantity} uds)
                       </div>
                     </div>

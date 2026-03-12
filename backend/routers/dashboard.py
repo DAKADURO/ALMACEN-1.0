@@ -61,11 +61,13 @@ def get_dashboard_stats(db: Session = Depends(database.get_db)):
         origin_wh = db.query(models.Warehouse).filter(models.Warehouse.id == m.origin_warehouse_id).first() if m.origin_warehouse_id else None
         recent_list.append({
             "product_name": product.name if product else "Desconocido",
+            "product_code": product.code if product else "",
             "quantity": int(m.quantity),
             "movement_type": m.movement_type,
             "destination": dest_wh.name if dest_wh else None,
             "origin": origin_wh.name if origin_wh else None,
             "created_at": m.created_at.isoformat() if m.created_at else None,
+            "reference_doc": m.reference_doc,
             "notes": m.notes
         })
 

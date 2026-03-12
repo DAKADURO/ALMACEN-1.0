@@ -50,10 +50,11 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 fps: 30, 
                 qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
                     const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                    const size = Math.floor(minEdge * 0.7);
-                    return { width: size, height: Math.floor(size * 0.6) };
+                    // QR codes are square, so a larger square box is better
+                    const size = Math.floor(minEdge * 0.82);
+                    return { width: size, height: size };
                 },
-                aspectRatio: undefined, // Let the browser choose native aspect ratio for better clarity
+                aspectRatio: undefined, 
                 experimentalFeatures: {
                     useBarCodeDetectorIfSupported: true
                 },

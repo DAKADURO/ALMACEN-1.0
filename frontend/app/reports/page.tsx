@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { fetchMovements, fetchProducts, fetchWarehouses } from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
+import { generateVoucherPDF } from "@/lib/pdf-utils";
 
 // Helpers for UI
 const typeLabels: any = {
@@ -72,6 +73,59 @@ export default function ReportsPage() {
             };
         });
         exportToCSV(exportData, "Reporte_Movimientos");
+    };
+
+    const handleReprint = async (folio: string) => {
+        if (!folio) {
+            alert("Este movimiento no tiene un folio asociado.");
+            return;
+        }
+
+        try {
+            // 1. Fetch all movements for this folio
+            const movementsInVoucher = await fetchMovements({ reference_doc: folio });
+            if (movementsInVoucher.length === 0) throw new Error("No se encontraron productos para este folio.");
+
+            // 2. Prepare data for PDF
+            const first = movementsInVoucher[0];
+            const context = localStorage.getItem("inventory-context") || "tuberia";
+            const selectedCompany = context === "refacciones" ? "PROAIR" : "AIRPIPE";
+
+            // Extract secondary info from notes if possible (very basic parsing)
+            const notes = first.notes || "";
+            const requestedByMatch = notes.match(/Solicitante: (.*)\. Tipo:/);
+            const requestedBy = requestedByMatch ? requestedByMatch[1] : "";
+
+            // 3. Map items to PDF utility format
+            const items = movementsInVoucher.map((m: any) => {
+                const p = products.find((prod: any) => prod.id === m.product_id) as any;
+                return {
+                    code: p?.code || "N/A",
+                    quantity: m.quantity,
+                    unit: p?.unit_of_measure || "PZA",
+                    name: p?.description || p?.name || "N/A"
+                };
+            });
+
+            await generateVoucherPDF({
+                folio: folio,
+                mType: first.movement_type,
+                entrySubType: notes.includes("Tipo: ") ? notes.split("Tipo: ")[1].split(".")[0] : "GENERAL",
+                header: {
+                    client: notes.includes("Cliente: ") ? notes.split("Cliente: ")[1].split(".")[0] : "Re-impresión",
+                    requested_by: requestedBy,
+                    origin_warehouse_id: first.origin_warehouse_id,
+                    destination_warehouse_id: first.destination_warehouse_id,
+                    delivery_person: first.created_by || "MIGUEL LOMELI",
+                    date: new Date(first.created_at).toLocaleDateString('es-MX')
+                },
+                items,
+                selectedCompany,
+                warehouses
+            });
+        } catch (error: any) {
+            alert("Error al regenerar PDF: " + error.message);
+        }
     };
 
     return (
@@ -162,6 +216,7 @@ export default function ReportsPage() {
                             <th className="p-4">Origen</th>
                             <th className="p-4">Destino</th>
                             <th className="p-4">Folio</th>
+                            <th className="p-4 text-center">Acciones</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700 text-sm">
@@ -199,6 +254,17 @@ export default function ReportsPage() {
                                     <td className="p-4 text-xs text-white">{originWh?.name || "—"}</td>
                                     <td className="p-4 text-xs text-white">{destWh?.name || "—"}</td>
                                     <td className="p-4 text-xs font-bold text-emerald-400 font-mono">{m.reference_doc || "—"}</td>
+                                    <td className="p-4 text-center">
+                                        {m.reference_doc && (
+                                            <button
+                                                onClick={() => handleReprint(m.reference_doc)}
+                                                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 mx-auto"
+                                                title="Re-imprimir Vale PDF"
+                                            >
+                                                📄 <span className="hidden sm:inline">Vale PDF</span>
+                                            </button>
+                                        )}
+                                    </td>
                                 </tr>
                             );
                         })}

@@ -120,6 +120,7 @@ def get_inventory_summary(db: Session = Depends(database.get_db)):
 def get_movements(
     product_id: int = None, 
     warehouse_id: int = None,
+    reference_doc: str = None,
     start_date: str = None,
     end_date: str = None,
     db: Session = Depends(database.get_db)
@@ -135,6 +136,9 @@ def get_movements(
             (models.StockMovement.origin_warehouse_id == warehouse_id) | 
             (models.StockMovement.destination_warehouse_id == warehouse_id)
         )
+    
+    if reference_doc:
+        query = query.filter(models.StockMovement.reference_doc == reference_doc)
         
     if start_date:
         query = query.filter(models.StockMovement.created_at >= start_date)

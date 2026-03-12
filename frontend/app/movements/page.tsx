@@ -5,6 +5,7 @@ import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Link from "next/link";
 import BarcodeScanner from "@/components/BarcodeScanner";
+import { generateVoucherPDF } from "@/lib/pdf-utils";
 
 type MovementItem = {
     product_id: number | null;
@@ -196,104 +197,19 @@ export default function MovementsPage() {
         TRANSFER: "bg-amber-500 text-white shadow-lg"
     };
 
-    const downloadPDF = () => {
-        const doc = new jsPDF();
-        const pageWidth = doc.internal.pageSize.getWidth();
-
-        // Branding Config
-        const isProAir = selectedCompany === 'PROAIR';
-        const primaryColor = isProAir ? [0, 173, 239] : [0, 112, 184]; // ProAir Blue vs AIRpipe Blue
-        const companyName = isProAir ? "Pro Air" : "AIRpipe";
-        const logoPath = isProAir ? "/logos/proair_logo.png" : "/logos/airpipe_logo.png";
-
-        // Add Logo
-        try {
-            // Note: In a real environment, we'd ensure the logo is pre-loaded or use base64
-            // Since this runs in browser, jsPDF can try to load via URL if same-origin
-            doc.addImage(logoPath, 'PNG', 15, 12, isProAir ? 25 : 35, isProAir ? 25 : 12);
-        } catch (e) {
-            console.warn("Logo could not be loaded for PDF", e);
-            doc.setFontSize(22);
-            doc.setTextColor(primaryColor[0], primaryColor[1], primaryColor[2]);
-            doc.text(companyName, 15, 20);
-        }
-
-        doc.setFontSize(10);
-        doc.setTextColor(150, 150, 150);
-        doc.text("ALMACEN", 15, isProAir ? 42 : 28);
-
-        // Folio & Date
-        doc.setFontSize(10);
-        doc.setTextColor(100, 100, 100);
-        doc.text(`Folio: ${folio}`, pageWidth - 15, 20, { align: "right" });
-        doc.text(`Fecha: ${new Date().toLocaleDateString('es-MX')}`, pageWidth - 15, 25, { align: "right" });
-
-        // Header Info
-        doc.setDrawColor(220, 220, 220);
-        doc.line(15, isProAir ? 45 : 30, pageWidth - 15, isProAir ? 45 : 30);
-
-        doc.setFontSize(9);
-        doc.setTextColor(50, 50, 50);
-        doc.text("CLIENTE / PROYECTO:", 15, isProAir ? 55 : 40);
-        doc.setFont("helvetica", "bold");
-        doc.text(header.client || "—", 55, isProAir ? 55 : 40);
-
-        doc.setFont("helvetica", "normal");
-        doc.text("MOVIMIENTO:", 15, isProAir ? 60 : 45);
-        doc.setFont("helvetica", "bold");
-        doc.text(mType === 'ENTRY' ? `ENTRADA (${entrySubType})` : mType === 'EXIT' ? 'SALIDA' : 'TRASPASO', 55, isProAir ? 60 : 45);
-
-        doc.setFont("helvetica", "normal");
-        doc.text("SOLICITADO POR:", 15, isProAir ? 65 : 50);
-        doc.setFont("helvetica", "bold");
-        doc.text(header.requested_by || "—", 55, isProAir ? 65 : 50);
-
-        doc.setFont("helvetica", "normal");
-        doc.text("UBICACIÓN:", 15, isProAir ? 70 : 55);
-        doc.setFont("helvetica", "bold");
-        const location = mType === 'ENTRY' ? (warehouses.find(w => w.id == header.destination_warehouse_id)?.name) :
-            mType === 'EXIT' ? (warehouses.find(w => w.id == header.origin_warehouse_id)?.name) :
-                `${warehouses.find(w => w.id == header.origin_warehouse_id)?.name} -> ${warehouses.find(w => w.id == header.destination_warehouse_id)?.name}`;
-        doc.text(location || "—", 55, isProAir ? 70 : 55);
-
-        // Table
-        const tableData = items.map(item => [
-            item.product_code,
-            item.quantity,
-            item.unit,
-            item.description
-        ]);
-
-        autoTable(doc, {
-            startY: isProAir ? 85 : 65,
-            head: [['Código', 'Cant.', 'Unid.', 'Descripción']],
-            body: tableData,
-            theme: 'striped',
-            headStyles: { fillColor: primaryColor as [number, number, number] },
-            styles: { fontSize: 8 },
+    const downloadPDF = async () => {
+        await generateVoucherPDF({
+            folio,
+            mType,
+            entrySubType,
+            header: {
+                ...header,
+                date: new Date().toLocaleDateString('es-MX')
+            },
+            items,
+            selectedCompany,
+            warehouses
         });
-
-        const finalY = (doc as any).lastAutoTable.finalY + 30;
-
-        // Signatures
-        doc.line(20, finalY, 80, finalY);
-        doc.text("ENTREGÓ / DELIVERY", 50, finalY + 5, { align: "center" });
-        doc.setFontSize(7);
-        doc.text(header.delivery_person, 50, finalY + 10, { align: "center" });
-
-        doc.setFontSize(9);
-        doc.line(130, finalY, 190, finalY);
-        doc.text("RECIBIÓ / RECEIVE", 160, finalY + 5, { align: "center" });
-        doc.setFontSize(7);
-        doc.text(header.receiver_person || "Firma de conformidad", 160, finalY + 10, { align: "center" });
-
-        // Footer
-        doc.setFontSize(8);
-        doc.setTextColor(150, 150, 150);
-        const footerText = isProAir ? "Pro Air de México S.A. de C.V. — Hermosillo, Sonora" : "AIRpipe de México S.A. de C.V. — Hermosillo, Sonora";
-        doc.text(footerText, pageWidth / 2, 285, { align: "center" });
-
-        doc.save(`Vale_${folio}.pdf`);
     };
 
     const ModalComponent = () => {

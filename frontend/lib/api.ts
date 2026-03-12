@@ -91,12 +91,14 @@ export async function deleteProduct(id: number) {
 export async function fetchMovements(filters?: {
     product_id?: number;
     warehouse_id?: number;
+    reference_doc?: string;
     start_date?: string;
     end_date?: string;
 }) {
     const params = new URLSearchParams();
     if (filters?.product_id) params.append("product_id", filters.product_id.toString());
     if (filters?.warehouse_id) params.append("warehouse_id", filters.warehouse_id.toString());
+    if (filters?.reference_doc) params.append("reference_doc", filters.reference_doc);
     if (filters?.start_date) params.append("start_date", filters.start_date);
     if (filters?.end_date) params.append("end_date", filters.end_date);
 

@@ -452,7 +452,7 @@ export default function MovementsPage() {
 
                     <div className="divide-y divide-slate-700/30">
                         {items.map((item, idx) => (
-                            <div key={idx} className="group hover:bg-white/5 transition-colors py-6 lg:py-4 px-4 grid grid-cols-1 lg:grid-cols-[1fr_120px_100px_1fr_60px] gap-6 lg:gap-4 items-center">
+                            <div key={idx} className="group hover:bg-white/5 transition-colors py-6 lg:py-4 px-4 grid grid-cols-1 lg:grid-cols-[1fr_120px_100px_1fr_60px] gap-6 lg:gap-4 items-center relative">
                                 {/* Product / Code */}
                                 <div className="space-y-1 relative">
                                     <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Producto / Código</label>
@@ -496,28 +496,29 @@ export default function MovementsPage() {
                                     )}
                                 </div>
 
-                                {/* Quantity */}
-                                <div className="space-y-1">
-                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
-                                    <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-center text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
-                                </div>
+                                {/* Quantity & Unit (Grouped for mobile side-by-side) */}
+                                <div className="grid grid-cols-2 lg:contents gap-4">
+                                    <div className="space-y-1">
+                                        <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                                        <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 lg:py-3 text-center text-lg lg:text-xl font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
+                                    </div>
 
-                                {/* Unit */}
-                                <div className="flex flex-col lg:items-center space-y-1">
-                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Unidad</label>
-                                    <span className="text-xs text-white font-black uppercase tracking-widest bg-slate-900/50 px-3 py-2 rounded-lg lg:bg-transparent">{item.unit || "N/A"}</span>
+                                    <div className="flex flex-col lg:items-center space-y-1 h-full justify-end lg:justify-center">
+                                        <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Unidad</label>
+                                        <span className="text-xs text-white font-black uppercase tracking-widest bg-slate-900/50 px-3 py-2.5 lg:py-2 rounded-lg lg:bg-transparent border border-white/5 lg:border-0 text-center">{item.unit || "N/A"}</span>
+                                    </div>
                                 </div>
 
                                 {/* Description */}
                                 <div className="space-y-1">
                                     <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Descripción</label>
-                                    <div className="text-[10px] text-slate-500 italic line-clamp-2 px-1">{item.description || "Pendiente de selección..."}</div>
+                                    <div className="text-[10px] text-slate-400 italic line-clamp-2 px-1">{item.description || "Pendiente de selección..."}</div>
                                 </div>
 
                                 {/* Actions */}
-                                <div className="flex justify-end pt-2 lg:pt-0">
-                                    <button onClick={() => removeItem(idx)} className="text-slate-700 hover:text-red-500 transition-colors p-3 bg-red-500/5 hover:bg-red-500/10 rounded-xl lg:bg-transparent">
-                                        <svg className="w-6 h-6 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                <div className="flex justify-end lg:pt-0 absolute -top-1 right-2 lg:relative lg:top-auto lg:right-auto">
+                                    <button onClick={() => removeItem(idx)} className="text-slate-600 hover:text-red-500 transition-colors p-2 lg:p-3 bg-red-500/5 lg:bg-transparent rounded-full">
+                                        <svg className="w-4 h-4 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
                                     </button>
                                 </div>
                             </div>

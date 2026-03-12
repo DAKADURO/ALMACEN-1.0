@@ -440,80 +440,88 @@ export default function MovementsPage() {
                     </div>
                 </div>
 
-                {/* Table Section */}
+                {/* Table Section - Responsive Grid */}
                 <div className="p-4 sm:p-8">
-                    <div className="lg:overflow-visible overflow-x-auto no-scrollbar -mx-4 sm:mx-0">
-                        <table className="w-full text-left min-w-[700px]">
-                            <thead className="text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50">
-                                <tr>
-                                    <th className="pb-4 px-4 w-[35%]">Producto / Código</th>
-                                    <th className="pb-4 w-28 text-center">Cant.</th>
-                                    <th className="pb-4 w-24 text-center">Unidad</th>
-                                    <th className="pb-4 px-4">Descripción</th>
-                                    <th className="pb-4 w-12 text-center"></th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-700/30">
-                                {items.map((item, idx) => (
-                                    <tr key={idx} className="group hover:bg-white/5 transition-colors">
-                                        <td className="py-4 px-4 relative">
-                                            {item.product_id ? (
-                                                <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2">
-                                                    <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-mono text-xs font-bold">{item.product_code}</span>
-                                                    <span className="text-sm font-medium truncate flex-grow">{item.product_label}</span>
-                                                    <button onClick={() => updateItem(idx, 'product_id', null)} className="text-slate-500 hover:text-red-400">✕</button>
-                                                </div>
-                                            ) : (
-                                                <div className="relative">
-                                                    <input
-                                                        type="text"
-                                                        placeholder="Escribe código o nombre..."
-                                                        className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all font-medium"
-                                                        value={searchIndex === idx ? searchQuery : ""}
-                                                        onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
-                                                        onChange={e => setSearchQuery(e.target.value)}
-                                                    />
-                                                    <button 
-                                                        onClick={() => setScanningIndex(idx)}
-                                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors p-1"
-                                                        title="Escanear Código"
-                                                    >
-                                                        📸
-                                                    </button>
-                                                    {searchIndex === idx && searchQuery.length > 0 && (
-                                                        <div className="absolute z-[100] left-0 right-0 mt-2 bg-slate-800 border-2 border-slate-600 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[min(500px,70vh)] overflow-auto animate-in fade-in zoom-in-95 duration-200">
-                                                            {filteredProducts.slice(0, 15).map(p => (
-                                                                <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 transition-colors border-b border-slate-700 last:border-0 flex justify-between items-center">
-                                                                    <div className="flex flex-col">
-                                                                        <span className="font-mono text-xs opacity-60 group-hover:text-current">{p.code}</span>
-                                                                        <span className="font-bold text-sm">{p.description || p.name}</span>
-                                                                    </div>
-                                                                    <span className="text-[10px] font-black uppercase opacity-40">{p.unit_of_measure}</span>
-                                                                </button>
-                                                            ))}
-                                                        </div>
-                                                    )}
+                    <div className="hidden lg:grid grid-cols-[1fr_120px_100px_1fr_60px] gap-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50 pb-4 px-4">
+                        <div>Producto / Código</div>
+                        <div className="text-center">Cant.</div>
+                        <div className="text-center">Unidad</div>
+                        <div>Descripción</div>
+                        <div></div>
+                    </div>
+
+                    <div className="divide-y divide-slate-700/30">
+                        {items.map((item, idx) => (
+                            <div key={idx} className="group hover:bg-white/5 transition-colors py-6 lg:py-4 px-4 grid grid-cols-1 lg:grid-cols-[1fr_120px_100px_1fr_60px] gap-6 lg:gap-4 items-center">
+                                {/* Product / Code */}
+                                <div className="space-y-1 relative">
+                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Producto / Código</label>
+                                    {item.product_id ? (
+                                        <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2">
+                                            <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-mono text-xs font-bold">{item.product_code}</span>
+                                            <span className="text-sm font-medium truncate flex-grow">{item.product_label}</span>
+                                            <button onClick={() => updateItem(idx, 'product_id', null)} className="text-slate-500 hover:text-red-400">✕</button>
+                                        </div>
+                                    ) : (
+                                        <div className="relative">
+                                            <input
+                                                type="text"
+                                                placeholder="Escribe código o nombre..."
+                                                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all font-medium"
+                                                value={searchIndex === idx ? searchQuery : ""}
+                                                onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
+                                                onChange={e => setSearchQuery(e.target.value)}
+                                            />
+                                            <button 
+                                                onClick={() => setScanningIndex(idx)}
+                                                className="absolute right-2 top-1/2 -translate-y-1/2 text-slate-500 hover:text-emerald-400 transition-colors p-1"
+                                                title="Escanear Código"
+                                            >
+                                                📸
+                                            </button>
+                                            {searchIndex === idx && searchQuery.length > 0 && (
+                                                <div className="absolute z-[100] left-0 right-0 mt-2 bg-slate-800 border-2 border-slate-600 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[min(500px,70vh)] overflow-auto animate-in fade-in zoom-in-95 duration-200">
+                                                    {filteredProducts.slice(0, 15).map(p => (
+                                                        <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 transition-colors border-b border-slate-700 last:border-0 flex justify-between items-center">
+                                                            <div className="flex flex-col">
+                                                                <span className="font-mono text-xs opacity-60 group-hover:text-current">{p.code}</span>
+                                                                <span className="font-bold text-sm">{p.description || p.name}</span>
+                                                            </div>
+                                                            <span className="text-[10px] font-black uppercase opacity-40">{p.unit_of_measure}</span>
+                                                        </button>
+                                                    ))}
                                                 </div>
                                             )}
-                                        </td>
-                                        <td className="py-4 px-2">
-                                            <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-center text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <span className="text-xs text-slate-400 font-black uppercase tracking-widest">{item.unit || "N/A"}</span>
-                                        </td>
-                                        <td className="py-4 px-4 max-w-xs">
-                                            <div className="text-[10px] text-slate-500 italic truncate">{item.description || "Pendiente de selección..."}</div>
-                                        </td>
-                                        <td className="py-4 text-center">
-                                            <button onClick={() => removeItem(idx)} className="text-slate-700 hover:text-red-500 transition-colors p-2">
-                                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
-                                            </button>
-                                        </td>
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Quantity */}
+                                <div className="space-y-1">
+                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
+                                    <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-3 text-center text-lg font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
+                                </div>
+
+                                {/* Unit */}
+                                <div className="flex flex-col lg:items-center space-y-1">
+                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Unidad</label>
+                                    <span className="text-xs text-white font-black uppercase tracking-widest bg-slate-900/50 px-3 py-2 rounded-lg lg:bg-transparent">{item.unit || "N/A"}</span>
+                                </div>
+
+                                {/* Description */}
+                                <div className="space-y-1">
+                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Descripción</label>
+                                    <div className="text-[10px] text-slate-500 italic line-clamp-2 px-1">{item.description || "Pendiente de selección..."}</div>
+                                </div>
+
+                                {/* Actions */}
+                                <div className="flex justify-end pt-2 lg:pt-0">
+                                    <button onClick={() => removeItem(idx)} className="text-slate-700 hover:text-red-500 transition-colors p-3 bg-red-500/5 hover:bg-red-500/10 rounded-xl lg:bg-transparent">
+                                        <svg className="w-6 h-6 lg:w-5 lg:h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ))}
                     </div>
                 </div>
 

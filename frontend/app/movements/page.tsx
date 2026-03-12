@@ -35,7 +35,7 @@ export default function MovementsPage() {
 
     const [header, setHeader] = useState({
         client: "",
-        reference_doc: "",
+        requested_by: "",
         notes: "",
         origin_warehouse_id: "",
         destination_warehouse_id: "",
@@ -171,8 +171,8 @@ export default function MovementsPage() {
                 destination_warehouse_id: header.destination_warehouse_id ? parseInt(header.destination_warehouse_id) : null,
                 quantity: parseInt(item.quantity),
                 movement_type: mType,
-                reference_doc: header.reference_doc || folio,
-                notes: `Vale: ${folio}. Tipo: ${mType === 'ENTRY' ? entrySubType : 'ALMACEN'}. ${header.notes || ""}`.trim()
+                reference_doc: folio,
+                notes: `Solicitante: ${header.requested_by || "—"}. Tipo: ${mType === 'ENTRY' ? entrySubType : 'ALMACEN'}. ${header.notes || ""}`.trim()
             }));
 
             await recordBulkMovements(movements);
@@ -240,7 +240,7 @@ export default function MovementsPage() {
         doc.setFont("helvetica", "normal");
         doc.text("SOLICITADO POR:", 15, isProAir ? 65 : 50);
         doc.setFont("helvetica", "bold");
-        doc.text(header.reference_doc || "—", 55, isProAir ? 65 : 50);
+        doc.text(header.requested_by || "—", 55, isProAir ? 65 : 50);
 
         doc.setFont("helvetica", "normal");
         doc.text("UBICACIÓN:", 15, isProAir ? 70 : 55);
@@ -358,7 +358,7 @@ export default function MovementsPage() {
                             </div>
                             <div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">Solicitado Por</div>
-                                <div className="font-semibold border-b border-slate-200 pb-1">{header.reference_doc || "—"}</div>
+                                <div className="font-semibold border-b border-slate-200 pb-1">{header.requested_by || "—"}</div>
                             </div>
                         </div>
                         <div className="space-y-3">
@@ -506,7 +506,7 @@ export default function MovementsPage() {
                                 </div>
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Solicitado por</label>
-                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.reference_doc} onChange={e => setHeader({ ...header, reference_doc: e.target.value })} />
+                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.requested_by} onChange={e => setHeader({ ...header, requested_by: e.target.value })} />
                                 </div>
                             </div>
                         </div>

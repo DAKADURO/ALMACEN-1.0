@@ -67,7 +67,7 @@ export default function ReportsPage() {
                 Cantidad: m.quantity,
                 Origen: originWh?.name || "N/A",
                 Destino: destWh?.name || "N/A",
-                Referencia: m.reference_doc || "",
+                Folio: m.reference_doc || "",
                 Notas: m.notes || ""
             };
         });
@@ -161,7 +161,7 @@ export default function ReportsPage() {
                             <th className="p-4">Cantidad</th>
                             <th className="p-4">Origen</th>
                             <th className="p-4">Destino</th>
-                            <th className="p-4">Referencia</th>
+                            <th className="p-4">Folio</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-700 text-sm">
@@ -198,7 +198,7 @@ export default function ReportsPage() {
                                     <td className="p-4 font-bold text-center">{m.quantity}</td>
                                     <td className="p-4 text-xs text-white">{originWh?.name || "—"}</td>
                                     <td className="p-4 text-xs text-white">{destWh?.name || "—"}</td>
-                                    <td className="p-4 text-xs italic text-white">{m.reference_doc || "—"}</td>
+                                    <td className="p-4 text-xs font-bold text-emerald-400 font-mono">{m.reference_doc || "—"}</td>
                                 </tr>
                             );
                         })}

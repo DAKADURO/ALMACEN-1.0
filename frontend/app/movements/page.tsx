@@ -23,6 +23,12 @@ export default function MovementsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<'PROAIR' | 'AIRPIPE'>('PROAIR');
+    
+    useEffect(() => {
+        // Detect branding from context
+        const context = localStorage.getItem("inventory-context") || "tuberia";
+        setSelectedCompany(context === "refacciones" ? "PROAIR" : "AIRPIPE");
+    }, []);
     const [modalConfig, setModalConfig] = useState<{ isOpen: boolean, type: 'success' | 'error', message: string }>({ isOpen: false, type: 'success', message: '' });
 
     const closeModal = () => {
@@ -439,20 +445,6 @@ export default function MovementsPage() {
                     <p className="text-white opacity-60 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
                 </div>
                 <div className="text-left sm:text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700 w-full sm:w-auto flex flex-col items-center sm:items-end gap-1">
-                    <div className="flex gap-2 mb-2 p-1 bg-slate-900 rounded-xl border border-slate-700">
-                        <button 
-                            onClick={() => setSelectedCompany('PROAIR')}
-                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${selectedCompany === 'PROAIR' ? 'bg-blue-600 text-white' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            PRO AIR
-                        </button>
-                        <button 
-                            onClick={() => setSelectedCompany('AIRPIPE')}
-                            className={`px-3 py-1 rounded-lg text-[10px] font-black transition-all ${selectedCompany === 'AIRPIPE' ? 'bg-[#0070B8] text-white' : 'text-slate-500 hover:text-white'}`}
-                        >
-                            AIRPIPE
-                        </button>
-                    </div>
                     <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Folio sugerido</span>
                     <div className={`text-xl font-mono font-bold ${selectedCompany === 'PROAIR' ? 'text-blue-400' : 'text-[#0070B8]'}`}>{folio}</div>
                 </div>

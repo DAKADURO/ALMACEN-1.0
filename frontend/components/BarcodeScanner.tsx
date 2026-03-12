@@ -47,17 +47,27 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
             scannerRef.current = html5QrCode;
 
             const config = { 
-                fps: 20, 
-                qrbox: { width: 250, height: 150 },
-                aspectRatio: 1.777778, // 16:9
+                fps: 30, 
+                qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
+                    const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
+                    const size = Math.floor(minEdge * 0.7);
+                    return { width: size, height: Math.floor(size * 0.6) };
+                },
+                aspectRatio: undefined, // Let the browser choose native aspect ratio for better clarity
                 experimentalFeatures: {
                     useBarCodeDetectorIfSupported: true
+                },
+                videoConstraints: {
+                    focusMode: "continuous",
+                    width: { ideal: 1920 },
+                    height: { ideal: 1080 },
+                    facingMode: "environment"
                 }
             };
 
             await html5QrCode.start(
                 cameraId,
-                config,
+                config as any,
                 (decodedText) => {
                     onScanSuccess(decodedText);
                     stopScanner();
@@ -65,21 +75,36 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 () => {} // Suppress errors
             );
 
-            // Try to apply advanced constraints for focus if supported after a short delay
-            setTimeout(async () => {
+            // Apply advanced constraints for focus if supported
+            const applyFocus = async () => {
                 try {
-                    if (scannerRef.current) {
-                        await scannerRef.current.applyVideoConstraints({
-                            focusMode: "continuous",
-                            advanced: [
-                                { focusMode: "continuous" } as any
-                            ]
-                        } as any);
+                    const video = document.querySelector("#reader video") as HTMLVideoElement;
+                    if (video && video.srcObject) {
+                        const stream = video.srcObject as MediaStream;
+                        const runningTrack = stream.getVideoTracks()[0];
+                        
+                        if (runningTrack) {
+                            const capabilities = runningTrack.getCapabilities() as any;
+                            const constraints: any = { advanced: [] };
+                            
+                            if (capabilities.focusMode?.includes("continuous")) {
+                                constraints.advanced.push({ focusMode: "continuous" });
+                            }
+                            
+                            if (constraints.advanced.length > 0) {
+                                await runningTrack.applyConstraints(constraints);
+                            }
+                        }
                     }
                 } catch (e) {
-                    console.warn("Advanced focus constraints not supported", e);
+                    console.warn("Advanced focus constraints failed", e);
                 }
-            }, 1000);
+            };
+
+            // Try multiple times as some browsers need time to stabilize the track
+            setTimeout(applyFocus, 500);
+            setTimeout(applyFocus, 1500);
+            setTimeout(applyFocus, 3000);
 
             setIsScannerInitialized(true);
             setError(null);

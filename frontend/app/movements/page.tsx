@@ -215,9 +215,9 @@ export default function MovementsPage() {
     const ModalComponent = () => {
         if (!modalConfig.isOpen) return null;
         return (
-            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-950/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
-                <div className="bg-slate-900 border border-slate-700/50 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
-                    <button onClick={closeModal} className="absolute top-4 right-4 text-slate-500 hover:text-white transition-colors">
+            <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 backdrop-blur-md p-4 animate-in fade-in duration-200">
+                <div className="bg-[#131722] border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative animate-in zoom-in-95 duration-200">
+                    <button onClick={closeModal} className="absolute top-4 right-4 text-white/50 hover:text-white transition-colors">
                         <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
                     </button>
                     <div className="flex flex-col items-center gap-4 text-center">
@@ -239,9 +239,9 @@ export default function MovementsPage() {
                                 </div>
                             )}
                             <h3 className="text-xl font-bold text-white mb-2">{modalConfig.type === 'success' ? 'Vale Registrado' : 'Error'}</h3>
-                            <p className="text-slate-400 text-sm font-medium">{modalConfig.message}</p>
+                            <p className="text-white/70 text-sm font-medium">{modalConfig.message}</p>
                         </div>
-                        <button onClick={closeModal} className="mt-4 w-full py-3 rounded-xl font-bold transition-all bg-slate-800 hover:bg-slate-700 text-white border border-slate-700">
+                        <button onClick={closeModal} className="mt-4 w-full py-3 rounded-xl font-bold transition-all bg-[#1F2433] hover:bg-white/10 text-white border border-white/10">
                             Aceptar
                         </button>
                     </div>
@@ -344,7 +344,7 @@ export default function MovementsPage() {
                     <button onClick={downloadPDF} className={`flex-grow sm:flex-none ${selectedCompany === 'PROAIR' ? 'bg-blue-600 hover:bg-blue-500' : 'bg-[#0070B8] hover:bg-blue-600'} text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl flex items-center justify-center gap-2`}>
                         <span>📄</span> Descargar PDF
                     </button>
-                    <button onClick={() => window.print()} className="flex-grow sm:flex-none bg-slate-700 hover:bg-slate-600 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
+                    <button onClick={() => window.print()} className="flex-grow sm:flex-none bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white px-8 py-3 rounded-xl font-bold transition-all shadow-xl">Imprimir</button>
                     <button onClick={() => window.location.reload()} className={`flex-grow sm:flex-none ${selectedCompany === 'PROAIR' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30'} px-8 py-3 rounded-xl font-bold transition-all shadow-xl border`}>Nuevo Registro</button>
                     <Link href="/" className="flex-grow sm:flex-none bg-red-900/10 hover:bg-red-900/20 text-red-500 border border-red-900/30 px-8 py-3 rounded-xl font-bold transition-all shadow-xl text-center">Salir</Link>
                 </div>
@@ -358,21 +358,21 @@ export default function MovementsPage() {
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
                     <h1 className="text-2xl sm:text-3xl font-bold">Carga de Vale</h1>
-                    <p className="text-white opacity-60 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
+                    <p className="text-white/80 mt-1 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
                 </div>
-                <div className="text-left sm:text-right bg-slate-800/50 p-3 rounded-2xl border border-slate-700 w-full sm:w-auto flex flex-col items-center sm:items-end gap-1">
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Folio sugerido</span>
+                <div className="text-left sm:text-right bg-[#131722]/80 p-3 rounded-2xl border border-white/10 w-full sm:w-auto flex flex-col items-center sm:items-end gap-1">
+                    <span className="text-[10px] font-bold text-white/50 uppercase tracking-widest">Folio sugerido</span>
                     <div className={`text-xl font-mono font-bold ${selectedCompany === 'PROAIR' ? 'text-blue-400' : 'text-[#0070B8]'}`}>{folio}</div>
                 </div>
             </header>
 
-            <div className="bg-slate-800/40 border border-slate-700 rounded-3xl backdrop-blur-md shadow-2xl relative">
+            <div className="bg-[#131722]/60 border border-white/10 rounded-3xl backdrop-blur-md shadow-2xl relative">
                 {/* Header Section */}
-                <div className="p-4 sm:p-8 border-b border-slate-700 bg-slate-800/20">
+                <div className="p-4 sm:p-8 border-b border-white/10 bg-[#131722]/40 rounded-t-3xl">
                     <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
                         <div className="lg:col-span-2 space-y-6">
                             {/* Type selector */}
-                            <div className="flex flex-wrap gap-2 p-1 bg-slate-950 rounded-2xl w-full sm:w-fit">
+                            <div className="flex flex-wrap gap-2 p-1 bg-black/50 rounded-2xl w-full sm:w-fit">
                                 {[
                                     { key: "ENTRY", label: "Entrada" },
                                     { key: "EXIT", label: "Salida" },
@@ -381,7 +381,7 @@ export default function MovementsPage() {
                                     <button
                                         key={t.key}
                                         onClick={() => setMType(t.key)}
-                                        className={`flex-grow sm:flex-none px-6 py-2 rounded-xl text-sm font-black transition-all border-2 ${mType === t.key ? typeColors[t.key] + " border-transparent" : "border-slate-800 text-white/30 hover:text-white"}`}
+                                        className={`flex-grow sm:flex-none px-6 py-2 rounded-xl text-sm font-black transition-all border-2 ${mType === t.key ? typeColors[t.key] + " border-transparent" : "border-white/10 text-white/50 hover:text-white"}`}
                                     >
                                         {t.label}
                                     </button>
@@ -409,29 +409,29 @@ export default function MovementsPage() {
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Cliente / Proyecto</label>
-                                    <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
+                                    <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Cliente / Proyecto</label>
+                                    <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
                                 </div>
                                 <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Solicitado por</label>
-                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.requested_by} onChange={e => setHeader({ ...header, requested_by: e.target.value })} />
+                                    <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Solicitado por</label>
+                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.requested_by} onChange={e => setHeader({ ...header, requested_by: e.target.value })} />
                                 </div>
                             </div>
                         </div>
 
                         <div className="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4 h-fit">
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Origen</label>
+                                <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Almacén Origen</label>
                                 <select disabled={mType === "ENTRY"} value={header.origin_warehouse_id} onChange={e => setHeader({ ...header, origin_warehouse_id: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
+                                    className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'ENTRY' ? 'EXTERNO' : 'Seleccionar...'}</option>
                                     {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Almacén Destino</label>
+                                <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Almacén Destino</label>
                                 <select disabled={mType === "EXIT"} value={header.destination_warehouse_id} onChange={e => setHeader({ ...header, destination_warehouse_id: e.target.value })}
-                                    className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
+                                    className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-30">
                                     <option value="">{mType === 'EXIT' ? 'CONSUMO' : 'Seleccionar...'}</option>
                                     {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
@@ -442,7 +442,7 @@ export default function MovementsPage() {
 
                 {/* Table Section - Responsive Grid */}
                 <div className="p-4 sm:p-8">
-                    <div className="hidden lg:grid grid-cols-[1fr_120px_100px_1fr_60px] gap-4 text-[10px] font-black text-slate-500 uppercase tracking-widest border-b border-slate-700/50 pb-4 px-4">
+                    <div className="hidden lg:grid grid-cols-[1fr_120px_100px_1fr_60px] gap-4 text-[10px] font-black text-white/50 uppercase tracking-widest border-b border-white/10 pb-4 px-4">
                         <div>Producto / Código</div>
                         <div className="text-center">Cant.</div>
                         <div className="text-center">Unidad</div>
@@ -450,24 +450,24 @@ export default function MovementsPage() {
                         <div></div>
                     </div>
 
-                    <div className="divide-y divide-slate-700/30">
+                    <div className="divide-y divide-white/10">
                         {items.map((item, idx) => (
                             <div key={idx} className="group hover:bg-white/5 transition-colors py-6 lg:py-4 px-4 grid grid-cols-1 lg:grid-cols-[1fr_120px_100px_1fr_60px] gap-6 lg:gap-4 items-center relative">
                                 {/* Product / Code */}
                                 <div className="space-y-1 relative">
-                                    <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Producto / Código</label>
+                                    <label className="lg:hidden text-[10px] font-bold text-white/50 uppercase">Producto / Código</label>
                                     {item.product_id ? (
-                                        <div className="flex items-center gap-3 bg-slate-900 border border-emerald-500/30 rounded-xl px-3 py-2">
+                                        <div className="flex items-center gap-3 bg-black/50 border border-emerald-500/30 rounded-xl px-3 py-2">
                                             <span className="bg-emerald-500/10 text-emerald-400 px-2 py-1 rounded font-mono text-xs font-bold">{item.product_code}</span>
-                                            <span className="text-sm font-medium truncate flex-grow">{item.product_label}</span>
-                                            <button onClick={() => updateItem(idx, 'product_id', null)} className="text-slate-500 hover:text-red-400">✕</button>
+                                            <span className="text-sm font-medium text-white truncate flex-grow">{item.product_label}</span>
+                                            <button onClick={() => updateItem(idx, 'product_id', null)} className="text-white/50 hover:text-red-400">✕</button>
                                         </div>
                                     ) : (
                                         <div className="relative">
                                             <input
                                                 type="text"
                                                 placeholder="Escribe código o nombre..."
-                                                className="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-3 py-2 text-sm outline-none focus:border-emerald-500 transition-all font-medium"
+                                                className="w-full bg-black/50 border border-white/10 rounded-xl px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition-all font-medium"
                                                 value={searchIndex === idx ? searchQuery : ""}
                                                 onFocus={() => { setSearchIndex(idx); setSearchQuery(""); }}
                                                 onChange={e => setSearchQuery(e.target.value)}
@@ -480,9 +480,9 @@ export default function MovementsPage() {
                                                 📸
                                             </button>
                                             {searchIndex === idx && searchQuery.length > 0 && (
-                                                <div className="absolute z-[100] left-0 right-0 mt-2 bg-slate-800 border-2 border-slate-600 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[min(500px,70vh)] overflow-auto animate-in fade-in zoom-in-95 duration-200">
+                                                <div className="absolute z-[100] left-0 right-0 mt-2 bg-[#131722] border border-white/10 rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.5)] max-h-[min(500px,70vh)] overflow-auto animate-in fade-in zoom-in-95 duration-200">
                                                     {filteredProducts.slice(0, 15).map(p => (
-                                                        <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 transition-colors border-b border-slate-700 last:border-0 flex justify-between items-center">
+                                                        <button key={p.id} onClick={() => selectProduct(idx, p)} className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-slate-900 text-white transition-colors border-b border-white/5 last:border-0 flex justify-between items-center">
                                                             <div className="flex flex-col">
                                                                 <span className="font-mono text-xs opacity-60 group-hover:text-current">{p.code}</span>
                                                                 <span className="font-bold text-sm">{p.description || p.name}</span>
@@ -499,13 +499,13 @@ export default function MovementsPage() {
                                 {/* Quantity & Unit (Grouped for mobile side-by-side) */}
                                 <div className="grid grid-cols-2 lg:contents gap-4">
                                     <div className="space-y-1">
-                                        <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Cantidad</label>
-                                        <input type="number" inputMode="numeric" className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 lg:py-3 text-center text-lg lg:text-xl font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
+                                        <label className="lg:hidden text-[10px] font-bold text-white/50 uppercase">Cantidad</label>
+                                        <input type="number" inputMode="numeric" className="w-full bg-black/50 border border-white/10 text-white rounded-xl px-3 py-2 lg:py-3 text-center text-lg lg:text-xl font-black outline-none focus:ring-2 focus:ring-emerald-500 transition-all" value={item.quantity} onChange={e => updateItem(idx, 'quantity', e.target.value)} placeholder="0" />
                                     </div>
 
                                     <div className="flex flex-col lg:items-center space-y-1 h-full justify-end lg:justify-center">
-                                        <label className="lg:hidden text-[10px] font-bold text-slate-500 uppercase">Unidad</label>
-                                        <span className="text-xs text-white font-black uppercase tracking-widest bg-slate-900/50 px-3 py-2.5 lg:py-2 rounded-lg lg:bg-transparent border border-white/5 lg:border-0 text-center">{item.unit || "N/A"}</span>
+                                        <label className="lg:hidden text-[10px] font-bold text-white/50 uppercase">Unidad</label>
+                                        <span className="text-xs text-white font-black uppercase tracking-widest bg-black/50 px-3 py-2.5 lg:py-2 rounded-lg lg:bg-transparent border border-white/10 lg:border-0 text-center">{item.unit || "N/A"}</span>
                                     </div>
                                 </div>
 
@@ -534,15 +534,15 @@ export default function MovementsPage() {
                 </div>
 
                 {/* Footer Section Entries */}
-                <div className="p-4 sm:p-8 bg-slate-950/40 border-t border-slate-700">
+                <div className="p-4 sm:p-8 bg-black/40 border-t border-white/10 rounded-b-3xl">
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Entregó / Delivery</label>
-                            <input type="text" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.delivery_person} onChange={e => setHeader({ ...header, delivery_person: e.target.value })} />
+                            <label className="text-[10px] font-bold text-white/50 uppercase ml-2">Entregó / Delivery</label>
+                            <input type="text" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.delivery_person} onChange={e => setHeader({ ...header, delivery_person: e.target.value })} />
                         </div>
                         <div className="space-y-1">
-                            <label className="text-[10px] font-bold text-slate-500 uppercase ml-2">Recibió / Receiver</label>
-                            <input type="text" placeholder="Nombre de quien recibe" className="w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.receiver_person} onChange={e => setHeader({ ...header, receiver_person: e.target.value })} />
+                            <label className="text-[10px] font-bold text-white/50 uppercase ml-2">Recibió / Receiver</label>
+                            <input type="text" placeholder="Nombre de quien recibe" className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-4 text-white text-sm font-bold outline-none focus:ring-2 focus:ring-emerald-500" value={header.receiver_person} onChange={e => setHeader({ ...header, receiver_person: e.target.value })} />
                         </div>
                         <div className="flex items-end">
                             <button

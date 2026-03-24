@@ -33,23 +33,23 @@ export default function DashboardPage() {
     <div className="space-y-8 text-white">
       <header>
         <h1 className="text-3xl font-bold">Dashboard de Inventario</h1>
-        <p className="text-white opacity-80">Resumen general de existencias y alertas críticas.</p>
+        <p className="text-white/80 mt-1">Resumen general de existencias y alertas críticas.</p>
       </header>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <div className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 backdrop-blur-sm">
+        <div className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
           <div className="text-white/70 text-sm font-medium">Total Productos</div>
-          <div className="text-3xl font-bold mt-2">{stats.total_products}</div>
+          <div className="text-3xl font-bold mt-2 text-white">{stats.total_products}</div>
         </div>
         <div className="p-6 rounded-2xl bg-emerald-900/20 border border-emerald-900/30 backdrop-blur-sm">
           <div className="text-emerald-400 text-sm font-medium italic">Valuación Total</div>
           <div className="text-3xl font-black mt-2 text-emerald-500">
             ${stats.total_valuation?.toLocaleString('es-MX', { minimumFractionDigits: 2 })}
           </div>
-          <p className="text-white text-xs uppercase font-bold tracking-widest mt-1">Existencia Total</p>
+          <p className="text-white/80 text-xs uppercase font-bold tracking-widest mt-1">Existencia Total</p>
         </div>
-        <div className={`p-6 rounded-2xl backdrop-blur-sm ${stats.low_stock_count > 0 ? "bg-red-900/20 border border-red-900/30" : "bg-slate-800/40 border border-slate-700"}`}>
+        <div className={`p-6 rounded-2xl backdrop-blur-sm ${stats.low_stock_count > 0 ? "bg-red-900/20 border border-red-900/30" : "bg-[#131722]/60 border border-white/10"}`}>
           <div className="text-white/70 text-sm font-medium">Alertas Stock Bajo</div>
           <div className={`text-3xl font-bold mt-2 ${stats.low_stock_count > 0 ? "text-red-500" : "text-white"}`}>
             {stats.low_stock_count}
@@ -64,7 +64,7 @@ export default function DashboardPage() {
       {/* Tables */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Low Stock */}
-        <section className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col">
+        <section className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 flex flex-col shadow-xl">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>⚠️</span> Stock Bajo (Crítico)
           </h2>
@@ -75,7 +75,7 @@ export default function DashboardPage() {
               </div>
             ) : (
               stats.low_stock_items.map((item: any, i: number) => (
-                <div key={i} className="flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 border-red-500">
+                <div key={i} className="flex justify-between items-center p-3 bg-black/40 rounded-lg border-l-4 border-red-500 hover:bg-white/5 transition-colors">
                   <div>
                     <div className="font-semibold text-sm">{item.description || item.name}</div>
                     <div className="text-xs opacity-60">
@@ -93,7 +93,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Top Products (Rotation) */}
-        <section className="p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col shadow-lg shadow-emerald-900/10">
+        <section className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 flex flex-col shadow-xl">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>📈</span> Top Movimientos (30 días)
           </h2>
@@ -105,7 +105,7 @@ export default function DashboardPage() {
             ) : (
               stats.top_products.map((item: any, i: number) => {
                 // Calculate color intensity based on rank (i)
-                const colors = ["bg-emerald-500", "bg-emerald-600", "bg-emerald-700", "bg-slate-600", "bg-slate-700"];
+                const colors = ["bg-emerald-500", "bg-emerald-600", "bg-emerald-700", "bg-white/30", "bg-white/20"];
                 const progress = ((item.count / stats.top_products[0].count) * 100);
                 
                 return (
@@ -120,9 +120,9 @@ export default function DashboardPage() {
                         <span className="text-xs font-bold text-emerald-500 bg-emerald-500/10 px-2 py-0.5 rounded-full">{item.count} mov.</span>
                       </div>
                     </div>
-                    <div className="h-1.5 w-full bg-slate-700/50 rounded-full overflow-hidden">
+                    <div className="h-1.5 w-full bg-white/5 rounded-full overflow-hidden">
                       <div 
-                        className={`h-full ${colors[i] || "bg-slate-600"} transition-all duration-1000`} 
+                        className={`h-full ${colors[i] || "bg-white/20"} transition-all duration-1000`} 
                         style={{ width: `${progress}%` }}
                       ></div>
                     </div>
@@ -135,7 +135,7 @@ export default function DashboardPage() {
         </section>
 
         {/* Recent Movements */}
-        <section className="lg:col-span-2 p-6 rounded-2xl bg-slate-800/40 border border-slate-700 flex flex-col overflow-hidden">
+        <section className="lg:col-span-2 p-6 rounded-2xl bg-[#131722]/60 border border-white/10 flex flex-col overflow-hidden shadow-xl">
           <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
             <span>🕒</span> Últimos Movimientos
           </h2>
@@ -155,12 +155,12 @@ export default function DashboardPage() {
                     : `Salida de ${m.origin || "Almacén"}`;
 
                 return (
-                  <div key={i} className={`flex justify-between items-center p-3 bg-slate-900/50 rounded-lg border-l-4 ${borderColor}`}>
+                  <div key={i} className={`flex justify-between items-center p-3 bg-black/40 rounded-lg border-l-4 ${borderColor} hover:bg-white/5 transition-colors`}>
                     <div>
                       <div className="font-semibold text-sm line-clamp-1 flex items-center gap-2">
                         {label}
                         {m.reference_doc && (
-                          <span className="text-[10px] bg-slate-800 text-emerald-400 px-1.5 py-0.5 rounded font-mono border border-emerald-500/20">
+                          <span className="text-[10px] bg-[#1F2433] text-emerald-400 px-1.5 py-0.5 rounded font-mono border border-emerald-500/20">
                             {m.reference_doc}
                           </span>
                         )}

@@ -51,8 +51,8 @@ export default function LoginPage() {
     };
 
     return (
-        <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
-            <div className="w-full max-w-md bg-slate-800 rounded-2xl shadow-2xl border border-slate-700 overflow-hidden">
+        <div className="min-h-screen bg-[#0B0E14] flex items-center justify-center p-4">
+            <div className="w-full max-w-md bg-[#131722] rounded-2xl shadow-2xl border border-white/10 overflow-hidden">
                 <div className="p-8">
                     <div className="flex justify-center mb-8">
                         <div className="w-16 h-16 bg-blue-600 rounded-xl flex items-center justify-center shadow-lg shadow-blue-500/20">
@@ -63,7 +63,7 @@ export default function LoginPage() {
                     </div>
 
                     <h2 className="text-3xl font-bold text-white text-center mb-2">Almacén 1.0</h2>
-                    <p className="text-slate-400 text-center mb-8">Inicia sesión para continuar</p>
+                    <p className="text-white/60 text-center mb-8">Inicia sesión para continuar</p>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {error && (
@@ -73,24 +73,24 @@ export default function LoginPage() {
                         )}
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Usuario</label>
+                            <label className="block text-sm font-medium text-white/80 mb-2">Usuario</label>
                             <input
                                 type="text"
                                 value={username}
                                 onChange={(e) => setUsername(e.target.value)}
-                                className="w-full bg-slate-700 border border-slate-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                                 placeholder="Ingresa tu usuario"
                                 required
                             />
                         </div>
 
                         <div>
-                            <label className="block text-sm font-medium text-slate-300 mb-2">Contraseña</label>
+                            <label className="block text-sm font-medium text-white/80 mb-2">Contraseña</label>
                             <input
                                 type="password"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
-                                className="w-full bg-slate-700 border border-slate-600 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                                className="w-full bg-black/40 border border-white/10 rounded-lg py-3 px-4 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                                 placeholder="••••••••"
                                 required
                             />
@@ -106,8 +106,8 @@ export default function LoginPage() {
                     </form>
                 </div>
 
-                <div className="bg-slate-700/50 p-6 text-center border-t border-slate-700">
-                    <p className="text-sm text-slate-400">© 2026 Proair - Sistema de Inventarios</p>
+                <div className="bg-[#131722] p-6 text-center border-t border-white/10">
+                    <p className="text-sm text-white/60">© 2026 Proair - Sistema de Inventarios</p>
                 </div>
             </div>
         </div>

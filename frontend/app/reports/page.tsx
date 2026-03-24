@@ -133,7 +133,7 @@ export default function ReportsPage() {
             <header className="flex justify-between items-center">
                 <div>
                     <h1 className="text-3xl font-bold">Reportes y Kardex</h1>
-                    <p className="text-white">Historial de movimientos y exportación de datos.</p>
+                    <p className="text-white/80 mt-1">Historial de movimientos y exportación de datos.</p>
                 </div>
                 <button
                     onClick={handleExport}
@@ -145,11 +145,11 @@ export default function ReportsPage() {
             </header>
 
             {/* Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 rounded-2xl bg-slate-800/40 border border-slate-700 backdrop-blur-sm">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm shadow-xl">
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-white uppercase ml-1">Producto</label>
+                    <label className="text-xs font-bold text-white/70 uppercase ml-1">Producto</label>
                     <select
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.product_id}
                         onChange={(e) => setFilters({ ...filters, product_id: e.target.value })}
                     >
@@ -161,9 +161,9 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-white uppercase ml-1">Almacén</label>
+                    <label className="text-xs font-bold text-white/70 uppercase ml-1">Almacén</label>
                     <select
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.warehouse_id}
                         onChange={(e) => setFilters({ ...filters, warehouse_id: e.target.value })}
                     >
@@ -175,20 +175,20 @@ export default function ReportsPage() {
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-white uppercase ml-1">Desde</label>
+                    <label className="text-xs font-bold text-white/70 uppercase ml-1">Desde</label>
                     <input
                         type="date"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.start_date}
                         onChange={(e) => setFilters({ ...filters, start_date: e.target.value })}
                     />
                 </div>
 
                 <div className="space-y-1">
-                    <label className="text-xs font-bold text-white uppercase ml-1">Hasta</label>
+                    <label className="text-xs font-bold text-white/70 uppercase ml-1">Hasta</label>
                     <input
                         type="date"
-                        className="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
+                        className="w-full bg-black/50 border border-white/10 rounded-xl px-4 py-2 text-white outline-none focus:ring-2 focus:ring-emerald-500"
                         value={filters.end_date}
                         onChange={(e) => setFilters({ ...filters, end_date: e.target.value })}
                     />
@@ -205,9 +205,9 @@ export default function ReportsPage() {
             </div>
 
             {/* Tabla Kardex */}
-            <div className="rounded-2xl border border-slate-700 overflow-hidden bg-slate-800/20 backdrop-blur-sm shadow-xl">
+            <div className="rounded-2xl border border-white/10 overflow-hidden bg-[#131722]/40 backdrop-blur-sm shadow-xl">
                 <table className="w-full text-left">
-                    <thead className="bg-slate-800/60 border-b border-slate-700 text-white text-xs uppercase tracking-wider">
+                    <thead className="bg-[#131722] border-b border-white/10 text-white text-xs uppercase tracking-wider">
                         <tr>
                             <th className="p-4">Fecha</th>
                             <th className="p-4">Producto</th>
@@ -219,18 +219,18 @@ export default function ReportsPage() {
                             <th className="p-4 text-center">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700 text-sm">
+                    <tbody className="divide-y divide-white/10 text-sm">
                         {loading ? (
-                            <tr><td colSpan={7} className="p-12 text-center text-slate-500 text-lg animate-pulse">Cargando movimientos...</td></tr>
+                            <tr><td colSpan={7} className="p-12 text-center text-white/50 text-lg animate-pulse">Cargando movimientos...</td></tr>
                         ) : movements.length === 0 ? (
-                            <tr><td colSpan={7} className="p-12 text-center text-slate-500">No hay movimientos que coincidan con los filtros.</td></tr>
+                            <tr><td colSpan={7} className="p-12 text-center text-white/50">No hay movimientos que coincidan con los filtros.</td></tr>
                         ) : movements.map((m: any) => {
                             const product = products.find((p: any) => p.id === m.product_id) as any;
                             const originWh = warehouses.find((w: any) => w.id === m.origin_warehouse_id) as any;
                             const destWh = warehouses.find((w: any) => w.id === m.destination_warehouse_id) as any;
 
                             return (
-                                <tr key={m.id} className="hover:bg-slate-700/30 transition-colors">
+                                <tr key={m.id} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4 whitespace-nowrap text-white">
                                         {new Date(m.created_at).toLocaleString('es-MX', {
                                             day: '2-digit', month: '2-digit', year: '2-digit',
@@ -245,7 +245,7 @@ export default function ReportsPage() {
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${m.movement_type === 'ENTRY' ? 'bg-emerald-900/40 text-emerald-400' :
                                             m.movement_type === 'EXIT' ? 'bg-red-900/40 text-red-400' :
                                                 m.movement_type === 'TRANSFER' ? 'bg-blue-900/40 text-blue-400' :
-                                                    'bg-slate-700 text-slate-300'
+                                                    'bg-[#1F2433] text-white/70'
                                             }`}>
                                             {typeLabels[m.movement_type] || m.movement_type}
                                         </span>
@@ -258,7 +258,7 @@ export default function ReportsPage() {
                                         {m.reference_doc && (
                                             <button
                                                 onClick={() => handleReprint(m.reference_doc)}
-                                                className="px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 mx-auto"
+                                                className="px-3 py-1.5 bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 mx-auto"
                                                 title="Re-imprimir Vale PDF"
                                             >
                                                 📄 <span className="hidden sm:inline">Vale PDF</span>

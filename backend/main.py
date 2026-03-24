@@ -7,7 +7,7 @@ import models
 from sqlalchemy import text
 
 app = FastAPI(
-    title="Almacen 2.0 API",
+    title="Almacen 3.0 API",
     description="API for Warehouse and Inventory Management",
     version="1.0.0"
 )
@@ -105,7 +105,7 @@ app.include_router(auth.router)
 
 @app.get("/")
 async def root():
-    return {"message": "Welcome to Almacen 2.0 API"}
+    return {"message": "Welcome to Almacen 3.0 API"}
 
 @app.get("/health")
 async def health_check():

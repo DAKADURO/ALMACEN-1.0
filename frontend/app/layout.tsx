@@ -64,7 +64,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Top Header */}
       <div className="lg:hidden flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 sticky top-0 z-50">
         <div className="text-xl font-bold tracking-tight text-emerald-400">
-          ALMACEN <span className="text-white text-base">2.0</span>
+          ALMACEN <span className="text-white text-base">3.0</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
@@ -95,7 +95,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
       `}>
         <div className="hidden lg:flex items-center gap-3">
           <div className="text-2xl font-black tracking-tighter text-emerald-400">
-            ALMACEN<span className="text-white font-medium ml-1 text-xl">2.0</span>
+            ALMACEN<span className="text-white font-medium ml-1 text-xl">3.0</span>
           </div>
         </div>
 
@@ -190,7 +190,7 @@ export default function RootLayout({
   return (
     <html lang="es">
       <head>
-        <title>Almacen 2.0 - Gestión de Inventarios</title>
+        <title>Almacen 3.0 - Gestión de Inventarios</title>
         <meta name="description" content="Sistema centralizado de gestión de refacciones y consumibles" />
       </head>
       <body className={`${inter.className} bg-[#0B0E14] text-white min-h-screen`}>

@@ -1,4 +1,4 @@
-# Almacen 2.0 - Sistema de Gestión de Inventarios
+# Almacen 3.0 - Sistema de Gestión de Inventarios
 
 Sistema centralizado para el control de refacciones, tubería y consumibles de Proair.
 

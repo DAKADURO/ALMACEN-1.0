@@ -75,6 +75,15 @@ def ensure_views():
 
 @app.on_event("startup")
 def startup_event():
+    # Ensure tables are created for all contexts
+    contexts = ["tuberia", "refacciones"]
+    for ctx in contexts:
+        try:
+            engine, _ = database.get_engine(ctx)
+            models.Base.metadata.create_all(bind=engine)
+        except Exception as e:
+            print(f"Error creating tables for {ctx}: {e}")
+            
     ensure_warehouses()
     ensure_views()
 

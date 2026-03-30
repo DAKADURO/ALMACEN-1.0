@@ -215,3 +215,51 @@ export async function finishAudit(auditId: number) {
     if (!res.ok) throw new Error("Failed to finish audit");
     return res.json();
 }
+
+// --- Box API ---
+export async function fetchBoxes() {
+    const res = await fetch(`${API_URL}/boxes/`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch boxes");
+    return res.json();
+}
+
+export async function fetchBox(id: number) {
+    const res = await fetch(`${API_URL}/boxes/${id}`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch box");
+    return res.json();
+}
+
+export async function fetchBoxByCode(code: string) {
+    const res = await fetch(`${API_URL}/boxes/code/${code}`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch box by code");
+    return res.json();
+}
+
+export async function createBox(data: any) {
+    const res = await fetch(`${API_URL}/boxes/`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to create box");
+    return res.json();
+}
+
+export async function addItemToBox(boxId: number, data: any) {
+    const res = await fetch(`${API_URL}/boxes/${boxId}/items`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) throw new Error("Failed to add item to box");
+    return res.json();
+}
+
+export async function removeItemFromBox(boxId: number, productId: number) {
+    const res = await fetch(`${API_URL}/boxes/${boxId}/items/${productId}`, {
+        method: "DELETE",
+        headers: getHeaders(),
+    });
+    if (!res.ok) throw new Error("Failed to remove item from box");
+    return res.json();
+}

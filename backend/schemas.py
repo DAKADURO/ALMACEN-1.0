@@ -82,6 +82,39 @@ class BOMItemCheck(BaseModel):
     description: str
     quantity: float
 
+# --- Box Schemas ---
+class BoxItemBase(BaseModel):
+    product_id: int
+    quantity: int
+
+class BoxItemCreate(BoxItemBase):
+    pass
+
+class BoxItem(BoxItemBase):
+    id: int
+    box_id: int
+    product: Optional[Product] = None
+
+    class Config:
+        from_attributes = True
+
+class BoxBase(BaseModel):
+    code: str
+    description: Optional[str] = None
+    warehouse_id: int
+    active: bool = True
+
+class BoxCreate(BoxBase):
+    pass
+
+class Box(BoxBase):
+    id: int
+    created_at: datetime
+    items: List[BoxItem] = []
+
+    class Config:
+        from_attributes = True
+
 # --- Authentication Schemas ---
 class Token(BaseModel):
     access_token: str

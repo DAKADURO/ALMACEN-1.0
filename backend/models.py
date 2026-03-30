@@ -31,6 +31,7 @@ class Product(Base):
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
     movements = relationship("StockMovement", back_populates="product", primaryjoin="or_(Product.id==StockMovement.product_id)")
+    box_items = relationship("BoxItem", back_populates="product")
 
 class Warehouse(Base):
     __tablename__ = "warehouses"
@@ -40,6 +41,30 @@ class Warehouse(Base):
     description = Column(Text)
     location_type = Column(String(50), default='FIXED')
     active = Column(Boolean, default=True)
+
+class Box(Base):
+    __tablename__ = "boxes"
+
+    id = Column(Integer, primary_key=True, index=True)
+    code = Column(String(50), unique=True, index=True, nullable=False)
+    description = Column(Text)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), nullable=False)
+    active = Column(Boolean, default=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    warehouse = relationship("Warehouse")
+    items = relationship("BoxItem", back_populates="box", cascade="all, delete-orphan")
+
+class BoxItem(Base):
+    __tablename__ = "box_items"
+
+    id = Column(Integer, primary_key=True, index=True)
+    box_id = Column(Integer, ForeignKey("boxes.id"), nullable=False)
+    product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
+    quantity = Column(Integer, nullable=False)
+
+    box = relationship("Box", back_populates="items")
+    product = relationship("Product", back_populates="box_items")
 
 class StockMovement(Base):
     __tablename__ = "stock_movements"

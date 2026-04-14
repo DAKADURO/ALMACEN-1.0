@@ -53,17 +53,22 @@ CREATE TABLE stock_movements (
 -- or a table that is updated via triggers to maintain the "immutable" rule while being fast.
 CREATE VIEW v_inventory_summary AS
 SELECT 
+    p.id as product_id,
+    w.id as warehouse_id,
     p.code,
     p.name,
+    p.description,
     w.name as warehouse_name,
-    SUM(
+    COALESCE(SUM(
         CASE 
             WHEN sm.destination_warehouse_id = w.id THEN sm.quantity
             WHEN sm.origin_warehouse_id = w.id THEN -sm.quantity
             ELSE 0
         END
-    ) as current_stock
+    ), 0) as current_stock
 FROM products p
 CROSS JOIN warehouses w
-LEFT JOIN stock_movements sm ON (sm.product_id = p.id AND (sm.origin_warehouse_id = w.id OR sm.destination_warehouse_id = w.id))
-GROUP BY p.code, p.name, w.name;
+LEFT JOIN stock_movements sm ON p.id = sm.product_id 
+    AND (sm.destination_warehouse_id = w.id OR sm.origin_warehouse_id = w.id)
+WHERE w.active = 1
+GROUP BY p.id, w.id, p.code, p.name, p.description, w.name;

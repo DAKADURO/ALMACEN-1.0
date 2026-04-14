@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 import models, schemas, database
 
@@ -101,15 +101,17 @@ def get_inventory_summary(db: Session = Depends(database.get_db)):
     """Compute inventory summary efficiently using the SQL view."""
     try:
         # Use the view but filter by stock > 0 as requested
-        query = text("SELECT code, name, description, warehouse_name, current_stock FROM v_inventory_summary WHERE current_stock > 0")
+        query = text("SELECT product_id, warehouse_id, code, name, description, warehouse_name, current_stock FROM v_inventory_summary WHERE current_stock > 0")
         results = db.execute(query).fetchall()
         return [
             schemas.InventorySummary(
-                code=row[0],
-                name=row[1],
-                description=row[2],
-                warehouse_name=row[3],
-                current_stock=int(row[4])
+                product_id=row[0],
+                warehouse_id=row[1],
+                code=row[2],
+                name=row[3],
+                description=row[4],
+                warehouse_name=row[5],
+                current_stock=int(row[6])
             ) for row in results
         ]
     except Exception as e:
@@ -304,12 +306,18 @@ def start_audit(audit_in: schemas.AuditCreate, db: Session = Depends(database.ge
             ))
     
     db.commit()
-    db.refresh(new_audit)
-    return new_audit
+    # Fetch with joined relationships to satisfy the response model
+    return db.query(models.Audit).options(
+        joinedload(models.Audit.items).joinedload(models.AuditItem.product),
+        joinedload(models.Audit.warehouse)
+    ).filter(models.Audit.id == new_audit.id).first()
 
 @router.get("/audit/{audit_id}", response_model=schemas.Audit)
 def get_audit(audit_id: int, db: Session = Depends(database.get_db)):
-    audit = db.query(models.Audit).filter(models.Audit.id == audit_id).first()
+    audit = db.query(models.Audit).options(
+        joinedload(models.Audit.items).joinedload(models.AuditItem.product),
+        joinedload(models.Audit.warehouse)
+    ).filter(models.Audit.id == audit_id).first()
     if not audit:
         raise HTTPException(status_code=404, detail="Audit not found")
     return audit
@@ -328,10 +336,13 @@ def update_audit_items(audit_id: int, items_in: List[schemas.AuditItemBase], db:
     db.commit()
     return {"status": "updated"}
 
-@router.get("/audits/active/{warehouse_id}")
+@router.get("/audits/active/{warehouse_id}", response_model=Optional[schemas.Audit])
 def get_active_audit(warehouse_id: int, db: Session = Depends(database.get_db)):
     """Check if there's an active audit for a warehouse."""
-    return db.query(models.Audit).filter(
+    return db.query(models.Audit).options(
+        joinedload(models.Audit.items).joinedload(models.AuditItem.product),
+        joinedload(models.Audit.warehouse)
+    ).filter(
         models.Audit.warehouse_id == warehouse_id, 
         models.Audit.status == "IN_PROGRESS"
     ).first()
@@ -363,5 +374,8 @@ def finish_audit(audit_id: int, db: Session = Depends(database.get_db)):
     audit.status = "COMPLETED"
     audit.completed_at = datetime.now()
     db.commit()
-    db.refresh(audit)
-    return audit
+    
+    return db.query(models.Audit).options(
+        joinedload(models.Audit.items).joinedload(models.AuditItem.product),
+        joinedload(models.Audit.warehouse)
+    ).filter(models.Audit.id == audit.id).first()

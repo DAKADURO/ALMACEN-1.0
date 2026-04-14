@@ -16,6 +16,8 @@ def update_views():
             create_view_sql = """
             CREATE VIEW v_inventory_summary AS
             SELECT 
+                p.id as product_id,
+                w.id as warehouse_id,
                 p.code,
                 p.name,
                 p.description,
@@ -32,15 +34,15 @@ def update_views():
             LEFT JOIN stock_movements sm ON p.id = sm.product_id 
                 AND (sm.destination_warehouse_id = w.id OR sm.origin_warehouse_id = w.id)
             WHERE w.active = 1
-            GROUP BY p.id, p.code, p.name, p.description, w.id, w.name
+            GROUP BY p.id, w.id, p.code, p.name, p.description, w.name
             """
             
             db.execute(text(create_view_sql))
             db.commit()
             db.close()
-            print(f"  ✓ View updated for {context}")
+            print(f"  + View updated for {context}")
         except Exception as e:
-            print(f"  ❌ Error updating view for {context}: {e}")
+            print(f"  - Error updating view for {context}: {e}")
 
 if __name__ == "__main__":
     update_views()

@@ -161,7 +161,7 @@ export default function AuditPage() {
         );
     }
 
-    const discrepancies = audit.items.filter((it: any) => it.counted_stock !== null && it.counted_stock !== it.system_stock).length;
+    const discrepancies = (audit?.items || []).filter((it: any) => it.counted_stock !== null && it.counted_stock !== it.system_stock).length;
 
     return (
         <div className="space-y-6 text-white pb-20">
@@ -202,11 +202,11 @@ export default function AuditPage() {
             <div className="grid grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
                 <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700">
                     <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 italic">Total Ítems</div>
-                    <div className="text-xl sm:text-2xl font-black tracking-tighter">{audit.items.length}</div>
+                    <div className="text-xl sm:text-2xl font-black tracking-tighter">{audit?.items?.length || 0}</div>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-800/40 border border-slate-700">
                     <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 italic text-emerald-400/60">Contados</div>
-                    <div className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tighter">{audit.items.filter((it: any) => it.counted_stock !== null).length}</div>
+                    <div className="text-xl sm:text-2xl font-black text-emerald-400 tracking-tighter">{(audit?.items || []).filter((it: any) => it.counted_stock !== null).length}</div>
                 </div>
                 <div className="col-span-2 lg:col-span-1 p-4 rounded-2xl bg-slate-800/40 border border-slate-700">
                     <div className="text-[10px] text-slate-500 uppercase font-black tracking-widest mb-1 italic text-red-400/60">Discrepancias</div>
@@ -227,7 +227,7 @@ export default function AuditPage() {
                             </tr>
                         </thead>
                     <tbody className="divide-y divide-slate-700/30">
-                        {audit.items.map((item: any) => {
+                        {(audit?.items || []).map((item: any) => {
                             const isCounted = item.counted_stock !== null;
                             const diff = isCounted ? item.counted_stock - item.system_stock : 0;
                             const hasDiff = isCounted && diff !== 0;
@@ -240,8 +240,8 @@ export default function AuditPage() {
                                     className={`hover:bg-white/5 transition-all duration-500 ${hasDiff ? "bg-red-500/5" : ""} ${isHighlighted ? "bg-emerald-500/20 ring-2 ring-emerald-500 ring-inset" : ""}`}
                                 >
                                     <td className="px-6 py-4">
-                                        <div className="font-bold text-sm text-emerald-400">{item.product.code}</div>
-                                        <div className="text-xs opacity-60 line-clamp-1">{item.product.name}</div>
+                                        <div className="font-bold text-sm text-emerald-400">{item.product?.code || 'S/C'}</div>
+                                        <div className="text-xs opacity-60 line-clamp-1">{item.product?.name || 'Producto no encontrado'}</div>
                                     </td>
                                     <td className="px-6 py-4 text-center text-sm font-mono opacity-60">
                                         {item.system_stock}

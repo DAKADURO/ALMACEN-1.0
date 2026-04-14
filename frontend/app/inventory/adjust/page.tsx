@@ -37,22 +37,9 @@ export default function AdjustPage() {
 
         setIsSubmitting(true);
         try {
-            // Find warehouse ID by name from inventory summary (v_inventory_summary doesn't have ID, need to match)
-            const wh = warehouses.find(w => w.name === selectedItem.warehouse_name);
-            if (!wh) throw new Error("Almacén no encontrado");
-
-            // We need product ID too. v_inventory_summary has code and name but not ID. 
-            // In a real app we'd join or have ID in the view. 
-            // For now, I'll fetch products to find the ID.
-            const productsRes = await fetch(`${process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"}/products/`);
-            const products = await productsRes.json();
-            const product = products.find((p: any) => p.code === selectedItem.code);
-
-            if (!product) throw new Error("Producto no encontrado");
-
             await recordAdjustment({
-                product_id: product.id,
-                warehouse_id: wh.id,
+                product_id: selectedItem.product_id,
+                warehouse_id: selectedItem.warehouse_id,
                 new_quantity: parseInt(newQuantity),
                 notes: notes,
                 created_by: "Almacenista"

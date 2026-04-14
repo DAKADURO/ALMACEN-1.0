@@ -72,6 +72,8 @@ class AdjustmentCreate(BaseModel):
     created_by: Optional[str] = None
 
 class InventorySummary(BaseModel):
+    product_id: int
+    warehouse_id: int
     code: str
     name: str
     description: Optional[str] = None
@@ -167,6 +169,7 @@ class Audit(AuditBase):
     created_at: datetime
     completed_at: Optional[datetime] = None
     items: List[AuditItem] = []
+    warehouse: Optional[Warehouse] = None
 
     class Config:
         from_attributes = True

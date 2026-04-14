@@ -49,6 +49,8 @@ def ensure_views():
             create_view_sql = """
             CREATE VIEW v_inventory_summary AS
             SELECT 
+                p.id as product_id,
+                w.id as warehouse_id,
                 p.code,
                 p.name,
                 p.description,
@@ -65,7 +67,7 @@ def ensure_views():
             LEFT JOIN stock_movements sm ON p.id = sm.product_id 
                 AND (sm.destination_warehouse_id = w.id OR sm.origin_warehouse_id = w.id)
             WHERE w.active
-            GROUP BY p.id, p.code, p.name, p.description, w.id, w.name
+            GROUP BY p.id, w.id, p.code, p.name, p.description, w.name
             """
             db.execute(text(create_view_sql))
             db.commit()

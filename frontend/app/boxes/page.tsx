@@ -69,23 +69,23 @@ export default function BoxesPage() {
 
   return (
     <div className="space-y-6 text-white">
-      <header className="flex justify-between items-end">
+      <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 sm:gap-0">
         <div>
           <h1 className="text-3xl font-bold">Gestión de Cajas</h1>
           <p className="text-white/60">Organiza tus productos en contenedores físicos.</p>
         </div>
-        <div className="flex gap-3">
+        <div className="flex gap-3 w-full sm:w-auto">
           <button 
             onClick={() => setShowScanner(true)}
-            className="bg-[#131722]/60 hover:bg-white/5 border border-white/10 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center gap-2"
+            className="flex-1 sm:flex-none bg-[#131722]/60 hover:bg-white/5 border border-white/10 text-white px-5 py-2.5 rounded-xl font-bold transition-all flex items-center justify-center gap-2"
           >
-            <span>📷</span> Escanear QR
+            <span>📷</span> <span className="sm:inline">Escanear</span>
           </button>
           <button 
             onClick={() => setShowModal(true)}
-            className="bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center gap-2"
+            className="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-500 text-white px-6 py-2.5 rounded-xl font-bold transition-all shadow-lg shadow-emerald-900/20 flex items-center justify-center gap-2"
           >
-            <span>📦</span> Nueva Caja
+            <span>📦</span> <span className="sm:inline">Nueva Caja</span>
           </button>
         </div>
       </header>
@@ -99,18 +99,18 @@ export default function BoxesPage() {
       )}
 
       {/* Stats Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
-          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest">Total Cajas</div>
-          <div className="text-4xl font-black mt-1">{boxes.length}</div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
+          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest leading-none">Total Cajas</div>
+          <div className="text-3xl sm:text-4xl font-black mt-2 leading-none">{boxes.length}</div>
         </div>
-        <div className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
-          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest">Ocupación Promedio</div>
-          <div className="text-4xl font-black mt-1 text-emerald-400">High</div>
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
+          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest leading-none">Ocupación Promedio</div>
+          <div className="text-3xl sm:text-4xl font-black mt-2 leading-none text-emerald-400 uppercase italic">High</div>
         </div>
-        <div className="p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
-          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest">Almacenes con Cajas</div>
-          <div className="text-4xl font-black mt-1 text-blue-400">
+        <div className="p-5 sm:p-6 rounded-2xl bg-[#131722]/60 border border-white/10 backdrop-blur-sm">
+          <div className="text-white/40 text-[10px] font-black uppercase tracking-widest leading-none">Almacenes con Cajas</div>
+          <div className="text-3xl sm:text-4xl font-black mt-2 leading-none text-blue-400">
             {new Set(boxes.map(b => b.warehouse_id)).size}
           </div>
         </div>

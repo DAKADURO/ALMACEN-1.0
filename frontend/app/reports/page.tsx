@@ -133,7 +133,7 @@ export default function ReportsPage() {
 
     return (
         <div className="space-y-8">
-            <header className="flex justify-between items-center">
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 sm:gap-0">
                 <div>
                     <h1 className="text-3xl font-bold">Reportes y Kardex</h1>
                     <p className="text-white/80 mt-1">Historial de movimientos y exportación de datos.</p>
@@ -141,7 +141,7 @@ export default function ReportsPage() {
                 <button
                     onClick={handleExport}
                     disabled={movements.length === 0}
-                    className="bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-blue-900/20 flex items-center gap-2"
+                    className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 disabled:opacity-50 text-white px-6 py-2.5 rounded-xl font-semibold transition-all shadow-lg shadow-blue-900/20 flex items-center justify-center gap-2"
                 >
                     <span>📥</span> Exportar CSV
                 </button>
@@ -210,16 +210,15 @@ export default function ReportsPage() {
             {/* Tabla Kardex */}
             <div className="rounded-2xl border border-white/10 overflow-hidden bg-[#131722]/40 backdrop-blur-sm shadow-xl">
                 <table className="w-full text-left">
-                    <thead className="bg-[#131722] border-b border-white/10 text-white text-xs uppercase tracking-wider">
+                    <thead className="bg-[#131722] border-b border-white/10 text-white text-[10px] uppercase tracking-widest font-black">
                         <tr>
-                            <th className="p-4">Fecha</th>
+                            <th className="p-4">Fecha / Folio</th>
                             <th className="p-4">Producto</th>
                             <th className="p-4">Tipo</th>
-                            <th className="p-4">Cantidad</th>
-                            <th className="p-4">Origen</th>
-                            <th className="p-4">Destino</th>
-                            <th className="p-4">Folio</th>
-                            <th className="p-4 text-center">Acciones</th>
+                            <th className="p-4 hidden sm:table-cell">Cantidad</th>
+                            <th className="p-4 hidden md:table-cell">Origen</th>
+                            <th className="p-4 hidden md:table-cell">Destino</th>
+                            <th className="p-4 text-center"></th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-white/10 text-sm">
@@ -233,19 +232,29 @@ export default function ReportsPage() {
                             const destWh = warehouses.find((w: any) => w.id === m.destination_warehouse_id) as any;
 
                             return (
-                                <tr key={m.id} className="hover:bg-white/5 transition-colors">
-                                    <td className="p-4 whitespace-nowrap text-white">
-                                        {new Date(m.created_at).toLocaleString('es-MX', {
-                                            day: '2-digit', month: '2-digit', year: '2-digit',
-                                            hour: '2-digit', minute: '2-digit'
-                                        })}
+                             return (
+                                <tr key={m.id} className="hover:bg-white/5 transition-colors border-b border-white/5 last:border-0 text-[13px]">
+                                    <td className="p-4">
+                                        <div className="text-white font-medium leading-none mb-1">
+                                            {new Date(m.created_at).toLocaleString('es-MX', {
+                                                day: '2-digit', month: '2-digit', year: '2-digit',
+                                                hour: '2-digit', minute: '2-digit'
+                                            })}
+                                        </div>
+                                        <div className="text-[10px] font-black text-emerald-400 font-mono tracking-tighter sm:hidden">
+                                            FOLIO: {m.reference_doc || "—"}
+                                        </div>
+                                        <div className="sm:hidden mt-2 flex items-center gap-2">
+                                            <span className="text-[10px] font-bold text-white/40 uppercase">Cant:</span>
+                                            <span className="text-xs font-black text-white">{m.quantity}</span>
+                                        </div>
                                     </td>
                                     <td className="p-4">
-                                        <div className="font-bold text-white">{product?.description || product?.name || "Cargando..."}</div>
-                                        <div className="text-xs font-mono text-emerald-500">{product?.code}</div>
+                                        <div className="font-bold text-white leading-tight min-w-[120px]">{product?.description || product?.name || "Cargando..."}</div>
+                                        <div className="text-[10px] font-mono text-emerald-500 mt-0.5">{product?.code}</div>
                                     </td>
                                     <td className="p-4">
-                                        <span className={`px-2 py-1 rounded-full text-[10px] font-bold uppercase ${m.movement_type === 'ENTRY' ? 'bg-emerald-900/40 text-emerald-400' :
+                                        <span className={`inline-block px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-widest ${m.movement_type === 'ENTRY' ? 'bg-emerald-900/40 text-emerald-400' :
                                             m.movement_type === 'EXIT' ? 'bg-red-900/40 text-red-400' :
                                                 m.movement_type === 'TRANSFER' ? 'bg-blue-900/40 text-blue-400' :
                                                     'bg-[#1F2433] text-white/70'
@@ -253,16 +262,15 @@ export default function ReportsPage() {
                                             {typeLabels[m.movement_type] || m.movement_type}
                                         </span>
                                     </td>
-                                    <td className="p-4 font-bold text-center">{m.quantity}</td>
-                                    <td className="p-4 text-xs text-white">{originWh?.name || "—"}</td>
-                                    <td className="p-4 text-xs text-white">{destWh?.name || "—"}</td>
-                                    <td className="p-4 text-xs font-bold text-emerald-400 font-mono">{m.reference_doc || "—"}</td>
+                                    <td className="p-4 font-black hidden sm:table-cell text-center">{m.quantity}</td>
+                                    <td className="p-4 text-[10px] text-white/60 hidden md:table-cell">{originWh?.name || "—"}</td>
+                                    <td className="p-4 text-[10px] text-white/60 hidden md:table-cell">{destWh?.name || "—"}</td>
                                     <td className="p-4 text-center">
                                         {m.reference_doc && (
                                             <button
                                                 onClick={() => handleReprint(m.reference_doc)}
-                                                className="px-3 py-1.5 bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 mx-auto"
-                                                title="Re-imprimir Vale PDF"
+                                                className="w-8 h-8 sm:w-auto sm:h-auto sm:px-3 sm:py-1.5 bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white rounded-lg text-[10px] font-bold transition-all flex items-center justify-center gap-1 mx-auto"
+                                                title="Re-imprimir Vale"
                                             >
                                                 📄 <span className="hidden sm:inline">Vale PDF</span>
                                             </button>

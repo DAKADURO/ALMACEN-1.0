@@ -90,8 +90,8 @@ export default function AdjustPage() {
                             <thead className="bg-slate-800/60 sticky top-0 z-10 text-[10px] font-bold text-slate-400 uppercase tracking-widest border-b border-slate-700">
                                 <tr>
                                     <th className="p-4">Producto</th>
-                                    <th className="p-4">Almacén</th>
-                                    <th className="p-4 text-center">Stock Actual</th>
+                                    <th className="p-4 hidden sm:table-cell">Almacén</th>
+                                    <th className="p-4 hidden sm:table-cell text-center">Stock Actual</th>
                                     <th className="p-4 w-20"></th>
                                 </tr>
                             </thead>
@@ -103,17 +103,23 @@ export default function AdjustPage() {
                                 ) : filteredInventory.map((item, idx) => (
                                     <tr key={idx} className={`hover:bg-slate-700/30 transition-colors ${selectedItem === item ? 'bg-emerald-500/10' : ''}`}>
                                         <td className="p-4">
-                                            <div className="font-bold">{item.name}</div>
-                                            <div className="text-xs font-mono text-emerald-500">{item.code}</div>
+                                            <div className="font-bold text-white leading-tight mb-1">{item.name}</div>
+                                            <div className="flex items-center gap-2">
+                                                <span className="text-[10px] font-mono text-emerald-500 bg-emerald-500/10 px-1.5 py-0.5 rounded">{item.code}</span>
+                                                <div className="sm:hidden flex items-center gap-1.5">
+                                                    <span className="text-[10px] text-white/40 uppercase tracking-tighter">{item.warehouse_name}</span>
+                                                    <span className="text-[10px] font-black text-emerald-400">Stock: {item.current_stock}</span>
+                                                </div>
+                                            </div>
                                         </td>
-                                        <td className="p-4 text-slate-400">{item.warehouse_name}</td>
-                                        <td className="p-4 text-center font-bold text-lg">{item.current_stock}</td>
+                                        <td className="p-4 text-slate-400 hidden sm:table-cell">{item.warehouse_name}</td>
+                                        <td className="p-4 text-center font-bold text-lg hidden sm:table-cell">{item.current_stock}</td>
                                         <td className="p-4 text-right">
                                             <button
                                                 onClick={() => setSelectedItem(item)}
-                                                className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${selectedItem === item ? 'bg-emerald-500 text-white shadow-lg' : 'bg-slate-700 hover:bg-slate-600'}`}
+                                                className={`px-3 sm:px-4 py-2 rounded-xl text-[10px] sm:text-xs font-black uppercase tracking-widest transition-all ${selectedItem === item ? 'bg-emerald-500 text-white shadow-lg shadow-emerald-500/20' : 'bg-slate-700 hover:bg-slate-600 text-white/70'}`}
                                             >
-                                                {selectedItem === item ? 'Seleccionado' : 'Ajustar'}
+                                                {selectedItem === item ? 'Listo' : 'Ajustar'}
                                             </button>
                                         </td>
                                     </tr>

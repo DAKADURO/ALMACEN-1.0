@@ -5,6 +5,8 @@ import { usePathname } from "next/navigation";
 import { useState, useEffect } from "react";
 import "./globals.css";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
+import { NotificationProvider } from "@/context/NotificationContext";
+
 
 const inter = Inter({ subsets: ["latin"] });
 

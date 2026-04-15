@@ -11,7 +11,7 @@ class User(Base):
     hashed_password = Column(String(255), nullable=False)
     full_name = Column(String(100))
     role = Column(String(20), default="user") # admin, user
-    active = Column(Boolean, default=True)
+    active = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
 class Product(Base):

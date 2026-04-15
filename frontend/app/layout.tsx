@@ -15,6 +15,7 @@ const navItems = [
   { href: "/boxes", label: "Cajas", icon: <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" /></svg> },
   { href: "/inventory/adjust", label: "Ajustes", icon: <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3" /></svg> },
   { href: "/reports", label: "Reportes", icon: <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg> },
+  { href: "/admin/users", label: "Administración", icon: <svg className="w-5 h-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>, adminOnly: true },
 ];
 
 function AppContent({ children }: { children: React.ReactNode }) {
@@ -47,16 +48,16 @@ function AppContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Si no hay usuario y no estamos en la página de login, redirigir al login
-  if (!user && pathname !== "/login") {
+  // Si no hay usuario y no estamos en login o registro, redirigir al login
+  if (!user && pathname !== "/login" && pathname !== "/register") {
     if (typeof window !== 'undefined') {
       window.location.href = "/login";
     }
     return null;
   }
 
-  // Si estamos en login, mostrar solo el contenido (sin sidebar)
-  if (pathname === "/login") {
+  // Si estamos en login o registro, mostrar solo el contenido (sin sidebar)
+  if (pathname === "/login" || pathname === "/register") {
     return <main className="w-full">{children}</main>;
   }
 
@@ -130,6 +131,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
         <div className="mt-4 border-t border-white/5 pt-6">
           <ul className="flex flex-col gap-1.5">
             {navItems.map((item) => {
+              if (item.adminOnly && user?.role !== 'admin') return null;
               const isActive = pathname === item.href;
               return (
                 <li key={item.href}>

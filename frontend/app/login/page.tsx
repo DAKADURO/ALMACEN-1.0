@@ -107,7 +107,10 @@ export default function LoginPage() {
                 </div>
 
                 <div className="bg-[#131722] p-6 text-center border-t border-white/10">
-                    <p className="text-sm text-white/60">© 2026 Proair - Sistema de Inventarios</p>
+                    <p className="text-sm text-white/60 mb-4">© 2026 Proair - Sistema de Inventarios</p>
+                    <a href="/register" className="text-blue-400 hover:text-blue-300 text-sm font-semibold transition-colors">
+                        ¿No tienes cuenta? Solicita acceso aquí
+                    </a>
                 </div>
             </div>
         </div>

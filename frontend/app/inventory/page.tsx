@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
+import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, createWarehouse, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
@@ -22,6 +22,9 @@ export default function InventoryPage() {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [uploadWarehouseId, setUploadWarehouseId] = useState("");
     const [pendingFile, setPendingFile] = useState<File | null>(null);
+
+    const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
+    const [newWarehouse, setNewWarehouse] = useState({ name: "", description: "", location_type: "FIXED" });
 
     const [newProduct, setNewProduct] = useState({
         code: "", name: "", family: "", description: "", brand: "", unit: "PZA",
@@ -141,6 +144,29 @@ export default function InventoryPage() {
         } finally {
             setIsSubmitting(false);
         }
+    };
+
+    const handleWarehouseSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        try {
+            await createWarehouse(newWarehouse);
+            alert("✅ Almacén creado exitosamente");
+            setIsWarehouseModalOpen(false);
+            setNewWarehouse({ name: "", description: "", location_type: "FIXED" });
+            fetchWarehouses().then(setWarehouses).catch(console.error);
+        } catch (error: any) {
+            alert("❌ Error: " + error.message);
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
+
+    const getWarehouseColor = (name: string) => {
+        const n = name.toUpperCase();
+        if (n.includes("TIJUANA")) return "bg-emerald-500/20 text-emerald-400 border-emerald-500/30";
+        if (n.includes("HERMOSILLO")) return "bg-blue-500/20 text-blue-400 border-blue-500/30";
+        return "bg-slate-500/20 text-slate-400 border-slate-500/30";
     };
 
     const filteredData = data.filter((item: any) => {
@@ -288,6 +314,12 @@ export default function InventoryPage() {
                         <span>📁</span> Cargar Excel/CSV
                     </button>
                     <button
+                        onClick={() => setIsWarehouseModalOpen(true)}
+                        className="flex-grow md:flex-none bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white px-4 py-2 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 text-sm"
+                    >
+                        <span>📍</span> + Almacén
+                    </button>
+                    <button
                         onClick={openCreateModal}
                         className="flex-grow md:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg font-medium transition-colors text-sm"
                     >
@@ -405,7 +437,11 @@ export default function InventoryPage() {
                                     <tr key={i} className="hover:bg-white/5 transition-colors">
                                         <td className="p-4 font-mono text-emerald-400">{item.code}</td>
                                         <td className="p-4 text-white hover:text-emerald-300 font-medium transition-colors">{item.description || item.name}</td>
-                                        <td className="p-4 text-sm text-white/90">{item.warehouse_name}</td>
+                                        <td className="p-4">
+                                            <span className={`px-2 py-1 rounded-md text-[10px] font-bold border ${getWarehouseColor(item.warehouse_name)}`}>
+                                                {item.warehouse_name}
+                                            </span>
+                                        </td>
                                         <td className="p-4 text-right font-bold text-white">{item.current_stock}</td>
                                     </tr>
                                 ))}
@@ -660,6 +696,56 @@ export default function InventoryPage() {
                                 </button>
                             </div>
                         </div>
+                    </div>
+                </div>
+            )}
+            {/* Warehouse Creation Modal */}
+            {isWarehouseModalOpen && (
+                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                    <div className="bg-[#131722] border border-white/10 rounded-2xl w-full max-w-sm shadow-2xl">
+                        <div className="p-6 border-b border-white/10">
+                            <h2 className="text-xl font-bold text-white">📍 Registrar Nuevo Almacén</h2>
+                        </div>
+                        <form onSubmit={handleWarehouseSubmit} className="p-6 space-y-4">
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-white/70 uppercase">Nombre del Almacén</label>
+                                <input required type="text" placeholder="Ej: QUERÉTARO"
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                    value={newWarehouse.name}
+                                    onChange={(e) => setNewWarehouse({ ...newWarehouse, name: e.target.value.toUpperCase() })}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-white/70 uppercase">Descripción</label>
+                                <input type="text" placeholder="Ubicación o uso..."
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                    value={newWarehouse.description}
+                                    onChange={(e) => setNewWarehouse({ ...newWarehouse, description: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-1">
+                                <label className="text-xs font-bold text-white/70 uppercase">Tipo</label>
+                                <select required
+                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white focus:ring-2 focus:ring-emerald-500 outline-none"
+                                    value={newWarehouse.location_type}
+                                    onChange={(e) => setNewWarehouse({ ...newWarehouse, location_type: e.target.value })}
+                                >
+                                    <option value="FIXED">Fijo (Bodega)</option>
+                                    <option value="VEHICLE">Vehículo (Unidad Móvil)</option>
+                                    <option value="OTHER">Otro</option>
+                                </select>
+                            </div>
+                            <div className="flex gap-3 pt-2">
+                                <button type="button" onClick={() => setIsWarehouseModalOpen(false)}
+                                    className="flex-1 bg-[#1F2433] hover:bg-white/10 text-white font-medium py-2 rounded-lg transition-colors border border-white/5">
+                                    Cancelar
+                                </button>
+                                <button disabled={isSubmitting} type="submit"
+                                    className="flex-1 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-2 rounded-lg transition-colors">
+                                    {isSubmitting ? "Creando..." : "Crear Almacén"}
+                                </button>
+                            </div>
+                        </form>
                     </div>
                 </div>
             )}

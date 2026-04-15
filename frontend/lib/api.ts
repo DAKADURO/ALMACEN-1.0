@@ -63,6 +63,19 @@ export async function fetchWarehouses() {
     return res.json();
 }
 
+export async function createWarehouse(data: any) {
+    const res = await fetch(`${API_URL}/warehouses/`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify(data),
+    });
+    if (!res.ok) {
+        const errorData = await res.json();
+        throw new Error(errorData.detail || "Failed to create warehouse");
+    }
+    return res.json();
+}
+
 export async function updateProduct(id: number, data: any) {
     const res = await fetch(`${API_URL}/products/${id}`, {
         method: "PUT",

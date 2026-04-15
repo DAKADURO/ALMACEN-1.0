@@ -1,10 +1,12 @@
 "use client";
 import { useState, useEffect } from "react";
 import { fetchBoxes, createBox, fetchWarehouses, fetchBoxByCode } from "@/lib/api";
-import { Html5QrcodeScanner } from "html5-qrcode";
 import { useRouter } from "next/navigation";
+import BarcodeScanner from "@/components/BarcodeScanner";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function BoxesPage() {
+  const { showNotification } = useNotification();
   const router = useRouter();
   const [boxes, setBoxes] = useState<any[]>([]);
   const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -18,40 +20,19 @@ export default function BoxesPage() {
     loadData();
   }, []);
 
-  useEffect(() => {
-    let scanner: any = null;
-    if (showScanner) {
-      scanner = new Html5QrcodeScanner(
-        "reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        /* verbose= */ false
-      );
-      scanner.render(onScanSuccess, onScanFailure);
-    }
-    return () => {
-      if (scanner) {
-        scanner.clear().catch(console.error);
-      }
-    };
-  }, [showScanner]);
-
   async function onScanSuccess(decodedText: string) {
     if (scanning) return;
     setScanning(true);
     try {
-      // The QR code will contain the box code (e.g. "BOX-001")
+      showNotification("Código detectado: " + decodedText, "info");
       const box = await fetchBoxByCode(decodedText);
       setShowScanner(false);
       router.push(`/boxes/${box.id}`);
     } catch (error) {
       console.error("Scanned invalid code:", decodedText);
-      alert("Código no reconocido: " + decodedText);
+      showNotification("Código no reconocido: " + decodedText, "error");
       setScanning(false);
     }
-  }
-
-  function onScanFailure(error: any) {
-    // quietly handle scan failures (mostly just no qr in frame)
   }
 
   async function loadData() {
@@ -80,7 +61,7 @@ export default function BoxesPage() {
       setNewBox({ code: "", description: "", warehouse_id: "" });
       loadData();
     } catch (error) {
-      alert("Error al crear la caja");
+      showNotification("Error al crear la caja", "error");
     }
   }
 
@@ -111,22 +92,10 @@ export default function BoxesPage() {
 
       {/* Scanner Modal */}
       {showScanner && (
-        <div className="fixed inset-0 bg-black/90 backdrop-blur-md z-[110] flex items-center justify-center p-4">
-          <div className="bg-[#131722] border border-white/10 rounded-3xl w-full max-w-lg p-6 shadow-2xl relative overflow-hidden">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold flex items-center gap-2">
-                <span>📷</span> Escaneando Código de Caja
-              </h2>
-              <button onClick={() => setShowScanner(false)} className="text-white/40 hover:text-white">✕</button>
-            </div>
-            
-            <div id="reader" className="w-full rounded-2xl overflow-hidden bg-black/40 border border-white/5 shadow-inner"></div>
-            
-            <p className="text-center mt-6 text-white/40 text-sm">
-              Coloca el código QR de la caja frente a la cámara para identificarla.
-            </p>
-          </div>
-        </div>
+        <BarcodeScanner 
+            onScanSuccess={onScanSuccess}
+            onClose={() => setShowScanner(false)}
+        />
       )}
 
       {/* Stats Summary */}

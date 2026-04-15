@@ -15,16 +15,25 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
     const [currentCameraId, setCurrentCameraId] = useState<string | null>(null);
 
     useEffect(() => {
-        Html5Qrcode.getCameras().then(devices => {
-            if (devices && devices.length > 0) {
-                setCameras(devices);
-                // Try to find the back camera by default
-                const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('trasera'));
-                setCurrentCameraId(backCamera ? backCamera.id : devices[0].id);
+        const findCameras = async () => {
+            try {
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    setCameras(devices);
+                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('trasera'));
+                    setCurrentCameraId(backCamera ? backCamera.id : devices[0].id);
+                } else {
+                    setError("No se detectaron cámaras en este dispositivo.");
+                }
+            } catch (err) {
+                console.error("Error getting cameras", err);
+                // If getCameras fails, it's often due to lack of permissions.
+                // We'll show a button to manually trigger permission request via a direct start.
+                setError("PERMISO_REQUERIDO");
             }
-        }).catch(err => {
-            console.error("Error getting cameras", err);
-        });
+        };
+
+        findCameras();
 
         return () => {
             stopScanner();
@@ -111,7 +120,32 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
             setError(null);
         } catch (err) {
             console.error("Error starting scanner:", err);
-            setError("No se pudo acceder a la cámara seleccionada.");
+            setError("No se pudo acceder a la cámara seleccionada. Asegúrate de dar los permisos necesarios.");
+        }
+    };
+
+    const requestPermissionsManually = async () => {
+        setError(null);
+        try {
+            // Trying to start with environment facing mode often triggers the permission prompt
+            const html5QrCode = new Html5Qrcode("reader");
+            scannerRef.current = html5QrCode;
+            await html5QrCode.start(
+                { facingMode: "environment" },
+                { fps: 30, qrbox: 250 },
+                (decodedText) => {
+                    onScanSuccess(decodedText);
+                    stopScanner();
+                },
+                () => {}
+            );
+            setIsScannerInitialized(true);
+            // Refresh camera list now that we have permissions
+            const devices = await Html5Qrcode.getCameras();
+            setCameras(devices);
+        } catch (err) {
+            console.error("Manual permission request failed", err);
+            setError("No se pudo obtener acceso a la cámara. Por favor, revisa la configuración de tu navegador.");
         }
     };
 
@@ -167,7 +201,25 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                         </div>
                     )}
 
-                    {error && (
+                    {error && error === "PERMISO_REQUERIDO" && (
+                        <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center gap-5">
+                            <div className="w-20 h-20 bg-emerald-500/10 text-emerald-400 rounded-full flex items-center justify-center text-3xl animate-pulse">
+                                📷
+                            </div>
+                            <div>
+                                <h4 className="text-white font-bold mb-1">Permiso de Cámara</h4>
+                                <p className="text-slate-400 text-[10px] leading-relaxed">Necesitamos acceso a tu cámara para escanear los códigos QR.</p>
+                            </div>
+                            <button 
+                                onClick={requestPermissionsManually}
+                                className="w-full py-3 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-emerald-600/20 transition-all active:scale-95"
+                            >
+                                Autorizar Cámara
+                            </button>
+                        </div>
+                    )}
+
+                    {error && error !== "PERMISO_REQUERIDO" && (
                         <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center gap-4">
                             <span className="text-4xl">⚠️</span>
                             <div className="text-red-400 text-xs font-medium leading-relaxed">
@@ -177,7 +229,7 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                                 onClick={onClose}
                                 className="px-6 py-2 bg-slate-800 text-white rounded-xl text-xs font-bold border border-slate-700"
                             >
-                                Reintentar luego
+                                Cerrar
                             </button>
                         </div>
                     )}

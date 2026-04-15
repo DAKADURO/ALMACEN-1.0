@@ -1,8 +1,10 @@
 "use client";
 import React, { useState, useEffect } from "react";
 import { fetchInventorySummary, recordAdjustment, fetchWarehouses } from "@/lib/api";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function AdjustPage() {
+    const { showNotification } = useNotification();
     const [inventory, setInventory] = useState<any[]>([]);
     const [warehouses, setWarehouses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
@@ -45,13 +47,13 @@ export default function AdjustPage() {
                 created_by: "Almacenista"
             });
 
-            alert("✅ Ajuste realizado con éxito");
+            showNotification("Ajuste realizado con éxito", "success");
             setSelectedItem(null);
             setNewQuantity("");
             setNotes("");
             loadData();
         } catch (e: any) {
-            alert("❌ Error: " + e.message);
+            showNotification("Error: " + e.message, "error");
         } finally {
             setIsSubmitting(false);
         }

@@ -6,6 +6,7 @@ import autoTable from "jspdf-autotable";
 import Link from "next/link";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
+import { useNotification } from "@/context/NotificationContext";
 
 type MovementItem = {
     product_id: number | null;
@@ -17,6 +18,7 @@ type MovementItem = {
 };
 
 export default function MovementsPage() {
+    const { showNotification } = useNotification();
     const [mType, setMType] = useState("ENTRY");
     const [entrySubType, setEntrySubType] = useState("PROVEEDOR");
     const [warehouses, setWarehouses] = useState<any[]>([]);
@@ -154,7 +156,7 @@ export default function MovementsPage() {
             selectProduct(scanningIndex, product);
             setScanningIndex(null);
         } else {
-            alert(`Producto con código "${decodedText}" no encontrado.`);
+            showNotification(`Producto con código "${decodedText}" no encontrado.`, "error");
             setScanningIndex(null);
         }
     };
@@ -162,13 +164,22 @@ export default function MovementsPage() {
     const handleSubmit = async () => {
         const validItems = items.filter(i => i.product_id && parseInt(i.quantity) > 0);
         if (validItems.length === 0) {
-            alert("Agrega al menos un producto con cantidad válida");
+            showNotification("Agrega al menos un producto con cantidad válida", "warning");
             return;
         }
 
-        if (mType === "ENTRY" && !header.destination_warehouse_id) return alert("Selecciona almacén de destino");
-        if (mType === "EXIT" && !header.origin_warehouse_id) return alert("Selecciona almacén de origen");
-        if (mType === "TRANSFER" && (!header.origin_warehouse_id || !header.destination_warehouse_id)) return alert("Selecciona origen y destino");
+        if (mType === "ENTRY" && !header.destination_warehouse_id) {
+            showNotification("Selecciona almacén de destino", "warning");
+            return;
+        }
+        if (mType === "EXIT" && !header.origin_warehouse_id) {
+            showNotification("Selecciona almacén de origen", "warning");
+            return;
+        }
+        if (mType === "TRANSFER" && (!header.origin_warehouse_id || !header.destination_warehouse_id)) {
+            showNotification("Selecciona origen y destino", "warning");
+            return;
+        }
 
         setIsSubmitting(true);
         try {

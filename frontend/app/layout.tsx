@@ -197,9 +197,11 @@ export default function RootLayout({
         <meta name="description" content="Sistema centralizado de gestión de refacciones y consumibles" />
       </head>
       <body className={`${inter.className} bg-[#0B0E14] text-white min-h-screen`}>
-        <AuthProvider>
-          <AppContent>{children}</AppContent>
-        </AuthProvider>
+        <NotificationProvider>
+          <AuthProvider>
+            <AppContent>{children}</AppContent>
+          </AuthProvider>
+        </NotificationProvider>
       </body>
     </html>
   );

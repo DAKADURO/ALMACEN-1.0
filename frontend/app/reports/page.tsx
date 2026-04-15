@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
+import { useNotification } from "@/context/NotificationContext";
 import { fetchMovements, fetchProducts, fetchWarehouses } from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
@@ -14,6 +15,7 @@ const typeLabels: any = {
 };
 
 export default function ReportsPage() {
+    const { showNotification } = useNotification();
     const [movements, setMovements] = useState([]);
     const [products, setProducts] = useState([]);
     const [warehouses, setWarehouses] = useState([]);
@@ -77,7 +79,7 @@ export default function ReportsPage() {
 
     const handleReprint = async (folio: string) => {
         if (!folio) {
-            alert("Este movimiento no tiene un folio asociado.");
+            showNotification("Este movimiento no tiene un folio asociado.", "warning");
             return;
         }
 
@@ -123,8 +125,9 @@ export default function ReportsPage() {
                 selectedCompany,
                 warehouses
             });
+            showNotification("Vale PDF generado con éxito", "success");
         } catch (error: any) {
-            alert("Error al regenerar PDF: " + error.message);
+            showNotification("Error al regenerar PDF: " + error.message, "error");
         }
     };
 

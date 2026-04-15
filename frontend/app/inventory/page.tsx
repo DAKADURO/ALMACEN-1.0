@@ -1,12 +1,14 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, createWarehouse, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
+import { useNotification } from "@/context/NotificationContext";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import QRCode from "qrcode";
 import Link from "next/link";
 
 export default function InventoryPage() {
+    const { showNotification } = useNotification();
     const [tab, setTab] = useState<"stock" | "products">("stock");
     const [data, setData] = useState<any[]>([]);
     const [products, setProducts] = useState<any[]>([]);
@@ -85,10 +87,10 @@ export default function InventoryPage() {
         try {
             const whId = uploadWarehouseId ? parseInt(uploadWarehouseId) : undefined;
             const result = await uploadProductsFile(pendingFile, whId);
-            alert(result.detail);
+            showNotification(result.detail, "success");
             refreshData();
         } catch (error: any) {
-            alert("❌ Error al cargar: " + error.message);
+            showNotification("Error al cargar: " + error.message, "error");
         } finally {
             setIsSubmitting(false);
             setPendingFile(null);
@@ -101,8 +103,9 @@ export default function InventoryPage() {
         try {
             await deleteProduct(product.id);
             refreshData();
+            showNotification("Producto desactivado", "info");
         } catch (error: any) {
-            alert("Error: " + error.message);
+            showNotification("Error: " + error.message, "error");
         }
     };
 
@@ -123,7 +126,7 @@ export default function InventoryPage() {
 
             if (editingProduct) {
                 await updateProduct(editingProduct.id, productData);
-                alert("✅ Producto actualizado");
+                showNotification("Producto actualizado", "success");
             } else {
                 const product = await createProduct(productData);
                 if (parseInt(newProduct.initial_stock) > 0 && newProduct.warehouse_id) {
@@ -135,12 +138,12 @@ export default function InventoryPage() {
                         notes: "Stock inicial al crear producto"
                     });
                 }
-                alert("✅ Producto creado");
+                showNotification("Producto creado", "success");
             }
             setIsModalOpen(false);
             refreshData();
         } catch (error: any) {
-            alert("❌ Error: " + error.message);
+            showNotification("Error: " + error.message, "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -151,12 +154,12 @@ export default function InventoryPage() {
         setIsSubmitting(true);
         try {
             await createWarehouse(newWarehouse);
-            alert("✅ Almacén creado exitosamente");
+            showNotification("Almacén creado exitosamente", "success");
             setIsWarehouseModalOpen(false);
             setNewWarehouse({ name: "", description: "", location_type: "FIXED" });
             fetchWarehouses().then(setWarehouses).catch(console.error);
         } catch (error: any) {
-            alert("❌ Error: " + error.message);
+            showNotification("Error: " + error.message, "error");
         } finally {
             setIsSubmitting(false);
         }
@@ -285,9 +288,10 @@ export default function InventoryPage() {
             doc.line(2, 28, 48, 28);
 
             doc.save(`Etiqueta_${product.code}.pdf`);
+            showNotification("Etiqueta generada", "success");
         } catch (error) {
             console.error("Error generating label:", error);
-            alert("Error al generar la etiqueta");
+            showNotification("Error al generar la etiqueta", "error");
         }
     };
 

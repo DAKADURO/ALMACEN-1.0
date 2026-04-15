@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/lib/auth-context";
+import { useNotification } from "@/context/NotificationContext";
 
 export default function UserManagementPage() {
-    const { token } = useAuth();
+    const { showNotification } = useNotification();
+    const token = useAuth().token;
     const [users, setUsers] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState<number | null>(null);
@@ -51,13 +53,14 @@ export default function UserManagementPage() {
             if (response.ok) {
                 // local update
                 setUsers(users.map(u => u.id === userId ? { ...u, ...updates } : u));
+                showNotification("Usuario actualizado correctamente", "success");
             } else {
                 const data = await response.json();
-                alert(`Error: ${data.detail}`);
+                showNotification(`Error: ${data.detail}`, "error");
             }
         } catch (error) {
             console.error("Error updating user:", error);
-            alert("Error al actualizar usuario");
+            showNotification("Error al actualizar usuario", "error");
         } finally {
             setIsSubmitting(null);
         }

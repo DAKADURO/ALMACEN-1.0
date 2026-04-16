@@ -119,3 +119,14 @@ class Project(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), unique=True, index=True, nullable=False)
+
+    requesters = relationship("ProjectRequester", back_populates="project")
+
+class ProjectRequester(Base):
+    __tablename__ = "project_requesters"
+
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), index=True, nullable=False)
+    project_id = Column(Integer, ForeignKey("projects.id"), nullable=False)
+
+    project = relationship("Project", back_populates="requesters")

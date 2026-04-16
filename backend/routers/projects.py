@@ -23,3 +23,28 @@ def create_project(project: schemas.ProjectCreate, db: Session = Depends(databas
     db.commit()
     db.refresh(new_project)
     return new_project
+
+@router.get("/{project_id}/requesters", response_model=List[schemas.ProjectRequester])
+def read_project_requesters(project_id: int, db: Session = Depends(database.get_db)):
+    return db.query(models.ProjectRequester).filter(models.ProjectRequester.project_id == project_id).all()
+
+@router.post("/{project_id}/requesters", response_model=schemas.ProjectRequester)
+def create_project_requester(project_id: int, requester: schemas.ProjectRequesterBase, db: Session = Depends(database.get_db)):
+    # Verify project exists
+    project = db.query(models.Project).filter(models.Project.id == project_id).first()
+    if not project:
+        raise HTTPException(status_code=404, detail="Proyecto no encontrado")
+        
+    db_requester = db.query(models.ProjectRequester).filter(
+        models.ProjectRequester.name == requester.name,
+        models.ProjectRequester.project_id == project_id
+    ).first()
+    
+    if db_requester:
+        return db_requester
+        
+    new_requester = models.ProjectRequester(name=requester.name.strip(), project_id=project_id)
+    db.add(new_requester)
+    db.commit()
+    db.refresh(new_requester)
+    return new_requester

@@ -201,6 +201,21 @@ class ProjectCreate(ProjectBase):
 
 class Project(ProjectBase):
     id: int
+    requesters: List["ProjectRequester"] = []
+
+    class Config:
+        from_attributes = True
+
+# --- ProjectRequester Schemas ---
+class ProjectRequesterBase(BaseModel):
+    name: str
+    project_id: int
+
+class ProjectRequesterCreate(ProjectRequesterBase):
+    pass
+
+class ProjectRequester(ProjectRequesterBase):
+    id: int
 
     class Config:
         from_attributes = True

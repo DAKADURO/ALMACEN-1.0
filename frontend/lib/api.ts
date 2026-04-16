@@ -310,3 +310,19 @@ export async function createProject(name: string) {
     if (!res.ok) throw new Error("Failed to create project");
     return res.json();
 }
+
+export async function fetchProjectRequesters(projectId: number) {
+    const res = await fetch(`${API_URL}/projects/${projectId}/requesters`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch project requesters");
+    return res.json();
+}
+
+export async function createProjectRequester(projectId: number, name: string) {
+    const res = await fetch(`${API_URL}/projects/${projectId}/requesters`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name, project_id: projectId }),
+    });
+    if (!res.ok) throw new Error("Failed to create project requester");
+    return res.json();
+}

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio, fetchProjects, createProject } from "@/lib/api";
+import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio, fetchProjects, createProject, fetchProjectRequesters, createProjectRequester } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Link from "next/link";
@@ -29,6 +29,10 @@ export default function MovementsPage() {
     const [projects, setProjects] = useState<any[]>([]);
     const [projectSearch, setProjectSearch] = useState("");
     const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
+    
+    const [projectRequesters, setProjectRequesters] = useState<any[]>([]);
+    const [requesterSearch, setRequesterSearch] = useState("");
+    const [isRequesterDropdownOpen, setIsRequesterDropdownOpen] = useState(false);
     
     useEffect(() => {
         // Detect branding from context
@@ -113,6 +117,20 @@ export default function MovementsPage() {
         fetchProducts().then(setProducts).catch(console.error);
         fetchProjects().then(setProjects).catch(console.error);
     }, []);
+
+    // Load requesters when project changes
+    useEffect(() => {
+        if (!header.client) {
+            setProjectRequesters([]);
+            return;
+        }
+        const project = projects.find(p => p.name === header.client);
+        if (project) {
+            fetchProjectRequesters(project.id).then(setProjectRequesters).catch(console.error);
+        } else {
+            setProjectRequesters([]);
+        }
+    }, [header.client, projects]);
 
     const addItem = () => {
         setItems([...items, { product_id: null, product_label: "", product_code: "", unit: "", description: "", quantity: "" }]);
@@ -217,6 +235,25 @@ export default function MovementsPage() {
             setProjectSearch("");
             setIsProjectDropdownOpen(false);
             showNotification(`Proyecto "${p.name}" registrado`, "success");
+        } catch (error: any) {
+            showNotification("Error: " + error.message, "error");
+        }
+    };
+
+    const handleAddProjectRequester = async (name: string) => {
+        if (!name.trim()) return;
+        const project = projects.find(p => p.name === header.client);
+        if (!project) {
+            showNotification("Selecciona un proyecto primero", "warning");
+            return;
+        }
+        try {
+            const req = await createProjectRequester(project.id, name.trim());
+            setProjectRequesters([...projectRequesters, req]);
+            setHeader({ ...header, requested_by: req.name });
+            setRequesterSearch("");
+            setIsRequesterDropdownOpen(false);
+            showNotification(`Solicitante "${req.name}" registrado para el proyecto`, "success");
         } catch (error: any) {
             showNotification("Error: " + error.message, "error");
         }
@@ -487,9 +524,54 @@ export default function MovementsPage() {
                                         )}
                                     </div>
                                 )}
-                                <div className="space-y-1">
+                                <div className="space-y-1 relative">
                                     <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Solicitado por</label>
-                                    <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.requested_by} onChange={e => setHeader({ ...header, requested_by: e.target.value })} />
+                                    <div className="relative">
+                                        <input 
+                                            type="text" 
+                                            placeholder={header.client ? "Buscar o agregar solicitante..." : "Selecciona cliente primero"}
+                                            disabled={!header.client}
+                                            className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500 disabled:opacity-50" 
+                                            value={isRequesterDropdownOpen ? requesterSearch : header.requested_by} 
+                                            onFocus={() => {
+                                                if(header.client) {
+                                                    setIsRequesterDropdownOpen(true);
+                                                    setRequesterSearch(header.requested_by);
+                                                }
+                                            }}
+                                            onChange={e => setRequesterSearch(e.target.value)} 
+                                        />
+                                        {isRequesterDropdownOpen && header.client && (
+                                            <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1F2433] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-auto animate-in fade-in slide-in-from-top-1 duration-200">
+                                                {projectRequesters.filter(r => r.name.toLowerCase().includes(requesterSearch.toLowerCase())).map((r) => (
+                                                    <button
+                                                        key={r.id}
+                                                        type="button"
+                                                        className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-[#0B0E14] text-sm text-white/80 transition-colors border-b border-white/5 last:border-0"
+                                                        onClick={() => {
+                                                            setHeader({ ...header, requested_by: r.name });
+                                                            setIsRequesterDropdownOpen(false);
+                                                            setRequesterSearch("");
+                                                        }}
+                                                    >
+                                                        {r.name}
+                                                    </button>
+                                                ))}
+                                                {requesterSearch.trim() && !projectRequesters.find(r => r.name.toLowerCase() === requesterSearch.toLowerCase()) && (
+                                                    <button
+                                                        type="button"
+                                                        className="w-full text-left px-4 py-4 bg-emerald-500/10 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20 transition-colors"
+                                                        onClick={() => handleAddProjectRequester(requesterSearch)}
+                                                    >
+                                                        + Agregar &quot;{requesterSearch}&quot;
+                                                    </button>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                    {isRequesterDropdownOpen && (
+                                        <div className="fixed inset-0 z-40" onClick={() => setIsRequesterDropdownOpen(false)} />
+                                    )}
                                 </div>
                             </div>
                         </div>

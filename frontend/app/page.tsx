@@ -32,7 +32,7 @@ export default function DashboardPage() {
   return (
     <div className="space-y-8 text-white">
       <header>
-        <h1 className="text-3xl font-bold">Dashboard de Inventario</h1>
+        <h1 className="text-3xl font-bold text-yellow-400">Dashboard de Inventario</h1>
         <p className="text-white/80 mt-1">Resumen general de existencias y alertas críticas.</p>
       </header>
 

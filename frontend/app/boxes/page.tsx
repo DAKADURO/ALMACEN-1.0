@@ -71,7 +71,7 @@ export default function BoxesPage() {
     <div className="space-y-6 text-white">
       <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-6 sm:gap-0">
         <div>
-          <h1 className="text-3xl font-bold">Gestión de Cajas</h1>
+          <h1 className="text-3xl font-bold text-yellow-400">Gestión de Cajas</h1>
           <p className="text-white/60">Organiza tus productos en contenedores físicos.</p>
         </div>
         <div className="flex gap-3 w-full sm:w-auto">

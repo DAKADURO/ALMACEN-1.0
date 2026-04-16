@@ -67,7 +67,7 @@ export default function AdjustPage() {
     return (
         <div className="max-w-6xl mx-auto space-y-8">
             <header>
-                <h1 className="text-3xl font-bold">Ajustes de Inventario</h1>
+                <h1 className="text-3xl font-bold text-yellow-400">Ajustes de Inventario</h1>
                 <p className="text-slate-400">Corrige existencias tras conteos físicos o auditorías.</p>
             </header>
 

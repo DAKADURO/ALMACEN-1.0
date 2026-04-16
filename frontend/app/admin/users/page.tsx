@@ -69,7 +69,7 @@ export default function UserManagementPage() {
     return (
         <div className="space-y-6">
             <header>
-                <h1 className="text-3xl font-bold">Administración de Usuarios</h1>
+                <h1 className="text-3xl font-bold text-yellow-400">Administración de Usuarios</h1>
                 <p className="text-white/80 mt-1">Gestiona los accesos y roles del sistema.</p>
             </header>
 

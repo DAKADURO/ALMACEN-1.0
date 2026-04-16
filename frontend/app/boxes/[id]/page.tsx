@@ -89,7 +89,7 @@ export default function BoxDetailPage() {
           </button>
           <div>
             <div className="flex items-center gap-3">
-              <h1 className="text-3xl font-bold">{box.code}</h1>
+              <h1 className="text-3xl font-bold text-yellow-400">{box.code}</h1>
               <span className="bg-emerald-500/20 text-emerald-400 px-2 py-0.5 rounded text-[10px] font-black uppercase tracking-widest border border-emerald-500/20">Activa</span>
             </div>
             <p className="text-white/60">{box.description || "Sin descripción física registrada."}</p>

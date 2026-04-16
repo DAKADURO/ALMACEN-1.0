@@ -425,7 +425,7 @@ export default function MovementsPage() {
             <ModalComponent />
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-end gap-4">
                 <div>
-                    <h1 className="text-2xl sm:text-3xl font-bold">Carga de Vale</h1>
+                    <h1 className="text-2xl sm:text-3xl font-bold text-yellow-400">Carga de Vale</h1>
                     <p className="text-white/80 mt-1 text-sm sm:text-base">Digitalización de movimientos de almacén.</p>
                 </div>
                 <div className="text-left sm:text-right bg-[#131722]/80 p-3 rounded-2xl border border-white/10 w-full sm:w-auto flex flex-col items-center sm:items-end gap-1">

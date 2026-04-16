@@ -329,7 +329,7 @@ export default function InventoryPage() {
         <div className="space-y-6">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold">Inventario</h1>
+                    <h1 className="text-3xl font-bold text-yellow-400">Inventario</h1>
                     <p className="text-white/80 mt-1">Existencias y catálogo de productos.</p>
                 </div>
                 <div className="flex flex-wrap gap-2 w-full md:w-auto">

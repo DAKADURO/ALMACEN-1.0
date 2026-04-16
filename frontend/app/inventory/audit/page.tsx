@@ -123,7 +123,7 @@ export default function AuditPage() {
         return (
             <div className="max-w-2xl mx-auto space-y-6 text-white p-2 sm:p-4">
                 <header className="space-y-2 text-center sm:text-left">
-                    <h1 className="text-2xl sm:text-3xl font-black italic tracking-tighter uppercase text-emerald-400">MODO AUDITORÍA 📝</h1>
+                    <h1 className="text-2xl sm:text-3xl font-black italic tracking-tighter uppercase text-yellow-400">MODO AUDITORÍA 📝</h1>
                     <p className="text-slate-400 text-sm">Selecciona un almacén para comenzar el conteo físico.</p>
                 </header>
 
@@ -167,7 +167,7 @@ export default function AuditPage() {
         <div className="space-y-6 text-white pb-20">
             <header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div className="space-y-1">
-                    <h1 className="text-xl sm:text-2xl font-black uppercase">AUDITORÍA: {audit.warehouse?.name}</h1>
+                    <h1 className="text-xl sm:text-2xl font-black uppercase text-yellow-400">AUDITORÍA: {audit.warehouse?.name}</h1>
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-widest ${audit.status === 'COMPLETED' ? 'bg-blue-500 text-white' : 'bg-amber-500 text-slate-900'}`}>
                             {audit.status === 'COMPLETED' ? 'Finalizada' : 'En Progreso'}

@@ -135,7 +135,7 @@ export default function ReportsPage() {
         <div className="space-y-8">
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-6 sm:gap-0">
                 <div>
-                    <h1 className="text-3xl font-bold">Reportes y Kardex</h1>
+                    <h1 className="text-3xl font-bold text-yellow-400">Reportes y Kardex</h1>
                     <p className="text-white/80 mt-1">Historial de movimientos y exportación de datos.</p>
                 </div>
                 <button

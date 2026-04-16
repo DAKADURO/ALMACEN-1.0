@@ -53,9 +53,9 @@ export default function MovementsPage() {
     });
 
     const ALMACEN_PREFIXES: Record<string, string> = {
-        "TIJUANA": "TJ",
-        "HERMOSILLO": "HE",
-        "QUERETARO": "QU"
+        "TIJUANA": "TIJ",
+        "HERMOSILLO": "HMO",
+        "QUERETARO": "QRO"
     };
 
     const getWHPrefix = (id: string) => {
@@ -69,9 +69,11 @@ export default function MovementsPage() {
             let prefix = "AL";
 
             if (mType === "ENTRY") {
-                prefix = "IN";
+                const dest = getWHPrefix(header.destination_warehouse_id);
+                prefix = `${dest}-IN`;
             } else if (mType === "EXIT") {
-                prefix = "OUT";
+                const origin = getWHPrefix(header.origin_warehouse_id);
+                prefix = `${origin}-OUT`;
             } else if (mType === "TRANSFER") {
                 const origin = getWHPrefix(header.origin_warehouse_id);
                 const dest = getWHPrefix(header.destination_warehouse_id);

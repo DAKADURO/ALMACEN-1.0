@@ -178,3 +178,29 @@ class Audit(AuditBase):
 
     class Config:
         from_attributes = True
+
+# --- Brand Schemas ---
+class BrandBase(BaseModel):
+    name: str
+
+class BrandCreate(BrandBase):
+    pass
+
+class Brand(BrandBase):
+    id: int
+
+    class Config:
+        from_attributes = True
+
+# --- Project Schemas ---
+class ProjectBase(BaseModel):
+    name: str
+
+class ProjectCreate(ProjectBase):
+    pass
+
+class Project(ProjectBase):
+    id: int
+
+    class Config:
+        from_attributes = True

@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio } from "@/lib/api";
+import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio, fetchProjects, createProject } from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Link from "next/link";
@@ -26,6 +26,9 @@ export default function MovementsPage() {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<'PROAIR' | 'AIRPIPE'>('PROAIR');
+    const [projects, setProjects] = useState<any[]>([]);
+    const [projectSearch, setProjectSearch] = useState("");
+    const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
     
     useEffect(() => {
         // Detect branding from context
@@ -108,6 +111,7 @@ export default function MovementsPage() {
     useEffect(() => {
         fetchWarehouses().then(setWarehouses).catch(console.error);
         fetchProducts().then(setProducts).catch(console.error);
+        fetchProjects().then(setProjects).catch(console.error);
     }, []);
 
     const addItem = () => {
@@ -201,6 +205,20 @@ export default function MovementsPage() {
             setModalConfig({ isOpen: true, type: 'error', message: error.message || "Error al procesar la solicitud" });
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleAddProject = async (name: string) => {
+        if (!name.trim()) return;
+        try {
+            const p = await createProject(name.trim());
+            setProjects([...projects, p]);
+            setHeader({ ...header, client: p.name });
+            setProjectSearch("");
+            setIsProjectDropdownOpen(false);
+            showNotification(`Proyecto "${p.name}" registrado`, "success");
+        } catch (error: any) {
+            showNotification("Error: " + error.message, "error");
         }
     };
 
@@ -421,10 +439,54 @@ export default function MovementsPage() {
                             )}
 
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                <div className="space-y-1">
-                                    <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Cliente / Proyecto</label>
-                                    <input type="text" placeholder="Ej: Brady Mexico" className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.client} onChange={e => setHeader({ ...header, client: e.target.value })} />
-                                </div>
+                                {mType !== 'TRANSFER' && (
+                                    <div className="space-y-1 relative">
+                                        <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Cliente / Proyecto</label>
+                                        <div className="relative">
+                                            <input 
+                                                type="text" 
+                                                placeholder="Buscar o agregar proyecto..." 
+                                                className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" 
+                                                value={isProjectDropdownOpen ? projectSearch : header.client} 
+                                                onFocus={() => {
+                                                    setIsProjectDropdownOpen(true);
+                                                    setProjectSearch(header.client);
+                                                }}
+                                                onChange={e => setProjectSearch(e.target.value)} 
+                                            />
+                                            {isProjectDropdownOpen && (
+                                                <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1F2433] border border-white/10 rounded-xl shadow-2xl max-h-48 overflow-auto animate-in fade-in slide-in-from-top-1 duration-200">
+                                                    {projects.filter(p => p.name.toLowerCase().includes(projectSearch.toLowerCase())).map((p) => (
+                                                        <button
+                                                            key={p.id}
+                                                            type="button"
+                                                            className="w-full text-left px-4 py-3 hover:bg-emerald-500 hover:text-[#0B0E14] text-sm text-white/80 transition-colors border-b border-white/5 last:border-0"
+                                                            onClick={() => {
+                                                                setHeader({ ...header, client: p.name });
+                                                                setIsProjectDropdownOpen(false);
+                                                                setProjectSearch("");
+                                                            }}
+                                                        >
+                                                            {p.name}
+                                                        </button>
+                                                    ))}
+                                                    {projectSearch.trim() && !projects.find(p => p.name.toLowerCase() === projectSearch.toLowerCase()) && (
+                                                        <button
+                                                            type="button"
+                                                            className="w-full text-left px-4 py-4 bg-emerald-500/10 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20 transition-colors"
+                                                            onClick={() => handleAddProject(projectSearch)}
+                                                        >
+                                                            + Agregar &quot;{projectSearch}&quot;
+                                                        </button>
+                                                    )}
+                                                </div>
+                                            )}
+                                        </div>
+                                        {isProjectDropdownOpen && (
+                                            <div className="fixed inset-0 z-40" onClick={() => setIsProjectDropdownOpen(false)} />
+                                        )}
+                                    </div>
+                                )}
                                 <div className="space-y-1">
                                     <label className="text-[10px] font-bold text-white/60 uppercase ml-2">Solicitado por</label>
                                     <input type="text" placeholder="Ej: Ing. Juan Perez" className="w-full bg-[#131722] border border-white/10 rounded-xl px-4 py-3 text-white text-sm outline-none focus:ring-2 focus:ring-emerald-500" value={header.requested_by} onChange={e => setHeader({ ...header, requested_by: e.target.value })} />

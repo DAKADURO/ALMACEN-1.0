@@ -1,6 +1,18 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
-import { fetchInventorySummary, fetchProducts, createProduct, fetchWarehouses, createWarehouse, recordMovement, updateProduct, deleteProduct, uploadProductsFile } from "@/lib/api";
+import { 
+    fetchInventorySummary, 
+    fetchProducts, 
+    createProduct, 
+    fetchWarehouses, 
+    createWarehouse, 
+    recordMovement, 
+    updateProduct, 
+    deleteProduct, 
+    uploadProductsFile,
+    fetchBrands,
+    createBrand
+} from "@/lib/api";
 import { useNotification } from "@/context/NotificationContext";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
@@ -24,6 +36,9 @@ export default function InventoryPage() {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [uploadWarehouseId, setUploadWarehouseId] = useState("");
     const [pendingFile, setPendingFile] = useState<File | null>(null);
+    const [brands, setBrands] = useState<any[]>([]);
+    const [brandSearch, setBrandSearch] = useState("");
+    const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
 
     const [isWarehouseModalOpen, setIsWarehouseModalOpen] = useState(false);
     const [newWarehouse, setNewWarehouse] = useState({ name: "", description: "", location_type: "FIXED" });
@@ -47,6 +62,7 @@ export default function InventoryPage() {
     useEffect(() => {
         refreshData();
         fetchWarehouses().then(setWarehouses).catch(console.error);
+        fetchBrands().then(setBrands).catch(console.error);
     }, []);
 
     const openEditModal = (product: any) => {
@@ -146,6 +162,20 @@ export default function InventoryPage() {
             showNotification("Error: " + error.message, "error");
         } finally {
             setIsSubmitting(false);
+        }
+    };
+
+    const handleAddBrand = async (name: string) => {
+        if (!name.trim()) return;
+        try {
+            const b = await createBrand(name.trim());
+            setBrands([...brands, b]);
+            setNewProduct({ ...newProduct, brand: b.name });
+            setBrandSearch("");
+            setIsBrandDropdownOpen(false);
+            showNotification(`Marca "${b.name}" registrada`, "success");
+        } catch (error: any) {
+            showNotification("Error: " + error.message, "error");
         }
     };
 
@@ -593,13 +623,51 @@ export default function InventoryPage() {
                                 </div>
                             </div>
 
-                            <div className="space-y-1">
+                            <div className="space-y-1 relative">
                                 <label className="text-xs font-bold text-white/70 uppercase">Marca</label>
-                                <input type="text" placeholder="Ej: Parker, SMC, Festo"
-                                    className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:ring-2 focus:ring-emerald-500 outline-none"
-                                    value={newProduct.brand}
-                                    onChange={(e) => setNewProduct({ ...newProduct, brand: e.target.value })}
-                                />
+                                <div className="relative">
+                                    <input 
+                                        type="text" 
+                                        placeholder="Buscar o agregar marca..."
+                                        className="w-full bg-black/50 border border-white/10 rounded-lg px-3 py-2 text-white placeholder-white/30 focus:ring-2 focus:ring-emerald-500 outline-none"
+                                        value={isBrandDropdownOpen ? brandSearch : newProduct.brand}
+                                        onFocus={() => {
+                                            setIsBrandDropdownOpen(true);
+                                            setBrandSearch(newProduct.brand);
+                                        }}
+                                        onChange={(e) => setBrandSearch(e.target.value)}
+                                    />
+                                    {isBrandDropdownOpen && (
+                                        <div className="absolute z-50 left-0 right-0 mt-1 bg-[#1F2433] border border-white/10 rounded-lg shadow-2xl max-h-48 overflow-auto animate-in fade-in slide-in-from-top-1 duration-200">
+                                            {brands.filter(b => b.name.toLowerCase().includes(brandSearch.toLowerCase())).map((b) => (
+                                                <button
+                                                    key={b.id}
+                                                    type="button"
+                                                    className="w-full text-left px-4 py-2 hover:bg-emerald-500 hover:text-[#0B0E14] text-sm text-white/80 transition-colors border-b border-white/5 last:border-0"
+                                                    onClick={() => {
+                                                        setNewProduct({ ...newProduct, brand: b.name });
+                                                        setIsBrandDropdownOpen(false);
+                                                        setBrandSearch("");
+                                                    }}
+                                                >
+                                                    {b.name}
+                                                </button>
+                                            ))}
+                                            {brandSearch.trim() && !brands.find(b => b.name.toLowerCase() === brandSearch.toLowerCase()) && (
+                                                <button
+                                                    type="button"
+                                                    className="w-full text-left px-4 py-3 bg-emerald-500/10 text-emerald-400 text-sm font-bold hover:bg-emerald-500/20 transition-colors"
+                                                    onClick={() => handleAddBrand(brandSearch)}
+                                                >
+                                                    + Agregar &quot;{brandSearch}&quot;
+                                                </button>
+                                            )}
+                                        </div>
+                                    )}
+                                </div>
+                                {isBrandDropdownOpen && (
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsBrandDropdownOpen(false)} />
+                                )}
                             </div>
 
                             <div className="space-y-1">

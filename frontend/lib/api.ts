@@ -276,3 +276,37 @@ export async function removeItemFromBox(boxId: number, productId: number) {
     if (!res.ok) throw new Error("Failed to remove item from box");
     return res.json();
 }
+
+// --- Brand API ---
+export async function fetchBrands() {
+    const res = await fetch(`${API_URL}/brands/`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch brands");
+    return res.json();
+}
+
+export async function createBrand(name: string) {
+    const res = await fetch(`${API_URL}/brands/`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error("Failed to create brand");
+    return res.json();
+}
+
+// --- Project API ---
+export async function fetchProjects() {
+    const res = await fetch(`${API_URL}/projects/`, { headers: getHeaders() });
+    if (!res.ok) throw new Error("Failed to fetch projects");
+    return res.json();
+}
+
+export async function createProject(name: string) {
+    const res = await fetch(`${API_URL}/projects/`, {
+        method: "POST",
+        headers: getHeaders(),
+        body: JSON.stringify({ name }),
+    });
+    if (!res.ok) throw new Error("Failed to create project");
+    return res.json();
+}

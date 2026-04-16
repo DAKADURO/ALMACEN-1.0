@@ -1,7 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 import os
-from routers import products, inventory, warehouses, dashboard, auth, boxes
+from routers import products, inventory, warehouses, dashboard, auth, boxes, brands, projects
 import database
 import models
 from sqlalchemy import text
@@ -114,6 +114,8 @@ app.include_router(warehouses.router)
 app.include_router(dashboard.router)
 app.include_router(auth.router)
 app.include_router(boxes.router)
+app.include_router(brands.router)
+app.include_router(projects.router)
 
 @app.get("/")
 async def root():

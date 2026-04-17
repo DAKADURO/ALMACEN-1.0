@@ -3,6 +3,11 @@ from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from database import Base
 
+class UserWarehouse(Base):
+    __tablename__ = "user_warehouses"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    warehouse_id = Column(Integer, ForeignKey("warehouses.id"), primary_key=True)
+
 class User(Base):
     __tablename__ = "users"
 
@@ -13,6 +18,9 @@ class User(Base):
     role = Column(String(20), default="user") # admin, user
     active = Column(Boolean, default=False)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
+
+    # Relationship to warehouses
+    warehouses = relationship("Warehouse", secondary="user_warehouses")
 
 class Product(Base):
     __tablename__ = "products"

@@ -7,6 +7,7 @@ interface User {
     username: string;
     full_name?: string;
     role: string;
+    warehouses?: {id: number, name: string}[];
 }
 
 interface AuthContextType {

@@ -14,6 +14,7 @@ import {
     Project,
     ProjectRequester
 } from "@/lib/api";
+import { useAuth } from "@/lib/auth-context";
 import Link from "next/link";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
@@ -35,6 +36,7 @@ type MovementItem = {
 };
 
 export default function MovementsPage() {
+    const { user } = useAuth();
     const { showNotification } = useNotification();
     const [mType, setMType] = useState("ENTRY");
     const [entrySubType, setEntrySubType] = useState("PROVEEDOR");
@@ -126,10 +128,19 @@ export default function MovementsPage() {
     const [scanningIndex, setScanningIndex] = useState<number | null>(null);
 
     useEffect(() => {
-        fetchWarehouses().then(setWarehouses).catch(console.error);
+        fetchWarehouses().then(data => {
+            // Filter warehouses if user has specific assignments and is not admin
+            if (user?.role !== 'admin' && user?.warehouses && user.warehouses.length > 0) {
+                const permittedIds = user.warehouses.map(w => w.id);
+                setWarehouses(data.filter(w => permittedIds.includes(w.id)));
+            } else {
+                setWarehouses(data);
+            }
+        }).catch(console.error);
+        
         fetchProducts().then(setProducts).catch(console.error);
         fetchProjects().then(setProjects).catch(console.error);
-    }, []);
+    }, [user]);
 
     // Load requesters when project changes
     useEffect(() => {

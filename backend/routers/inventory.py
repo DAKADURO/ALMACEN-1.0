@@ -3,14 +3,22 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import func, text
 from typing import List, Optional
 from datetime import datetime
-import models, schemas, database
+import models, schemas, database, auth
 
 router = APIRouter(
     prefix="/inventory",
     tags=["inventory"]
 )
 
-def validate_and_create_movement(movement: schemas.MovementCreate, db: Session):
+def validate_and_create_movement(movement: schemas.MovementCreate, db: Session, current_user: models.User):
+    # RBAC Enforcement
+    if current_user.role != "admin" and current_user.warehouses:
+        permitted_ids = [w.id for w in current_user.warehouses]
+        if movement.origin_warehouse_id and movement.origin_warehouse_id not in permitted_ids:
+            raise HTTPException(status_code=403, detail="No tiene permiso para el almacén de origen")
+        if movement.destination_warehouse_id and movement.destination_warehouse_id not in permitted_ids:
+            raise HTTPException(status_code=403, detail="No tiene permiso para el almacén de destino")
+            
     product = db.query(models.Product).filter(models.Product.id == movement.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail=f"Producto con ID {movement.product_id} no encontrado")
@@ -36,18 +44,18 @@ def validate_and_create_movement(movement: schemas.MovementCreate, db: Session):
     return models.StockMovement(**movement.dict())
 
 @router.post("/move", response_model=schemas.Movement)
-def record_movement(movement: schemas.MovementCreate, db: Session = Depends(database.get_db)):
-    db_movement = validate_and_create_movement(movement, db)
+def record_movement(movement: schemas.MovementCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    db_movement = validate_and_create_movement(movement, db, current_user)
     db.add(db_movement)
     db.commit()
     db.refresh(db_movement)
     return db_movement
 
 @router.post("/move-bulk")
-def record_bulk_movements(bulk: schemas.BulkMovementCreate, db: Session = Depends(database.get_db)):
+def record_bulk_movements(bulk: schemas.BulkMovementCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     db_movements = []
     for m in bulk.movements:
-        db_movements.append(validate_and_create_movement(m, db))
+        db_movements.append(validate_and_create_movement(m, db, current_user))
     
     for db_m in db_movements:
         db.add(db_m)
@@ -56,7 +64,13 @@ def record_bulk_movements(bulk: schemas.BulkMovementCreate, db: Session = Depend
     return {"detail": f"Se registraron {len(db_movements)} movimientos exitosamente"}
 
 @router.post("/adjust")
-def record_adjustment(adjustment: schemas.AdjustmentCreate, db: Session = Depends(database.get_db)):
+def record_adjustment(adjustment: schemas.AdjustmentCreate, db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
+    # RBAC Enforcement for Adjustments
+    if current_user.role != "admin" and current_user.warehouses:
+        permitted_ids = [w.id for w in current_user.warehouses]
+        if adjustment.warehouse_id not in permitted_ids:
+            raise HTTPException(status_code=403, detail="No tiene permiso para ajustar este almacén")
+
     product = db.query(models.Product).filter(models.Product.id == adjustment.product_id).first()
     if not product:
         raise HTTPException(status_code=404, detail="Producto no encontrado")
@@ -97,11 +111,20 @@ def record_adjustment(adjustment: schemas.AdjustmentCreate, db: Session = Depend
     return {"detail": "Ajuste realizado con éxito", "current_stock": adjustment.new_quantity}
 
 @router.get("/summary", response_model=List[schemas.InventorySummary])
-def get_inventory_summary(db: Session = Depends(database.get_db)):
+def get_inventory_summary(db: Session = Depends(database.get_db), current_user: models.User = Depends(auth.get_current_user)):
     """Compute inventory summary efficiently using the SQL view."""
     try:
         # Use the view but filter by stock > 0 as requested
-        query = text("SELECT product_id, warehouse_id, code, name, description, warehouse_name, current_stock FROM v_inventory_summary WHERE current_stock > 0")
+        query_str = "SELECT product_id, warehouse_id, code, name, description, warehouse_name, current_stock FROM v_inventory_summary WHERE current_stock > 0"
+        
+        # RBAC Filtering
+        if current_user.role != 'admin' and current_user.warehouses:
+            permitted_ids = [w.id for w in current_user.warehouses]
+            # Convert list to string for SQL IN clause safely
+            wh_filter = ",".join(map(str, permitted_ids))
+            query_str += f" AND warehouse_id IN ({wh_filter})"
+
+        query = text(query_str)
         results = db.execute(query).fetchall()
         return [
             schemas.InventorySummary(
@@ -125,9 +148,18 @@ def get_movements(
     reference_doc: str = None,
     start_date: str = None,
     end_date: str = None,
-    db: Session = Depends(database.get_db)
+    db: Session = Depends(database.get_db),
+    current_user: models.User = Depends(auth.get_current_user)
 ):
     query = db.query(models.StockMovement)
+
+    # RBAC Filtering
+    if current_user.role != 'admin' and current_user.warehouses:
+        permitted_ids = [w.id for w in current_user.warehouses]
+        query = query.filter(
+            (models.StockMovement.origin_warehouse_id.in_(permitted_ids)) | 
+            (models.StockMovement.destination_warehouse_id.in_(permitted_ids))
+        )
     
     if product_id:
         query = query.filter(models.StockMovement.product_id == product_id)

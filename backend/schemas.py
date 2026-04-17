@@ -138,10 +138,12 @@ class UserUpdate(BaseModel):
     full_name: Optional[str] = None
     role: Optional[str] = None
     active: Optional[bool] = None
+    warehouse_ids: Optional[List[int]] = None
 
 class User(UserBase):
     id: int
     created_at: datetime
+    warehouses: List[Warehouse] = []
 
     class Config:
         from_attributes = True

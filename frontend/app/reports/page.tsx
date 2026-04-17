@@ -1,5 +1,6 @@
 "use client";
 import { useState, useEffect, useCallback } from "react";
+import { useAuth } from "@/lib/auth-context";
 import { useNotification } from "@/context/NotificationContext";
 import { fetchMovements, fetchProducts, fetchWarehouses, Movement, Product, Warehouse } from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
@@ -15,6 +16,7 @@ const typeLabels: Record<string, string> = {
 };
 
 export default function ReportsPage() {
+    const { user } = useAuth();
     const { showNotification } = useNotification();
     const [movements, setMovements] = useState<Movement[]>([]);
     const [products, setProducts] = useState<Product[]>([]);
@@ -50,9 +52,14 @@ export default function ReportsPage() {
             fetchWarehouses()
         ]).then(([p, w]) => {
             setProducts(p);
-            setWarehouses(w);
+            if (user?.role !== 'admin' && user?.warehouses && user.warehouses.length > 0) {
+                const permittedIds = user.warehouses.map(pw => pw.id);
+                setWarehouses(w.filter(wh => permittedIds.includes(wh.id)));
+            } else {
+                setWarehouses(w);
+            }
         });
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         loadMovements();

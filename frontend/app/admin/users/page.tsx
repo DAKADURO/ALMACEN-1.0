@@ -8,6 +8,7 @@ export default function UserManagementPage() {
     const { showNotification } = useNotification();
     const token = useAuth().token;
     const [users, setUsers] = useState<any[]>([]);
+    const [warehouses, setWarehouses] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState<number | null>(null);
 
@@ -32,9 +33,24 @@ export default function UserManagementPage() {
         }
     };
 
+    const fetchWarehouses = async () => {
+        try {
+            const response = await fetch(`${API_URL}/warehouses`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (response.ok) {
+                const data = await response.json();
+                setWarehouses(data);
+            }
+        } catch (error) {
+            console.error("Error fetching warehouses:", error);
+        }
+    };
+
     useEffect(() => {
         if (token) {
             fetchUsers();
+            fetchWarehouses();
         }
     }, [token]);
 
@@ -51,8 +67,9 @@ export default function UserManagementPage() {
             });
 
             if (response.ok) {
-                // local update
-                setUsers(users.map(u => u.id === userId ? { ...u, ...updates } : u));
+                const updatedUser = await response.json();
+                // Update with full object from server to get sync warehouses list
+                setUsers(users.map(u => u.id === userId ? updatedUser : u));
                 showNotification("Usuario actualizado correctamente", "success");
             } else {
                 const data = await response.json();
@@ -82,14 +99,15 @@ export default function UserManagementPage() {
                                 <th className="p-4">Nombre Completo</th>
                                 <th className="p-4">Rol</th>
                                 <th className="p-4">Estado</th>
+                                <th className="p-4">Almacenes Permitidos</th>
                                 <th className="p-4 text-right">Acciones</th>
                             </tr>
                         </thead>
                         <tbody className="divide-y divide-white/10">
                             {loading ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-white/50 animate-pulse">Cargando usuarios...</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-white/50 animate-pulse">Cargando usuarios...</td></tr>
                             ) : users.length === 0 ? (
-                                <tr><td colSpan={5} className="p-8 text-center text-white/50">No hay usuarios registrados.</td></tr>
+                                <tr><td colSpan={6} className="p-8 text-center text-white/50">No hay usuarios registrados.</td></tr>
                             ) : users.map((u) => (
                                 <tr key={u.id} className="hover:bg-white/5 transition-colors">
                                     <td className="p-4">
@@ -111,6 +129,30 @@ export default function UserManagementPage() {
                                         <span className={`px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${u.active ? "bg-emerald-900/40 text-emerald-400" : "bg-yellow-900/40 text-yellow-400"}`}>
                                             {u.active ? "Activo" : "Pendiente"}
                                         </span>
+                                    </td>
+                                    <td className="p-4">
+                                        <div className="flex flex-wrap gap-2 max-w-xs">
+                                            {warehouses.map(wh => {
+                                                const isPermitted = u.warehouses?.some((pw: any) => pw.id === wh.id);
+                                                return (
+                                                    <label key={wh.id} className="flex items-center gap-1.5 bg-black/30 px-2 py-1 rounded border border-white/5 cursor-pointer hover:bg-white/5 transition-all">
+                                                        <input 
+                                                            type="checkbox"
+                                                            checked={isPermitted}
+                                                            onChange={(e) => {
+                                                                const currentIds = u.warehouses?.map((w: any) => w.id) || [];
+                                                                const nextIds = e.target.checked 
+                                                                    ? [...currentIds, wh.id]
+                                                                    : currentIds.filter((id: number) => id !== wh.id);
+                                                                handleUpdateUser(u.id, { warehouse_ids: nextIds });
+                                                            }}
+                                                            className="w-3 h-3 accent-blue-500"
+                                                        />
+                                                        <span className="text-[10px] text-white/70 whitespace-nowrap">{wh.name}</span>
+                                                    </label>
+                                                );
+                                            })}
+                                        </div>
                                     </td>
                                     <td className="p-4 text-right">
                                         <div className="flex gap-2 justify-end">

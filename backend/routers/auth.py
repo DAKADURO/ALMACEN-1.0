@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from datetime import timedelta
 import auth, models, schemas
 from auth import get_db, verify_password, create_access_token, ACCESS_TOKEN_EXPIRE_MINUTES, get_current_user, get_password_hash
@@ -60,7 +60,7 @@ async def register(user_in: schemas.UserCreate, db: Session = Depends(get_db)):
 async def list_users(current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
     if current_user.role != "admin":
         raise HTTPException(status_code=403, detail="No tiene permisos suficientes")
-    return db.query(models.User).all()
+    return db.query(models.User).options(joinedload(models.User.warehouses)).all()
 
 @router.patch("/users/{user_id}", response_model=schemas.User)
 async def update_user(user_id: int, user_update: schemas.UserUpdate, current_user: models.User = Depends(get_current_user), db: Session = Depends(get_db)):
@@ -72,6 +72,13 @@ async def update_user(user_id: int, user_update: schemas.UserUpdate, current_use
         raise HTTPException(status_code=404, detail="Usuario no encontrado")
     
     update_data = user_update.dict(exclude_unset=True)
+    
+    if "warehouse_ids" in update_data:
+        wh_ids = update_data.pop("warehouse_ids")
+        if wh_ids is not None:
+            warehouses = db.query(models.Warehouse).filter(models.Warehouse.id.in_(wh_ids)).all()
+            db_user.warehouses = warehouses
+    
     for key, value in update_data.items():
         setattr(db_user, key, value)
     

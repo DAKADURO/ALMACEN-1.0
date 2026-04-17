@@ -88,6 +88,38 @@ export interface Audit {
     warehouse?: Warehouse;
 }
 
+export interface DashboardStats {
+    total_products: number;
+    total_valuation: number;
+    low_stock_count: number;
+    movements_today: number;
+    low_stock_items: {
+        name: string;
+        description: string;
+        code: string;
+        warehouse_name: string;
+        current_stock: number;
+        min_stock: number;
+        unit: string;
+    }[];
+    top_products: {
+        name: string;
+        code: string;
+        count: number;
+    }[];
+    recent_movements: {
+        movement_type: string;
+        origin: string | null;
+        destination: string | null;
+        product_code: string;
+        product_name: string;
+        product_description: string;
+        quantity: number;
+        reference_doc: string | null;
+        created_at: string;
+    }[];
+}
+
 export interface Brand {
     id: number;
     name: string;
@@ -126,7 +158,7 @@ export async function fetchProducts(): Promise<Product[]> {
     return res.json();
 }
 
-export async function fetchDashboardStats() {
+export async function fetchDashboardStats(): Promise<DashboardStats> {
     const res = await fetch(`${API_URL}/dashboard/stats`, { headers: getHeaders() });
     if (!res.ok) throw new Error("Failed to fetch dashboard stats");
     return res.json();

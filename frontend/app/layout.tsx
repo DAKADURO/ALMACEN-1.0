@@ -2,7 +2,7 @@
 
 import { Inter } from "next/font/google";
 import { usePathname } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import "./globals.css";
 import { AuthProvider, useAuth } from "@/lib/auth-context";
 import { NotificationProvider } from "@/context/NotificationContext";
@@ -28,19 +28,30 @@ function AppContent({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const savedContext = localStorage.getItem("inventory-context") || "tuberia";
-    setContext(savedContext);
-  }, []);
+    if (savedContext !== context) {
+      queueMicrotask(() => setContext(savedContext));
+    }
+  }, [context]);
+
+  useEffect(() => {
+    // Redirección segura
+    if (!isLoading && !user && pathname !== "/login" && pathname !== "/register") {
+      window.location.href = "/login";
+    }
+  }, [user, isLoading, pathname]);
 
   useEffect(() => {
     // Close mobile menu when pathname changes
-    setIsMobileMenuOpen(false);
-  }, [pathname]);
+    if (isMobileMenuOpen) {
+      queueMicrotask(() => setIsMobileMenuOpen(false));
+    }
+  }, [pathname, isMobileMenuOpen]);
 
-  const handleContextChange = (newContext: string) => {
+  const handleContextChange = useCallback((newContext: string) => {
     localStorage.setItem("inventory-context", newContext);
     setContext(newContext);
     window.location.reload();
-  };
+  }, []);
 
   if (isLoading) {
     return (
@@ -50,17 +61,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
     );
   }
 
-  // Si no hay usuario y no estamos en login o registro, redirigir al login
-  if (!user && pathname !== "/login" && pathname !== "/register") {
-    if (typeof window !== 'undefined') {
-      window.location.href = "/login";
-    }
-    return null;
-  }
-
   // Si estamos en login o registro, mostrar solo el contenido (sin sidebar)
   if (pathname === "/login" || pathname === "/register") {
     return <main className="w-full">{children}</main>;
+  }
+
+  // Si no hay usuario y no estamos en rutas públicas, el contenido principal no se muestra (el useEffect maneja la redirección)
+  if (!user) {
+    return null;
   }
 
   return (

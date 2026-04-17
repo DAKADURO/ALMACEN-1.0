@@ -43,8 +43,9 @@ export default function LoginPage() {
             const userData = await userResponse.json();
             login(data.access_token, userData);
 
-        } catch (err: any) {
-            setError(err.message || 'Error al iniciar sesión');
+        } catch (err) {
+            const message = err instanceof Error ? err.message : 'Error al iniciar sesión';
+            setError(message);
         } finally {
             setLoading(false);
         }

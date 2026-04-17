@@ -1,14 +1,14 @@
 "use client";
 import { useState, useEffect } from "react";
-import { fetchDashboardStats } from "@/lib/api";
+import { fetchDashboardStats, DashboardStats } from "@/lib/api";
 
 export default function DashboardPage() {
-  const [stats, setStats] = useState<any>(null);
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchDashboardStats()
-      .then(setStats)
+      .then((data) => queueMicrotask(() => setStats(data)))
       .catch(console.error)
       .finally(() => setLoading(false));
   }, []);
@@ -49,7 +49,7 @@ export default function DashboardPage() {
           </div>
           <p className="text-white/80 text-xs uppercase font-bold tracking-widest mt-1">Existencia Total</p>
         </div>
-        <div className={`p-6 rounded-2xl backdrop-blur-sm ${stats.low_stock_count > 0 ? "bg-red-900/20 border border-red-900/30" : "bg-[#131722]/60 border border-white/10"}`}>
+        <div className={`p-6 rounded-2xl backdrop-blur-sm ${stats.low_stock_count > 0 ? "bg-red-900/20 border border-red-900/100" : "bg-[#131722]/60 border border-white/10"}`}>
           <div className="text-white/70 text-sm font-medium">Alertas Stock Bajo</div>
           <div className={`text-3xl font-bold mt-2 ${stats.low_stock_count > 0 ? "text-red-500" : "text-white"}`}>
             {stats.low_stock_count}
@@ -74,7 +74,7 @@ export default function DashboardPage() {
                 ✅ Todos los productos están dentro del rango saludable.
               </div>
             ) : (
-              stats.low_stock_items.map((item: any, i: number) => (
+              stats.low_stock_items.map((item, i: number) => (
                 <div key={i} className="flex justify-between items-center p-3 bg-black/40 rounded-lg border-l-4 border-red-500 hover:bg-white/5 transition-colors">
                   <div>
                     <div className="font-semibold text-sm">{item.description || item.name}</div>
@@ -103,10 +103,9 @@ export default function DashboardPage() {
                 Sin rotación registrada en los últimos 30 días.
               </div>
             ) : (
-              stats.top_products.map((item: any, i: number) => {
-                // Calculate color intensity based on rank (i)
+              stats.top_products.map((item, i: number) => {
                 const colors = ["bg-emerald-500", "bg-emerald-600", "bg-emerald-700", "bg-white/30", "bg-white/20"];
-                const progress = ((item.count / stats.top_products[0].count) * 100);
+                const progress = ((item.count / (stats.top_products[0]?.count || 1)) * 100);
                 
                 return (
                   <div key={i} className="space-y-2">
@@ -145,7 +144,7 @@ export default function DashboardPage() {
                 Sin movimientos registrados aún.
               </div>
             ) : (
-              stats.recent_movements.map((m: any, i: number) => {
+              stats.recent_movements.map((m, i: number) => {
                 const isEntry = m.movement_type.includes("ENTRY") || m.movement_type.includes("INITIAL") || m.movement_type.includes("PURCHASE");
                 const borderColor = isEntry ? "border-emerald-500" : m.movement_type === "TRANSFER" ? "border-blue-500" : "border-amber-500";
                 const label = isEntry

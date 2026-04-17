@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { 
     fetchWarehouses, 
     fetchProducts, 
@@ -14,12 +14,16 @@ import {
     Project,
     ProjectRequester
 } from "@/lib/api";
-import jsPDF from "jspdf";
-import autoTable from "jspdf-autotable";
 import Link from "next/link";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
 import { useNotification } from "@/context/NotificationContext";
+
+const ALMACEN_PREFIXES: Record<string, string> = {
+    "TIJUANA": "TIJ",
+    "HERMOSILLO": "HMO",
+    "QUERETARO": "QRO"
+};
 
 type MovementItem = {
     product_id: number | null;
@@ -72,17 +76,13 @@ export default function MovementsPage() {
         receiver_person: ""
     });
 
-    const ALMACEN_PREFIXES: Record<string, string> = {
-        "TIJUANA": "TIJ",
-        "HERMOSILLO": "HMO",
-        "QUERETARO": "QRO"
-    };
 
-    const getWHPrefix = (id: string | number) => {
+
+    const getWHPrefix = useCallback((id: string | number) => {
         const wh = warehouses.find(w => w.id.toString() === id.toString());
         if (!wh) return "??";
         return ALMACEN_PREFIXES[wh.name.toUpperCase()] || wh.name.slice(0, 2).toUpperCase();
-    };
+    }, [warehouses]);
 
     useEffect(() => {
         const updateFolio = async () => {
@@ -115,7 +115,7 @@ export default function MovementsPage() {
         };
 
         updateFolio();
-    }, [mType, header.origin_warehouse_id, header.destination_warehouse_id, warehouses]);
+    }, [mType, header.origin_warehouse_id, header.destination_warehouse_id, getWHPrefix]);
 
     const [items, setItems] = useState<MovementItem[]>([
         { product_id: null, product_label: "", product_code: "", unit: "", description: "", quantity: "" }
@@ -154,13 +154,13 @@ export default function MovementsPage() {
         setItems(items.filter((_, i) => i !== index));
     };
 
-    const updateItem = (index: number, field: keyof MovementItem, value: any) => {
+    const updateItem = (index: number, field: keyof MovementItem, value: string | number | null) => {
         const newItems = [...items];
-        newItems[index] = { ...newItems[index], [field]: value };
+        newItems[index] = { ...newItems[index], [field]: value } as MovementItem;
         setItems(newItems);
     };
 
-    const selectProduct = (index: number, p: any) => {
+    const selectProduct = (index: number, p: Product) => {
         const newItems = [...items];
         newItems[index] = {
             ...newItems[index],
@@ -176,7 +176,7 @@ export default function MovementsPage() {
     };
 
     const filteredProducts = products.filter(
-        (p: any) =>
+        (p: Product) =>
             p.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
             p.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
@@ -232,8 +232,9 @@ export default function MovementsPage() {
 
             await recordBulkMovements(movements);
             setModalConfig({ isOpen: true, type: 'success', message: 'Vale registrado exitosamente' });
-        } catch (error: any) {
-            setModalConfig({ isOpen: true, type: 'error', message: error.message || "Error al procesar la solicitud" });
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error al procesar la solicitud";
+            setModalConfig({ isOpen: true, type: 'error', message });
         } finally {
             setIsSubmitting(false);
         }
@@ -248,8 +249,9 @@ export default function MovementsPage() {
             setProjectSearch("");
             setIsProjectDropdownOpen(false);
             showNotification(`Proyecto "${p.name}" registrado`, "success");
-        } catch (error: any) {
-            showNotification("Error: " + error.message, "error");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido";
+            showNotification("Error: " + message, "error");
         }
     };
 
@@ -267,8 +269,9 @@ export default function MovementsPage() {
             setRequesterSearch("");
             setIsRequesterDropdownOpen(false);
             showNotification(`Solicitante "${req.name}" registrado para el proyecto`, "success");
-        } catch (error: any) {
-            showNotification("Error: " + error.message, "error");
+        } catch (error) {
+            const message = error instanceof Error ? error.message : "Error desconocido";
+            showNotification("Error: " + message, "error");
         }
     };
 

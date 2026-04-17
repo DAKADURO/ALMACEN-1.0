@@ -1,12 +1,12 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNotification } from "@/context/NotificationContext";
 import { fetchMovements, fetchProducts, fetchWarehouses, Movement, Product, Warehouse } from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
 
 // Helpers for UI
-const typeLabels: any = {
+const typeLabels: Record<string, string> = {
     "ENTRY": "Entrada",
     "EXIT": "Salida",
     "TRANSFER": "Transferencia",
@@ -27,18 +27,7 @@ export default function ReportsPage() {
         end_date: ""
     });
 
-    useEffect(() => {
-        Promise.all([
-            fetchProducts(),
-            fetchWarehouses()
-        ]).then(([p, w]) => {
-            setProducts(p);
-            setWarehouses(w);
-        });
-        loadMovements();
-    }, []);
-
-    const loadMovements = async () => {
+    const loadMovements = useCallback(async () => {
         setLoading(true);
         try {
             const data = await fetchMovements({
@@ -53,13 +42,27 @@ export default function ReportsPage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [filters]);
+
+    useEffect(() => {
+        Promise.all([
+            fetchProducts(),
+            fetchWarehouses()
+        ]).then(([p, w]) => {
+            setProducts(p);
+            setWarehouses(w);
+        });
+    }, []);
+
+    useEffect(() => {
+        loadMovements();
+    }, [loadMovements]);
 
     const handleExport = () => {
-        const exportData = movements.map((m: any) => {
-            const product = products.find((p: any) => p.id === m.product_id) as any;
-            const originWh = warehouses.find((w: any) => w.id === m.origin_warehouse_id) as any;
-            const destWh = warehouses.find((w: any) => w.id === m.destination_warehouse_id) as any;
+        const exportData = movements.map((m: Movement) => {
+            const product = products.find((p: Product) => p.id === m.product_id);
+            const originWh = warehouses.find((w: Warehouse) => w.id === m.origin_warehouse_id);
+            const destWh = warehouses.find((w: Warehouse) => w.id === m.destination_warehouse_id);
 
             return {
                 ID: m.id,
@@ -226,10 +229,10 @@ export default function ReportsPage() {
                             <tr><td colSpan={7} className="p-12 text-center text-white/50 text-lg animate-pulse">Cargando movimientos...</td></tr>
                         ) : movements.length === 0 ? (
                             <tr><td colSpan={7} className="p-12 text-center text-white/50">No hay movimientos que coincidan con los filtros.</td></tr>
-                        ) : movements.map((m: any) => {
-                            const product = products.find((p: any) => p.id === m.product_id) as any;
-                            const originWh = warehouses.find((w: any) => w.id === m.origin_warehouse_id) as any;
-                            const destWh = warehouses.find((w: any) => w.id === m.destination_warehouse_id) as any;
+                        ) : movements.map((m: Movement) => {
+                            const product = products.find((p: Product) => p.id === m.product_id);
+                            const originWh = warehouses.find((w: Warehouse) => w.id === m.origin_warehouse_id);
+                            const destWh = warehouses.find((w: Warehouse) => w.id === m.destination_warehouse_id);
 
                             return (
                                 <tr key={m.id} className="hover:bg-white/5 transition-colors">
@@ -258,7 +261,7 @@ export default function ReportsPage() {
                                     <td className="p-4 text-center">
                                         {m.reference_doc && (
                                             <button
-                                                onClick={() => handleReprint(m.reference_doc)}
+                                                onClick={() => handleReprint(m.reference_doc as string)}
                                                 className="px-3 py-1.5 bg-[#1F2433] hover:bg-white/10 border border-white/5 text-white rounded-lg text-[10px] font-bold transition-all flex items-center gap-1 mx-auto"
                                                 title="Vale PDF"
                                             >
@@ -279,10 +282,10 @@ export default function ReportsPage() {
                     <div className="p-12 text-center text-white/50 animate-pulse">Cargando movimientos...</div>
                 ) : movements.length === 0 ? (
                     <div className="p-12 text-center text-white/50 bg-[#131722]/40 rounded-2xl border border-white/10">No hay movimientos.</div>
-                ) : movements.map((m: any) => {
-                    const product = products.find((p: any) => p.id === m.product_id) as any;
-                    const originWh = warehouses.find((w: any) => w.id === m.origin_warehouse_id) as any;
-                    const destWh = warehouses.find((w: any) => w.id === m.destination_warehouse_id) as any;
+                ) : movements.map((m: Movement) => {
+                    const product = products.find((p: Product) => p.id === m.product_id);
+                    const originWh = warehouses.find((w: Warehouse) => w.id === m.origin_warehouse_id);
+                    const destWh = warehouses.find((w: Warehouse) => w.id === m.destination_warehouse_id);
 
                     return (
                         <div key={m.id} className="bg-[#131722]/60 border border-white/10 rounded-2xl p-5 space-y-4 shadow-lg backdrop-blur-sm relative overflow-hidden">
@@ -345,7 +348,7 @@ export default function ReportsPage() {
                                 
                                 {m.reference_doc && (
                                     <button
-                                        onClick={() => handleReprint(m.reference_doc)}
+                                        onClick={() => handleReprint(m.reference_doc as string)}
                                         className="h-9 px-4 bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all border border-emerald-500/20 active:scale-95 flex items-center gap-2"
                                     >
                                         <span>📄</span> Vale PDF

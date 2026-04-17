@@ -1,6 +1,6 @@
 "use client";
-import React, { useEffect, useRef, useState } from "react";
-import { Html5Qrcode } from "html5-qrcode";
+import React, { useEffect, useRef, useState, useCallback } from "react";
+import { Html5Qrcode, CameraDevice } from "html5-qrcode";
 
 interface BarcodeScannerProps {
     onScanSuccess: (decodedText: string) => void;
@@ -11,42 +11,21 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
     const scannerRef = useRef<Html5Qrcode | null>(null);
     const [isScannerInitialized, setIsScannerInitialized] = useState(false);
     const [error, setError] = useState<string | null>(null);
-    const [cameras, setCameras] = useState<any[]>([]);
+    const [cameras, setCameras] = useState<CameraDevice[]>([]);
     const [currentCameraId, setCurrentCameraId] = useState<string | null>(null);
 
-    useEffect(() => {
-        const findCameras = async () => {
+    const stopScanner = useCallback(async () => {
+        if (scannerRef.current && scannerRef.current.isScanning) {
             try {
-                const devices = await Html5Qrcode.getCameras();
-                if (devices && devices.length > 0) {
-                    setCameras(devices);
-                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('trasera'));
-                    setCurrentCameraId(backCamera ? backCamera.id : devices[0].id);
-                } else {
-                    setError("No se detectaron cámaras en este dispositivo.");
-                }
+                await scannerRef.current.stop();
+                await scannerRef.current.clear();
             } catch (err) {
-                console.error("Error getting cameras", err);
-                // If getCameras fails, it's often due to lack of permissions.
-                // We'll show a button to manually trigger permission request via a direct start.
-                setError("PERMISO_REQUERIDO");
+                console.error("Error stopping scanner:", err);
             }
-        };
-
-        findCameras();
-
-        return () => {
-            stopScanner();
-        };
+        }
     }, []);
 
-    useEffect(() => {
-        if (currentCameraId) {
-            startScanner(currentCameraId);
-        }
-    }, [currentCameraId]);
-
-    const startScanner = async (cameraId: string) => {
+    const startScanner = useCallback(async (cameraId: string) => {
         try {
             if (scannerRef.current && scannerRef.current.isScanning) {
                 await scannerRef.current.stop();
@@ -59,7 +38,6 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 fps: 30, 
                 qrbox: (viewfinderWidth: number, viewfinderHeight: number) => {
                     const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                    // QR codes are square, so a larger square box is better
                     const size = Math.floor(minEdge * 0.82);
                     return { width: size, height: size };
                 },
@@ -77,7 +55,7 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
 
             await html5QrCode.start(
                 cameraId,
-                config as any,
+                config,
                 (decodedText) => {
                     onScanSuccess(decodedText);
                     stopScanner();
@@ -85,7 +63,6 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 () => {} // Suppress errors
             );
 
-            // Apply advanced constraints for focus if supported
             const applyFocus = async () => {
                 try {
                     const video = document.querySelector("#reader video") as HTMLVideoElement;
@@ -94,15 +71,18 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                         const runningTrack = stream.getVideoTracks()[0];
                         
                         if (runningTrack) {
-                            const capabilities = runningTrack.getCapabilities() as any;
-                            const constraints: any = { advanced: [] };
+                            interface ExtendedCapabilities extends MediaTrackCapabilities {
+                                focusMode?: string[];
+                            }
+                            const capabilities = runningTrack.getCapabilities() as ExtendedCapabilities;
+                            const constraints: MediaTrackConstraints & { advanced?: Array<{ focusMode?: string }> } = { advanced: [] };
                             
                             if (capabilities.focusMode?.includes("continuous")) {
-                                constraints.advanced.push({ focusMode: "continuous" });
+                                constraints.advanced?.push({ focusMode: "continuous" });
                             }
                             
-                            if (constraints.advanced.length > 0) {
-                                await runningTrack.applyConstraints(constraints);
+                            if (constraints.advanced && constraints.advanced.length > 0) {
+                                await runningTrack.applyConstraints(constraints as MediaTrackConstraints);
                             }
                         }
                     }
@@ -111,7 +91,6 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 }
             };
 
-            // Try multiple times as some browsers need time to stabilize the track
             setTimeout(applyFocus, 500);
             setTimeout(applyFocus, 1500);
             setTimeout(applyFocus, 3000);
@@ -122,12 +101,11 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
             console.error("Error starting scanner:", err);
             setError("No se pudo acceder a la cámara seleccionada. Asegúrate de dar los permisos necesarios.");
         }
-    };
+    }, [onScanSuccess, stopScanner]);
 
     const requestPermissionsManually = async () => {
         setError(null);
         try {
-            // Trying to start with environment facing mode often triggers the permission prompt
             const html5QrCode = new Html5Qrcode("reader");
             scannerRef.current = html5QrCode;
             await html5QrCode.start(
@@ -140,7 +118,6 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
                 () => {}
             );
             setIsScannerInitialized(true);
-            // Refresh camera list now that we have permissions
             const devices = await Html5Qrcode.getCameras();
             setCameras(devices);
         } catch (err) {
@@ -149,16 +126,38 @@ export default function BarcodeScanner({ onScanSuccess, onClose }: BarcodeScanne
         }
     };
 
-    const stopScanner = async () => {
-        if (scannerRef.current && scannerRef.current.isScanning) {
+    useEffect(() => {
+        const findCameras = async () => {
             try {
-                await scannerRef.current.stop();
-                await scannerRef.current.clear();
+                const devices = await Html5Qrcode.getCameras();
+                if (devices && devices.length > 0) {
+                    setCameras(devices);
+                    const backCamera = devices.find(d => d.label.toLowerCase().includes('back') || d.label.toLowerCase().includes('trasera'));
+                    setCurrentCameraId(backCamera ? backCamera.id : devices[0].id);
+                } else {
+                    setError("No se detectaron cámaras en este dispositivo.");
+                }
             } catch (err) {
-                console.error("Error stopping scanner:", err);
+                console.error("Error getting cameras", err);
+                setError("PERMISO_REQUERIDO");
             }
+        };
+
+        findCameras();
+
+        return () => {
+            stopScanner();
+        };
+    }, [stopScanner]);
+
+    useEffect(() => {
+        if (currentCameraId) {
+            const timer = setTimeout(() => {
+                startScanner(currentCameraId);
+            }, 0);
+            return () => clearTimeout(timer);
         }
-    };
+    }, [currentCameraId, startScanner]);
 
     return (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-slate-950/90 backdrop-blur-xl p-4 animate-in fade-in duration-300">

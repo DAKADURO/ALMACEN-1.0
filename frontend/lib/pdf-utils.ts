@@ -131,7 +131,7 @@ export async function generateVoucherPDF({
     });
 
     // Finalize table and get end position
-    const tableFinalY = (doc as any).lastAutoTable.finalY + 30;
+    const tableFinalY = (doc as jsPDF & { lastAutoTable: { finalY: number } }).lastAutoTable.finalY + 30;
 
     // Signatures
     doc.line(20, tableFinalY, 80, tableFinalY);

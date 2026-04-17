@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
-import { fetchWarehouses, startAudit, fetchAudit, updateAuditItems, finishAudit, fetchActiveAudit } from "@/lib/api";
+import { fetchWarehouses, startAudit, fetchAudit, updateAuditItems, finishAudit, fetchActiveAudit, Warehouse, Audit, AuditItem } from "@/lib/api";
 import Link from "next/link";
 import BarcodeScanner from "@/components/BarcodeScanner";
 
 export default function AuditPage() {
-    const [warehouses, setWarehouses] = useState<any[]>([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [selectedWarehouse, setSelectedWarehouse] = useState<string>("");
-    const [audit, setAudit] = useState<any>(null);
+    const [audit, setAudit] = useState<Audit | null>(null);
     const [loading, setLoading] = useState(true);
     const [saving, setSaving] = useState(false);
     const [message, setMessage] = useState({ text: "", type: "" });
@@ -51,16 +51,18 @@ export default function AuditPage() {
     };
 
     const handleUpdateCount = (productId: number, count: string) => {
-        const updatedItems = audit.items.map((item: any) => 
-            item.product_id === productId ? { ...item, counted_stock: count === "" ? null : parseInt(count) } : item
+        if (!audit) return;
+        const updatedItems = audit.items.map((item: AuditItem) => 
+            item.product_id === productId ? { ...item, counted_stock: count === "" ? undefined : parseInt(count) } : item
         );
         setAudit({ ...audit, items: updatedItems });
     };
 
     const handleSaveProgress = async () => {
+        if (!audit) return;
         setSaving(true);
         try {
-            const itemsToUpdate = audit.items.map((it: any) => ({
+            const itemsToUpdate = audit.items.map((it: AuditItem) => ({
                 product_id: it.product_id,
                 counted_stock: it.counted_stock,
                 notes: it.notes
@@ -75,11 +77,12 @@ export default function AuditPage() {
     };
 
     const handleFinish = async () => {
+        if (!audit) return;
         if (!confirm("¿Estás seguro de finalizar la auditoría? Se generarán ajustes automáticos en el inventario.")) return;
         setSaving(true);
         try {
             // Save first to ensure latest counts are in DB
-            const itemsToUpdate = audit.items.map((it: any) => ({
+            const itemsToUpdate = audit.items.map((it: AuditItem) => ({
                 product_id: it.product_id,
                 counted_stock: it.counted_stock,
                 notes: it.notes
@@ -97,8 +100,9 @@ export default function AuditPage() {
     };
 
     const handleGlobalScanSuccess = (decodedText: string) => {
-        const productItem = audit.items.find((it: any) => 
-            it.product.code.trim().toUpperCase() === decodedText.trim().toUpperCase()
+        if (!audit) return;
+        const productItem = audit.items.find((it: AuditItem) => 
+            it.product?.code.trim().toUpperCase() === decodedText.trim().toUpperCase()
         );
 
         if (productItem) {
@@ -226,10 +230,10 @@ export default function AuditPage() {
                                 <th className="px-6 py-4">Notas</th>
                             </tr>
                         </thead>
-                    <tbody className="divide-y divide-slate-700/30">
-                        {(audit?.items || []).map((item: any) => {
-                            const isCounted = item.counted_stock !== null;
-                            const diff = isCounted ? item.counted_stock - item.system_stock : 0;
+                        <tbody className="divide-y divide-slate-700/30">
+                            {(audit?.items || []).map((item: AuditItem) => {
+                                const isCounted = item.counted_stock !== undefined && item.counted_stock !== null;
+                                const diff = isCounted ? (item.counted_stock || 0) - item.system_stock : 0;
                             const hasDiff = isCounted && diff !== 0;
                             const isHighlighted = highlightedProductId === item.product_id;
 

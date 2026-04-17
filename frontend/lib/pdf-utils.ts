@@ -1,6 +1,32 @@
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 
+export interface VoucherHeader {
+    date?: string;
+    client?: string;
+    requested_by?: string;
+    origin_warehouse_id?: number | string | null;
+    destination_warehouse_id?: number | string | null;
+    delivery_person?: string | null;
+    receiver_person?: string | null;
+}
+
+export interface VoucherItem {
+    product_code?: string;
+    code?: string;
+    quantity: number;
+    unit?: string;
+    unit_of_measure?: string;
+    description?: string;
+    product_label?: string;
+    name?: string;
+}
+
+export interface Warehouse {
+    id: number | string;
+    name: string;
+}
+
 export async function generateVoucherPDF({
     folio,
     mType,
@@ -13,10 +39,10 @@ export async function generateVoucherPDF({
     folio: string;
     mType: string;
     entrySubType?: string;
-    header: any;
-    items: any[];
+    header: VoucherHeader;
+    items: VoucherItem[];
     selectedCompany: 'PROAIR' | 'AIRPIPE';
-    warehouses: any[];
+    warehouses: Warehouse[];
 }) {
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -72,9 +98,9 @@ export async function generateVoucherPDF({
     doc.setFont("helvetica", "bold");
     
     // Find warehouse names if only IDs are provided
-    const getWHName = (id: any) => {
-        if (!id) return null;
-        const wh = warehouses.find(w => w.id == id);
+    const getWHName = (id: number | string | null | undefined) => {
+        if (!id) return "—";
+        const wh = warehouses.find(w => w.id.toString() === id.toString());
         return wh ? wh.name : "Desconocido";
     };
 
@@ -89,10 +115,10 @@ export async function generateVoucherPDF({
 
     // Table
     const tableData = items.map(item => [
-        item.product_code || item.code,
+        item.product_code || item.code || "",
         item.quantity,
-        item.unit || item.unit_of_measure,
-        item.description || item.product_label || item.name
+        item.unit || item.unit_of_measure || "PZA",
+        item.description || item.product_label || item.name || ""
     ]);
 
     autoTable(doc, {
@@ -104,19 +130,20 @@ export async function generateVoucherPDF({
         styles: { fontSize: 8 },
     });
 
-    const finalY = (doc as any).lastAutoTable.finalY + 30;
+    // Finalize table and get end position
+    const tableFinalY = (doc as any).lastAutoTable.finalY + 30;
 
     // Signatures
-    doc.line(20, finalY, 80, finalY);
-    doc.text("ENTREGÓ / DELIVERY", 50, finalY + 5, { align: "center" });
+    doc.line(20, tableFinalY, 80, tableFinalY);
+    doc.text("ENTREGÓ / DELIVERY", 50, tableFinalY + 5, { align: "center" });
     doc.setFontSize(7);
-    doc.text(header.delivery_person || "MIGUEL LOMELI", 50, finalY + 10, { align: "center" });
+    doc.text(header.delivery_person || "MIGUEL LOMELI", 50, tableFinalY + 10, { align: "center" });
 
     doc.setFontSize(9);
-    doc.line(130, finalY, 190, finalY);
-    doc.text("RECIBIÓ / RECEIVE", 160, finalY + 5, { align: "center" });
+    doc.line(130, tableFinalY, 190, tableFinalY);
+    doc.text("RECIBIÓ / RECEIVE", 160, tableFinalY + 5, { align: "center" });
     doc.setFontSize(7);
-    doc.text(header.receiver_person || "Firma de conformidad", 160, finalY + 10, { align: "center" });
+    doc.text(header.receiver_person || "Firma de conformidad", 160, tableFinalY + 10, { align: "center" });
 
     // Footer
     doc.setFontSize(8);

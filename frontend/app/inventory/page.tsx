@@ -11,7 +11,11 @@ import {
     deleteProduct, 
     uploadProductsFile,
     fetchBrands,
-    createBrand
+    createBrand,
+    Product,
+    Warehouse,
+    InventorySummary,
+    Brand
 } from "@/lib/api";
 import { useNotification } from "@/context/NotificationContext";
 import jsPDF from "jspdf";
@@ -22,13 +26,13 @@ import Link from "next/link";
 export default function InventoryPage() {
     const { showNotification } = useNotification();
     const [tab, setTab] = useState<"stock" | "products">("stock");
-    const [data, setData] = useState<any[]>([]);
-    const [products, setProducts] = useState<any[]>([]);
+    const [data, setData] = useState<InventorySummary[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [editingProduct, setEditingProduct] = useState<any>(null);
+    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [warehouses, setWarehouses] = useState([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [selectedWarehouse, setSelectedWarehouse] = useState("all");
     const [selectedSegment, setSelectedSegment] = useState("all");
@@ -36,7 +40,7 @@ export default function InventoryPage() {
     const [isUploadDialogOpen, setIsUploadDialogOpen] = useState(false);
     const [uploadWarehouseId, setUploadWarehouseId] = useState("");
     const [pendingFile, setPendingFile] = useState<File | null>(null);
-    const [brands, setBrands] = useState<any[]>([]);
+    const [brands, setBrands] = useState<Brand[]>([]);
     const [brandSearch, setBrandSearch] = useState("");
     const [isBrandDropdownOpen, setIsBrandDropdownOpen] = useState(false);
 

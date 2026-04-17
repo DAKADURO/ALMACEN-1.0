@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { fetchBoxes, createBox, fetchWarehouses, fetchBoxByCode } from "@/lib/api";
+import { fetchBoxes, createBox, fetchWarehouses, fetchBoxByCode, Box, Warehouse } from "@/lib/api";
 import { useRouter } from "next/navigation";
 import BarcodeScanner from "@/components/BarcodeScanner";
 import { useNotification } from "@/context/NotificationContext";
@@ -8,8 +8,8 @@ import { useNotification } from "@/context/NotificationContext";
 export default function BoxesPage() {
   const { showNotification } = useNotification();
   const router = useRouter();
-  const [boxes, setBoxes] = useState<any[]>([]);
-  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [boxes, setBoxes] = useState<Box[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
   const [showScanner, setShowScanner] = useState(false);

@@ -1,15 +1,15 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { fetchBox, fetchProducts, addItemToBox, removeItemFromBox, fetchWarehouses } from "@/lib/api";
+import { fetchBox, fetchProducts, addItemToBox, removeItemFromBox, fetchWarehouses, Box, Product, Warehouse } from "@/lib/api";
 import QRCode from "qrcode";
 
 export default function BoxDetailPage() {
   const { id } = useParams();
   const router = useRouter();
-  const [box, setBox] = useState<any>(null);
-  const [products, setProducts] = useState<any[]>([]);
-  const [warehouses, setWarehouses] = useState<any[]>([]);
+  const [box, setBox] = useState<Box | null>(null);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
   const [addingItem, setAddingItem] = useState<{product_id: number, quantity: number} | null>(null);
@@ -49,7 +49,7 @@ export default function BoxDetailPage() {
   const warehouseName = warehouses.find(w => w.id === box?.warehouse_id)?.name || "Almacén";
 
   async function handleAddItem() {
-    if (!addingItem) return;
+    if (!addingItem || !box) return;
     try {
       await addItemToBox(box.id, addingItem);
       setAddingItem(null);
@@ -60,6 +60,7 @@ export default function BoxDetailPage() {
   }
 
   async function handleRemoveItem(productId: number) {
+    if (!box) return;
     if (!confirm("¿Seguro que quieres sacar este producto de la caja?")) return;
     try {
       await removeItemFromBox(box.id, productId);

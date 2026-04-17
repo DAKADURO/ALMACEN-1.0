@@ -1,6 +1,19 @@
 "use client";
 import React, { useState, useEffect, useRef } from "react";
-import { fetchWarehouses, fetchProducts, recordBulkMovements, fetchNextFolio, fetchProjects, createProject, fetchProjectRequesters, createProjectRequester } from "@/lib/api";
+import { 
+    fetchWarehouses, 
+    fetchProducts, 
+    recordBulkMovements, 
+    fetchNextFolio, 
+    fetchProjects, 
+    createProject, 
+    fetchProjectRequesters, 
+    createProjectRequester,
+    Warehouse,
+    Product,
+    Project,
+    ProjectRequester
+} from "@/lib/api";
 import jsPDF from "jspdf";
 import autoTable from "jspdf-autotable";
 import Link from "next/link";
@@ -21,16 +34,16 @@ export default function MovementsPage() {
     const { showNotification } = useNotification();
     const [mType, setMType] = useState("ENTRY");
     const [entrySubType, setEntrySubType] = useState("PROVEEDOR");
-    const [warehouses, setWarehouses] = useState<any[]>([]);
-    const [products, setProducts] = useState<any[]>([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [isVoucherMode, setIsVoucherMode] = useState(false);
     const [selectedCompany, setSelectedCompany] = useState<'PROAIR' | 'AIRPIPE'>('PROAIR');
-    const [projects, setProjects] = useState<any[]>([]);
+    const [projects, setProjects] = useState<Project[]>([]);
     const [projectSearch, setProjectSearch] = useState("");
     const [isProjectDropdownOpen, setIsProjectDropdownOpen] = useState(false);
     
-    const [projectRequesters, setProjectRequesters] = useState<any[]>([]);
+    const [projectRequesters, setProjectRequesters] = useState<ProjectRequester[]>([]);
     const [requesterSearch, setRequesterSearch] = useState("");
     const [isRequesterDropdownOpen, setIsRequesterDropdownOpen] = useState(false);
     
@@ -65,8 +78,8 @@ export default function MovementsPage() {
         "QUERETARO": "QRO"
     };
 
-    const getWHPrefix = (id: string) => {
-        const wh = warehouses.find(w => w.id == id);
+    const getWHPrefix = (id: string | number) => {
+        const wh = warehouses.find(w => w.id.toString() === id.toString());
         if (!wh) return "??";
         return ALMACEN_PREFIXES[wh.name.toUpperCase()] || wh.name.slice(0, 2).toUpperCase();
     };
@@ -274,7 +287,10 @@ export default function MovementsPage() {
                 ...header,
                 date: new Date().toLocaleDateString('es-MX')
             },
-            items,
+            items: items.map(item => ({
+                ...item,
+                quantity: parseFloat(item.quantity) || 0
+            })),
             selectedCompany,
             warehouses
         });
@@ -359,9 +375,9 @@ export default function MovementsPage() {
                             <div>
                                 <div className="text-[10px] font-bold text-slate-400 uppercase">Ubicación</div>
                                 <div className="font-semibold border-b border-slate-200 pb-1">
-                                    {mType === 'ENTRY' ? (warehouses.find(w => w.id == header.destination_warehouse_id)?.name) :
-                                        mType === 'EXIT' ? (warehouses.find(w => w.id == header.origin_warehouse_id)?.name) :
-                                            `${warehouses.find(w => w.id == header.origin_warehouse_id)?.name} ➔ ${warehouses.find(w => w.id == header.destination_warehouse_id)?.name}`}
+                                    {mType === 'ENTRY' ? (warehouses.find(w => w.id.toString() === header.destination_warehouse_id.toString())?.name) :
+                                        mType === 'EXIT' ? (warehouses.find(w => w.id.toString() === header.origin_warehouse_id.toString())?.name) :
+                                            `${warehouses.find(w => w.id.toString() === header.origin_warehouse_id.toString())?.name} ➔ ${warehouses.find(w => w.id.toString() === header.destination_warehouse_id.toString())?.name}`}
                                 </div>
                             </div>
                         </div>

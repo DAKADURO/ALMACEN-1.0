@@ -26,14 +26,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const router = useRouter();
 
     useEffect(() => {
-        const savedToken = localStorage.getItem('auth_token');
-        const savedUser = localStorage.getItem('auth_user');
+        // Use queueMicrotask to avoid synchronous setState warning and potential cascading renders
+        queueMicrotask(() => {
+            const savedToken = localStorage.getItem('auth_token');
+            const savedUser = localStorage.getItem('auth_user');
 
-        if (savedToken && savedUser) {
-            setToken(savedToken);
-            setUser(JSON.parse(savedUser));
-        }
-        setIsLoading(false);
+            if (savedToken && savedUser) {
+                try {
+                    const parsedUser = JSON.parse(savedUser);
+                    setUser(parsedUser);
+                    setToken(savedToken);
+                } catch (error) {
+                    console.error("Error parsing saved user:", error);
+                    localStorage.removeItem('auth_token');
+                    localStorage.removeItem('auth_user');
+                }
+            }
+            setIsLoading(false);
+        });
     }, []);
 
     const login = (newToken: string, newUser: User) => {

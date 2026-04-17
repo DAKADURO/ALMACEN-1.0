@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { useNotification } from "@/context/NotificationContext";
-import { fetchMovements, fetchProducts, fetchWarehouses } from "@/lib/api";
+import { fetchMovements, fetchProducts, fetchWarehouses, Movement, Product, Warehouse } from "@/lib/api";
 import { exportToCSV } from "@/lib/export";
 import { generateVoucherPDF } from "@/lib/pdf-utils";
 
@@ -16,9 +16,9 @@ const typeLabels: any = {
 
 export default function ReportsPage() {
     const { showNotification } = useNotification();
-    const [movements, setMovements] = useState([]);
-    const [products, setProducts] = useState([]);
-    const [warehouses, setWarehouses] = useState([]);
+    const [movements, setMovements] = useState<Movement[]>([]);
+    const [products, setProducts] = useState<Product[]>([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [loading, setLoading] = useState(true);
     const [filters, setFilters] = useState({
         product_id: "",

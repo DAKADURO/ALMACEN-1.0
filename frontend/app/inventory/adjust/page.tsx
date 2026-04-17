@@ -1,15 +1,15 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { fetchInventorySummary, recordAdjustment, fetchWarehouses } from "@/lib/api";
+import { fetchInventorySummary, recordAdjustment, fetchWarehouses, InventorySummary, Warehouse } from "@/lib/api";
 import { useNotification } from "@/context/NotificationContext";
 
 export default function AdjustPage() {
     const { showNotification } = useNotification();
-    const [inventory, setInventory] = useState<any[]>([]);
-    const [warehouses, setWarehouses] = useState<any[]>([]);
+    const [inventory, setInventory] = useState<InventorySummary[]>([]);
+    const [warehouses, setWarehouses] = useState<Warehouse[]>([]);
     const [loading, setLoading] = useState(true);
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [selectedItem, setSelectedItem] = useState<any>(null);
+    const [selectedItem, setSelectedItem] = useState<InventorySummary | null>(null);
     const [newQuantity, setNewQuantity] = useState("");
     const [notes, setNotes] = useState("");
     const [searchQuery, setSearchQuery] = useState("");

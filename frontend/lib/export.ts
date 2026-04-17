@@ -1,7 +1,7 @@
 /**
  * Utilidad para exportar datos JSON a CSV y descargar el archivo.
  */
-export function exportToCSV(data: any[], filename: string) {
+export function exportToCSV<T extends Record<string, unknown>>(data: T[], filename: string) {
     if (data.length === 0) return;
 
     // Obtener las cabeceras a partir de las llaves del primer objeto

@@ -1,14 +1,22 @@
-"use client";
-
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
+import { useSearchParams } from 'next/navigation';
 
 export default function LoginPage() {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
+    const [sessionExpired, setSessionExpired] = useState(false);
     const [loading, setLoading] = useState(false);
+    
+    const searchParams = useSearchParams();
     const { login } = useAuth();
+
+    useEffect(() => {
+        if (searchParams.get('expired') === 'true') {
+            setSessionExpired(true);
+        }
+    }, [searchParams]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -67,6 +75,12 @@ export default function LoginPage() {
                     <p className="text-white/60 text-center mb-8">Inicia sesión para continuar</p>
 
                     <form onSubmit={handleSubmit} className="space-y-6">
+                        {sessionExpired && !error && (
+                            <div className="bg-amber-500/10 border border-amber-500/50 text-amber-500 p-3 rounded-lg text-sm text-center">
+                                Tu sesión ha expirado por seguridad. Por favor, inicia sesión de nuevo.
+                            </div>
+                        )}
+
                         {error && (
                             <div className="bg-red-500/10 border border-red-500/50 text-red-500 p-3 rounded-lg text-sm text-center">
                                 {error}

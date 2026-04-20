@@ -74,15 +74,16 @@ function AppContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col lg:flex-row w-full min-h-screen">
       {/* Mobile Top Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 sticky top-0 z-50">
+      <div className="lg:hidden flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 sticky top-0 z-[70]">
         <div className="text-xl font-bold tracking-tight text-emerald-400">
           ALMACEN <span className="text-white text-base">3.0</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-2 text-white hover:bg-slate-800 rounded-lg transition-colors"
+          className="p-3 -m-2 text-white hover:bg-white/10 rounded-xl transition-all active:scale-95 z-[80] relative"
+          aria-label="Toggle Menu"
         >
-          <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             {isMobileMenuOpen ? (
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             ) : (
@@ -95,14 +96,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/80 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] lg:hidden animate-in fade-in duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
 
       {/* Sidebar (Desktop & Mobile Drawer) */}
       <nav className={`
-        fixed inset-y-0 left-0 z-50 w-64 bg-[#131722]/95 lg:bg-[#131722]/80 backdrop-blur-md border-r border-[#1F2433] p-6 flex flex-col gap-6 transform transition-transform duration-300 ease-in-out h-full
+        fixed inset-y-0 left-0 z-[80] lg:z-50 w-64 bg-[#131722]/95 lg:bg-[#131722]/80 backdrop-blur-md border-r border-[#1F2433] p-6 flex flex-col gap-6 transform transition-transform duration-300 ease-in-out h-full
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:sticky lg:top-0'}
       `}>
         <div className="hidden lg:flex items-center gap-3">

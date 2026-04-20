@@ -152,22 +152,46 @@ const getHeaders = (extraHeaders = {}) => {
     };
 };
 
+/**
+ * Helper to handle API responses and manage global errors like 401 Unauthorized.
+ */
+async function handleResponse<T>(res: Response): Promise<T> {
+    if (res.status === 401) {
+        if (typeof window !== "undefined") {
+            console.error("Sesión expirada. Redirigiendo al login...");
+            localStorage.removeItem("auth_token");
+            localStorage.removeItem("auth_user");
+            window.location.href = "/login?expired=true";
+        }
+        throw new Error("Sesión expirada");
+    }
+
+    if (!res.ok) {
+        let errorData;
+        try {
+            errorData = await res.json();
+        } catch (e) {
+            errorData = { detail: "Error desconocido en el servidor" };
+        }
+        throw new Error(errorData.detail || `Error del servidor: ${res.status}`);
+    }
+
+    return res.json();
+}
+
 export async function fetchProducts(): Promise<Product[]> {
     const res = await fetch(`${API_URL}/products/`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch products");
-    return res.json();
+    return handleResponse<Product[]>(res);
 }
 
 export async function fetchDashboardStats(): Promise<DashboardStats> {
     const res = await fetch(`${API_URL}/dashboard/stats`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch dashboard stats");
-    return res.json();
+    return handleResponse<DashboardStats>(res);
 }
 
 export async function fetchInventorySummary(): Promise<InventorySummary[]> {
     const res = await fetch(`${API_URL}/inventory/summary`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch inventory summary");
-    return res.json();
+    return handleResponse<InventorySummary[]>(res);
 }
 
 export async function recordMovement(data: Partial<Movement>): Promise<Movement> {
@@ -176,11 +200,7 @@ export async function recordMovement(data: Partial<Movement>): Promise<Movement>
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to record movement");
-    }
-    return res.json();
+    return handleResponse<Movement>(res);
 }
 
 export async function createProduct(data: Partial<Product>): Promise<Product> {
@@ -189,17 +209,12 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to create product");
-    }
-    return res.json();
+    return handleResponse<Product>(res);
 }
 
 export async function fetchWarehouses(): Promise<Warehouse[]> {
     const res = await fetch(`${API_URL}/warehouses/`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch warehouses");
-    return res.json();
+    return handleResponse<Warehouse[]>(res);
 }
 
 export async function createWarehouse(data: Partial<Warehouse>): Promise<Warehouse> {
@@ -208,11 +223,7 @@ export async function createWarehouse(data: Partial<Warehouse>): Promise<Warehou
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to create warehouse");
-    }
-    return res.json();
+    return handleResponse<Warehouse>(res);
 }
 
 export async function updateProduct(id: number, data: Partial<Product>): Promise<Product> {
@@ -221,11 +232,7 @@ export async function updateProduct(id: number, data: Partial<Product>): Promise
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to update product");
-    }
-    return res.json();
+    return handleResponse<Product>(res);
 }
 
 export async function deleteProduct(id: number) {
@@ -233,11 +240,7 @@ export async function deleteProduct(id: number) {
         method: "DELETE",
         headers: getHeaders()
     });
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to delete product");
-    }
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 export async function fetchMovements(filters?: {
@@ -255,8 +258,7 @@ export async function fetchMovements(filters?: {
     if (filters?.end_date) params.append("end_date", filters.end_date);
 
     const res = await fetch(`${API_URL}/inventory/movements?${params.toString()}`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch movements");
-    return res.json();
+    return handleResponse<Movement[]>(res);
 }
 
 export async function uploadProductsFile(file: File, warehouseId?: number) {
@@ -276,11 +278,7 @@ export async function uploadProductsFile(file: File, warehouseId?: number) {
         body: formData,
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to upload file");
-    }
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 export async function recordBulkMovements(movements: Partial<Movement>[]): Promise<{ message: string }> {
@@ -290,11 +288,7 @@ export async function recordBulkMovements(movements: Partial<Movement>[]): Promi
         body: JSON.stringify({ movements }),
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to record bulk movements");
-    }
-    return res.json();
+    return handleResponse<{ message: string }>(res);
 }
 
 export async function fetchNextFolio(prefix: string) {
@@ -302,11 +296,7 @@ export async function fetchNextFolio(prefix: string) {
         headers: getHeaders(),
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to fetch next folio");
-    }
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 export async function recordAdjustment(data: {
@@ -323,11 +313,7 @@ export async function recordAdjustment(data: {
         body: JSON.stringify(data),
     });
 
-    if (!res.ok) {
-        const errorData = await res.json();
-        throw new Error(errorData.detail || "Failed to record adjustment");
-    }
-    return res.json();
+    return handleResponse<Movement>(res);
 }
 
 export async function startAudit(warehouseId: number) {
@@ -336,16 +322,14 @@ export async function startAudit(warehouseId: number) {
         headers: getHeaders(),
         body: JSON.stringify({ warehouse_id: warehouseId }),
     });
-    if (!res.ok) throw new Error("Failed to start audit");
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 export async function fetchAudit(auditId: number) {
     const res = await fetch(`${API_URL}/inventory/audit/${auditId}`, {
         headers: getHeaders(),
     });
-    if (!res.ok) throw new Error("Failed to fetch audit");
-    return res.json();
+    return handleResponse<Audit>(res);
 }
 
 export async function updateAuditItems(auditId: number, items: Partial<AuditItem>[]): Promise<Audit> {
@@ -354,16 +338,14 @@ export async function updateAuditItems(auditId: number, items: Partial<AuditItem
         headers: getHeaders(),
         body: JSON.stringify(items),
     });
-    if (!res.ok) throw new Error("Failed to update audit items");
-    return res.json();
+    return handleResponse<Audit>(res);
 }
 
 export async function fetchActiveAudit(warehouseId: number) {
     const res = await fetch(`${API_URL}/inventory/audits/active/${warehouseId}`, {
         headers: getHeaders(),
     });
-    if (!res.ok) throw new Error("Failed to fetch active audit");
-    return res.json();
+    return handleResponse<Audit | null>(res);
 }
 
 export async function finishAudit(auditId: number) {
@@ -371,27 +353,23 @@ export async function finishAudit(auditId: number) {
         method: "POST",
         headers: getHeaders(),
     });
-    if (!res.ok) throw new Error("Failed to finish audit");
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 // --- Box API ---
 export async function fetchBoxes() {
     const res = await fetch(`${API_URL}/boxes/`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch boxes");
-    return res.json();
+    return handleResponse<Box[]>(res);
 }
 
 export async function fetchBox(id: number) {
     const res = await fetch(`${API_URL}/boxes/${id}`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch box");
-    return res.json();
+    return handleResponse<Box>(res);
 }
 
 export async function fetchBoxByCode(code: string) {
     const res = await fetch(`${API_URL}/boxes/code/${code}`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch box by code");
-    return res.json();
+    return handleResponse<Box>(res);
 }
 
 export async function createBox(data: Partial<Box>): Promise<Box> {
@@ -400,8 +378,7 @@ export async function createBox(data: Partial<Box>): Promise<Box> {
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Failed to create box");
-    return res.json();
+    return handleResponse<Box>(res);
 }
 
 export async function addItemToBox(boxId: number, data: { product_id: number; quantity: number }): Promise<BoxItem> {
@@ -410,8 +387,7 @@ export async function addItemToBox(boxId: number, data: { product_id: number; qu
         headers: getHeaders(),
         body: JSON.stringify(data),
     });
-    if (!res.ok) throw new Error("Failed to add item to box");
-    return res.json();
+    return handleResponse<BoxItem>(res);
 }
 
 export async function removeItemFromBox(boxId: number, productId: number) {
@@ -419,15 +395,13 @@ export async function removeItemFromBox(boxId: number, productId: number) {
         method: "DELETE",
         headers: getHeaders(),
     });
-    if (!res.ok) throw new Error("Failed to remove item from box");
-    return res.json();
+    return handleResponse<any>(res);
 }
 
 // --- Brand API ---
 export async function fetchBrands() {
     const res = await fetch(`${API_URL}/brands/`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch brands");
-    return res.json();
+    return handleResponse<Brand[]>(res);
 }
 
 export async function createBrand(name: string) {
@@ -436,15 +410,13 @@ export async function createBrand(name: string) {
         headers: getHeaders(),
         body: JSON.stringify({ name }),
     });
-    if (!res.ok) throw new Error("Failed to create brand");
-    return res.json();
+    return handleResponse<Brand>(res);
 }
 
 // --- Project API ---
 export async function fetchProjects() {
     const res = await fetch(`${API_URL}/projects/`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch projects");
-    return res.json();
+    return handleResponse<Project[]>(res);
 }
 
 export async function createProject(name: string) {
@@ -453,14 +425,12 @@ export async function createProject(name: string) {
         headers: getHeaders(),
         body: JSON.stringify({ name }),
     });
-    if (!res.ok) throw new Error("Failed to create project");
-    return res.json();
+    return handleResponse<Project>(res);
 }
 
 export async function fetchProjectRequesters(projectId: number) {
     const res = await fetch(`${API_URL}/projects/${projectId}/requesters`, { headers: getHeaders() });
-    if (!res.ok) throw new Error("Failed to fetch project requesters");
-    return res.json();
+    return handleResponse<ProjectRequester[]>(res);
 }
 
 export async function createProjectRequester(projectId: number, name: string) {
@@ -469,6 +439,5 @@ export async function createProjectRequester(projectId: number, name: string) {
         headers: getHeaders(),
         body: JSON.stringify({ name, project_id: projectId }),
     });
-    if (!res.ok) throw new Error("Failed to create project requester");
-    return res.json();
+    return handleResponse<ProjectRequester>(res);
 }

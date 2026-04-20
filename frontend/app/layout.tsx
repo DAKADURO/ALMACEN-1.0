@@ -72,15 +72,15 @@ function AppContent({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex flex-col lg:flex-row w-full min-h-screen">
+    <div className="flex flex-col lg:flex-row w-full min-h-screen pt-[71px] lg:pt-0">
       {/* Mobile Top Header */}
-      <div className="lg:hidden flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 sticky top-0 z-[70]">
+      <header className="lg:hidden fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 z-[70]">
         <div className="text-xl font-bold tracking-tight text-emerald-400">
           ALMACEN <span className="text-white text-base">3.0</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-3 -m-2 text-white hover:bg-white/10 rounded-xl transition-all active:scale-95 z-[80] relative"
+          className="p-3 -m-2 text-white hover:bg-white/10 rounded-xl transition-all active:scale-95 z-[80] relative cursor-pointer"
           aria-label="Toggle Menu"
         >
           <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -91,12 +91,12 @@ function AppContent({ children }: { children: React.ReactNode }) {
             )}
           </svg>
         </button>
-      </div>
+      </header>
 
       {/* Mobile Overlay */}
       {isMobileMenuOpen && (
         <div 
-          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] lg:hidden animate-in fade-in duration-300"
+          className="fixed inset-0 bg-black/60 backdrop-blur-md z-[60] lg:hidden transition-opacity duration-300"
           onClick={() => setIsMobileMenuOpen(false)}
         />
       )}
@@ -104,7 +104,7 @@ function AppContent({ children }: { children: React.ReactNode }) {
       {/* Sidebar (Desktop & Mobile Drawer) */}
       <nav className={`
         fixed inset-y-0 left-0 z-[80] lg:z-50 w-64 bg-[#131722]/95 lg:bg-[#131722]/80 backdrop-blur-md border-r border-[#1F2433] p-6 flex flex-col gap-6 transform transition-transform duration-300 ease-in-out h-full
-        ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0 lg:sticky lg:top-0'}
+        ${isMobileMenuOpen ? 'translate-x-0 pointer-events-auto' : '-translate-x-full pointer-events-none lg:pointer-events-auto lg:translate-x-0 lg:sticky lg:top-0'}
       `}>
         <div className="hidden lg:flex items-center gap-3">
           <div className="text-2xl font-black tracking-tighter text-emerald-400">

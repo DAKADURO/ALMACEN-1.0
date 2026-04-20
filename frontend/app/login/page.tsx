@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/lib/auth-context';
 import { useSearchParams } from 'next/navigation';

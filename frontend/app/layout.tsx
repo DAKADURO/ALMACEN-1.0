@@ -43,9 +43,9 @@ function AppContent({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     // Close mobile menu when pathname changes
     if (isMobileMenuOpen) {
-      queueMicrotask(() => setIsMobileMenuOpen(false));
+      setIsMobileMenuOpen(false);
     }
-  }, [pathname, isMobileMenuOpen]);
+  }, [pathname]);
 
   const handleContextChange = useCallback((newContext: string) => {
     localStorage.setItem("inventory-context", newContext);
@@ -74,13 +74,14 @@ function AppContent({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex flex-col lg:flex-row w-full min-h-screen pt-[71px] lg:pt-0">
       {/* Mobile Top Header */}
-      <header className="lg:hidden fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 z-[70]">
+      {/* Mobile Top Header */}
+      <header className="lg:hidden fixed top-0 left-0 w-full flex items-center justify-between p-4 bg-[#0B0E14] border-b border-white/5 z-[100]">
         <div className="text-xl font-bold tracking-tight text-emerald-400">
           ALMACEN <span className="text-white text-base">3.0</span>
         </div>
         <button 
           onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          className="p-3 -m-2 text-white hover:bg-white/10 rounded-xl transition-all active:scale-95 z-[80] relative cursor-pointer"
+          className="p-3 -m-2 text-white hover:bg-white/10 rounded-xl transition-all active:scale-95 z-[110] relative cursor-pointer"
           aria-label="Toggle Menu"
         >
           <svg className="w-7 h-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
